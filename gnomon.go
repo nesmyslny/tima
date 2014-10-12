@@ -1,15 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	http.HandleFunc("/", handler)
+	router := mux.NewRouter()
+	router.HandleFunc("/signin", signin).Methods("POST")
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("web/")))
+	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>gnomon</h1>...literally \"one that knows or examines\"...")
+func signin(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "invalid user/password", http.StatusBadRequest)
 }
