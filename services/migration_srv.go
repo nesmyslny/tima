@@ -6,9 +6,9 @@ import (
 	"github.com/rubenv/sql-migrate"
 )
 
-type Migration struct{}
+type MigrationService struct{}
 
-func (this *Migration) Run() error {
+func (this *MigrationService) Run() error {
 	const dialect = "mysql"
 	migrate.SetTable("migrations")
 	migrations := &migrate.FileMigrationSource{
