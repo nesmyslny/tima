@@ -6,11 +6,15 @@ import (
 )
 
 type MigrationController struct {
-	MigrationService *services.MigrationService
+	migrationService *services.MigrationService
+}
+
+func NewMigrationController(migrationService *services.MigrationService) *MigrationController {
+	return &MigrationController{migrationService}
 }
 
 func (this *MigrationController) Upgrade(w http.ResponseWriter, r *http.Request) {
-	err := this.MigrationService.Run()
+	err := this.migrationService.Run()
 	if err != nil {
 		// todo: logging
 		// in this case, the internal error is directly exposed to the user.

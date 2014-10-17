@@ -3,12 +3,18 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"gnomon/controllers"
+	"gnomon/dbaccess"
 	"gnomon/services"
 	"net/http"
 )
 
 func main() {
-	migrationController := controllers.MigrationController{&services.MigrationService{}}
+	// todo: configuration
+	db := DbAccess.New("root:pwd@tcp(localhost:3307)/gnomon?parseTime=true")
+	defer db.Close()
+
+	migrationService := services.NewMigrationService(db)
+	migrationController := controllers.NewMigrationController(migrationService)
 	userController := controllers.UserController{}
 
 	router := mux.NewRouter()

@@ -1,33 +1,45 @@
 package services
 
 import (
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/rubenv/sql-migrate"
+	"gnomon/dbaccess"
+	"gnomon/models"
 )
 
-type MigrationService struct{}
+type MigrationService struct {
+	db *DbAccess.Db
+}
+
+func NewMigrationService(db *DbAccess.Db) *MigrationService {
+	return &MigrationService{db}
+}
 
 func (this *MigrationService) Run() error {
-	const dialect = "mysql"
-	migrate.SetTable("migrations")
-	migrations := &migrate.FileMigrationSource{
-		Dir: "migrations",
-	}
-
-	// todo: configuration of datasource string
-	db, err := sql.Open("mysql", "root:pwd@tcp(localhost:3307)/gnomon?parseTime=true")
+	err := this.db.Upgrade()
 	if err != nil {
 		return err
 	}
-	defer db.Close()
 
-	_, err = migrate.Exec(db, dialect, migrations, migrate.Up)
+	err = this.postMigration()
 	if err != nil {
-		// todo: logging
-		// if(!) any migration were applied, try to roll back:
-		// migrate.ExecMax(nil, dialect, migrations, migrate.Down, applied)
 		return err
+	}
+
+	return nil
+}
+
+func (this *MigrationService) postMigration() error {
+	countUsers, err := this.db.GetNumberOfUsers()
+	if err != nil {
+		return err
+	}
+
+	if countUsers == 0 {
+		user := &models.User{
+			Id:           -1,
+			Username:     "admin",
+			PasswordHash: "pwd",
+		}
+		this.db.SaveUser(user)
 	}
 
 	return nil
