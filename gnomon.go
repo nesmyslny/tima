@@ -13,9 +13,10 @@ func main() {
 	db := DbAccess.New("root:pwd@tcp(localhost:3307)/gnomon?parseTime=true")
 	defer db.Close()
 
-	migrationService := services.NewMigrationService(db)
+	userService := services.NewUserService(db)
+	migrationService := services.NewMigrationService(db, userService)
 	migrationController := controllers.NewMigrationController(migrationService)
-	userController := controllers.UserController{}
+	userController := controllers.NewUserController(userService)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/signin", userController.Signin).Methods("POST")

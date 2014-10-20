@@ -2,15 +2,15 @@ package services
 
 import (
 	"gnomon/dbaccess"
-	"gnomon/models"
 )
 
 type MigrationService struct {
-	db *DbAccess.Db
+	db          *DbAccess.Db
+	userService *UserService
 }
 
-func NewMigrationService(db *DbAccess.Db) *MigrationService {
-	return &MigrationService{db}
+func NewMigrationService(db *DbAccess.Db, userService *UserService) *MigrationService {
+	return &MigrationService{db, userService}
 }
 
 func (this *MigrationService) Run() error {
@@ -34,13 +34,8 @@ func (this *MigrationService) postMigration() error {
 	}
 
 	if countUsers == 0 {
-		user := &models.User{
-			Id:           -1,
-			Username:     "admin",
-			PasswordHash: "pwd",
-		}
-		this.db.SaveUser(user)
+		_, err = this.userService.AddUser("admin", "pwd", "", "", "")
 	}
 
-	return nil
+	return err
 }

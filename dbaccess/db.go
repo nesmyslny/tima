@@ -62,6 +62,15 @@ func (this *Db) GetNumberOfUsers() (int, error) {
 	return int(count), err
 }
 
+func (this *Db) GetUserByName(username string) *models.User {
+	var user *models.User
+	err := this.dbMap.SelectOne(&user, "select * from users where username = ?", username)
+	if err != nil {
+		return nil
+	}
+	return user
+}
+
 func (this *Db) SaveUser(user *models.User) error {
 	var err error
 	if user.Id < 0 {
