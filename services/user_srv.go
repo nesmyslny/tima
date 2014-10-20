@@ -22,7 +22,7 @@ func (this *UserService) Authenticate(username string, pwd string) bool {
 		return false
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(pwd))
+	err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pwd))
 	if err != nil {
 		return false
 	}
@@ -39,7 +39,7 @@ func (this *UserService) AddUser(username string, pwd string, firstName string, 
 	user := &models.User{
 		Id:           -1,
 		Username:     username,
-		PasswordHash: string(pwdHash),
+		PasswordHash: pwdHash,
 		FirstName:    firstName,
 		LastName:     lastName,
 		Email:        email,
