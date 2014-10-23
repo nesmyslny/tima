@@ -4,11 +4,11 @@ angular
 
     $routeProvider
     .when('/signin', {
-        templateUrl: 'app/components/signin/signin.html',
+        templateUrl: 'app/signin/signin.html',
         controller: 'SigninController'
     })
     .when('/', {
-        templateUrl: 'app/components/secret/secret.html',
+        templateUrl: 'app/secret/secret.html',
         controller: 'SigninController',
         resolve: {
             loggedin: function(authService, $q, $timeout, $http, $location, $rootScope) {
