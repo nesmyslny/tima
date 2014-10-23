@@ -13,3 +13,8 @@ type UserSignin struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type JsonResult struct {
+	BoolResult   bool   `json:"BoolResult"`
+	StringResult string `json:"StringResult"`
+}

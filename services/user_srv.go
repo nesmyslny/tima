@@ -16,20 +16,6 @@ func NewUserService(db *DbAccess.Db) *UserService {
 	return &UserService{db}
 }
 
-func (this *UserService) Authenticate(username string, pwd string) bool {
-	user := this.db.GetUserByName(username)
-	if user == nil {
-		return false
-	}
-
-	err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pwd))
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
 func (this *UserService) AddUser(username string, pwd string, firstName string, lastName string, email string) (*models.User, error) {
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcryptCost)
 	if err != nil {

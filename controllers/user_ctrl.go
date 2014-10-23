@@ -1,46 +1,41 @@
 package controllers
 
 import (
-	"encoding/json"
-	"errors"
 	"gnomon/models"
 	"gnomon/services"
-	"io"
-	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type UserController struct {
+	authService *services.AuthService
 	userService *services.UserService
 }
 
-func NewUserController(userService *services.UserService) *UserController {
-	return &UserController{userService}
+func NewUserController(authService *services.AuthService, userService *services.UserService) *UserController {
+	return &UserController{authService, userService}
 }
 
-func (this *UserController) Signin(w http.ResponseWriter, r *http.Request) {
+func (this *UserController) Signin(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
 	var formData models.UserSignin
-	err := unmarshalRequestData(r.Body, &formData)
+	err := unmarshalJson(r.Body, &formData)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	if !this.userService.Authenticate(formData.Username, formData.Password) {
-		http.Error(w, "invalid user/password", http.StatusBadRequest)
+	token, err := this.authService.Authenticate(formData.Username, formData.Password)
+	if err != nil {
+		return nil, &CtrlHandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
+
+	return jsonResultString(token)
 }
 
-func unmarshalRequestData(body io.Reader, model interface{}) error {
-	data, err := ioutil.ReadAll(body)
-	if err != nil {
-		return errors.New("invalid request")
-	}
+func (this *UserController) IsSignedIn(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
+	signedIn := this.authService.ValidateToken(r)
+	return jsonResultBool(signedIn)
+}
 
-	err = json.Unmarshal(data, model)
-	if err != nil {
-		return errors.New("invalid data")
-	}
-
-	return nil
+func (this *UserController) Secret(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
+	return jsonResult(true, time.Now().String())
 }
