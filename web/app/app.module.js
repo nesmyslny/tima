@@ -3,11 +3,11 @@ angular
 .config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
 
     $routeProvider
-    .when('/', {
+    .when('/signin', {
         templateUrl: 'app/components/signin/signin.html',
         controller: 'SigninController'
     })
-    .when('/secret', {
+    .when('/', {
         templateUrl: 'app/components/secret/secret.html',
         controller: 'SigninController',
         resolve: {
@@ -17,7 +17,7 @@ angular
         }
     })
     .otherwise({
-        redirectTo: '/'
+        redirectTo: '/signin'
     });
 
     $httpProvider.interceptors.push('authInterceptor');

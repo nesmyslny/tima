@@ -17,7 +17,7 @@ angular.module('gnomon').controller('SigninController', ['$scope', '$http', 'aut
             return;
         }
 
-        authService.signIn($scope.formData, '/secret');
+        authService.signIn($scope.formData, '/');
     };
 
     $scope.signout = function(){

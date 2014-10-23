@@ -1,4 +1,4 @@
-angular.module('gnomon').factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function ($rootScope, $q, $window, $location) {
+angular.module('gnomon').factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', '$injector', function ($rootScope, $q, $window, $location, $injector) {
     return {
         request: function (config) {
             config.headers = config.headers || {};
@@ -9,7 +9,10 @@ angular.module('gnomon').factory('authInterceptor', ['$rootScope', '$q', '$windo
         },
         responseError: function (response) {
             if (response.status == 401) {
-                $location.path('/');
+                // manuelly getting authService because of circular dependency ($http).
+                // todo: investigate / refactor authService?
+                authService = $injector.get('authService');
+                authService.signOut();
             }
             return $q.reject(response);
         }

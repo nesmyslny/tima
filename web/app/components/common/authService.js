@@ -1,5 +1,7 @@
 angular.module('gnomon').factory('authService', ['$http', '$window', '$location', function($http, $window, $location) {
 
+    var signinPath = 'signin';
+
     return {
 
         signIn: function(credentials, redirectPath) {
@@ -17,7 +19,7 @@ angular.module('gnomon').factory('authService', ['$http', '$window', '$location'
 
         signOut: function() {
             delete $window.sessionStorage.token;
-            $location.path('/');
+            $location.path(signinPath);
         },
 
         isSignedIn : function($q, $timeout, $http, $location, $rootScope){
@@ -28,12 +30,12 @@ angular.module('gnomon').factory('authService', ['$http', '$window', '$location'
                     $timeout(deferred.resolve, 0);
                 } else {
                     $timeout(function(){deferred.reject();}, 0);
-                    $location.url('/');
+                    $location.url(signinPath);
                 }
             })
             .error(function(data, status, headers, config) {
                 $timeout(function(){deferred.reject();}, 0);
-                $location.url('/');
+                $location.url(signinPath);
             });
 
             return deferred.promise;
