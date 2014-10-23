@@ -25,7 +25,7 @@ func main() {
 	router.Handle("/issignedin", controllers.CtrlHandlerStruct{userController.IsSignedIn, nil}).Methods("GET")
 	router.Handle("/secret", controllers.CtrlHandlerStruct{userController.Secret, authService.ValidateToken}).Methods("GET")
 	router.Handle("/upgrade", controllers.CtrlHandlerStruct{migrationController.Upgrade, nil}).Methods("POST")
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("web/")))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
 }
