@@ -20,12 +20,12 @@ type AuthService struct {
 func NewAuthService(db *DbAccess.Db) *AuthService {
 	// todo: configuration of paths (private/public key)
 	// todo: error handling (when keys not present)
-	privKey, err := ioutil.ReadFile("jwt-keys/dev.rsa")
+	privKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pubKey, err := ioutil.ReadFile("jwt-keys/dev.rsa.pub")
+	pubKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa.pub")
 	if err != nil {
 		log.Fatal(err)
 	}
