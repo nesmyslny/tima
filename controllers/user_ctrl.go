@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"gnomon/models"
-	"gnomon/services"
+	"github.com/nesmyslny/tima/models"
+	"github.com/nesmyslny/tima/services"
 	"net/http"
 	"time"
 )

@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"gnomon/models"
+	"github.com/nesmyslny/tima/models"
 	"io"
 	"io/ioutil"
 	"net/http"

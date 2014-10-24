@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 MYSQL_PASSWORD="pwd"
-MYSQL_DBNAME="gnomon"
+MYSQL_DBNAME="tima"
 
 apt-get update
 

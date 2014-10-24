@@ -1,4 +1,4 @@
-angular.module('gnomon').factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', '$injector', function ($rootScope, $q, $window, $location, $injector) {
+angular.module('tima').factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', '$injector', function ($rootScope, $q, $window, $location, $injector) {
     return {
         request: function (config) {
             config.headers = config.headers || {};

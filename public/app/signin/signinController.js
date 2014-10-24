@@ -1,4 +1,4 @@
-angular.module('gnomon').controller('SigninController', ['$scope', '$http', 'authService', function ($scope, $http, authService) {
+angular.module('tima').controller('SigninController', ['$scope', '$http', 'authService', function ($scope, $http, authService) {
     $scope.formData = {
         username: '',
         password: '',

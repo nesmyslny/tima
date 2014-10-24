@@ -1,4 +1,4 @@
-angular.module('gnomon').factory('authService', ['$http', '$window', '$location', function($http, $window, $location) {
+angular.module('tima').factory('authService', ['$http', '$window', '$location', function($http, $window, $location) {
 
     var signinPath = 'signin';
 

@@ -2,15 +2,15 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"gnomon/controllers"
-	"gnomon/dbaccess"
-	"gnomon/services"
+	"github.com/nesmyslny/tima/controllers"
+	"github.com/nesmyslny/tima/dbaccess"
+	"github.com/nesmyslny/tima/services"
 	"net/http"
 )
 
 func main() {
 	// todo: configuration
-	db := DbAccess.New("root:pwd@tcp(localhost:3307)/gnomon?parseTime=true")
+	db := DbAccess.New("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
 	defer db.Close()
 
 	authService := services.NewAuthService(db)

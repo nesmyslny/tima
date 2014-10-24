@@ -1,7 +1,7 @@
 package services
 
 import (
-	"gnomon/dbaccess"
+	"github.com/nesmyslny/tima/dbaccess"
 )
 
 type MigrationService struct {

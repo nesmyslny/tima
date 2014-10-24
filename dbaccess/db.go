@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"github.com/coopernurse/gorp"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/nesmyslny/tima/models"
 	"github.com/rubenv/sql-migrate"
-	"gnomon/models"
 )
 
 type Db struct {

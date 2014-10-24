@@ -4,7 +4,7 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"gnomon/dbaccess"
+	"github.com/nesmyslny/tima/dbaccess"
 	"io/ioutil"
 	"log"
 	"net/http"

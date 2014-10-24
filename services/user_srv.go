@@ -2,8 +2,8 @@ package services
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
-	"gnomon/dbaccess"
-	"gnomon/models"
+	"github.com/nesmyslny/tima/dbaccess"
+	"github.com/nesmyslny/tima/models"
 )
 
 type UserService struct {

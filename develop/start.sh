@@ -3,7 +3,7 @@
 DEV="$( cd "$( dirname "$0" )" && pwd )"
 DEV_TMP="$DEV/tmp"
 BASE="$( cd "$DEV" && cd .. && pwd )"
-GIN_BIN=".${DEV_TMP#$BASE}/gnomon-gin" # must be relative
+GIN_BIN=".${DEV_TMP#$BASE}/tima-gin" # must be relative
 GIN_LOG="$DEV_TMP/gin.log"
 GIN_PID="$DEV_TMP/gin.pid"
 

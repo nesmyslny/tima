@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"gnomon/services"
+	"github.com/nesmyslny/tima/services"
 	"net/http"
 )
 

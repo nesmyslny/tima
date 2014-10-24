@@ -1,5 +1,5 @@
 angular
-.module('gnomon', ['ngRoute', 'ui.bootstrap.showErrors'])
+.module('tima', ['ngRoute', 'ui.bootstrap.showErrors'])
 .config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
 
     $routeProvider
