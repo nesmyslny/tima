@@ -1,4 +1,20 @@
 .panel-signin {
-    width: 300px;
-    margin: 200px auto auto auto;
+    left: 50%;
+    margin-top: 70px;
+    max-width: 300px;
+    position: absolute;
+    top: 10%;
+    transform: translate(-50%, 0);
+    width: 100%;
+}
+
+.calendar-text {
+    font-size: .5em;
+    margin-top: .3em;
+}
+
+.dropdown .fa-stack {
+    height: 1.3em;
+    line-height: 1em;
+    width: 1.28571429em;
 }
