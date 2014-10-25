@@ -1,25 +1,28 @@
-angular.module('tima').factory('authService', ['$http', '$window', '$location', function($http, $window, $location) {
+angular.module('tima').factory('authService', ['$http', '$location', 'sessionService', function($http, $location, sessionService) {
 
-    var signinPath = 'signin';
+    var service = {
 
-    return {
+        getUsername: function() {
+            return sessionService.getUsername();
+        },
 
         signIn: function(credentials, redirectPath) {
             $http.post('/signin', credentials)
             .success(function(data, status, headers, config) {
-                $window.sessionStorage.token = data.StringResult;
+                var tokenData = jwt_decode(data.StringResult);
+                sessionService.init(data.StringResult, tokenData.username);
                 $location.path(redirectPath);
                 credentials.clear();
             })
             .error(function(data, status, headers, config) {
-                delete $window.sessionStorage.token;
+                sessionService.delete();
                 credentials.clear();
             });
         },
 
         signOut: function() {
-            delete $window.sessionStorage.token;
-            $location.path(signinPath);
+            sessionService.delete();
+            $location.path('signin');
         },
 
         isSignedIn : function($q, $timeout, $http, $location, $rootScope){
@@ -30,16 +33,18 @@ angular.module('tima').factory('authService', ['$http', '$window', '$location', 
                     $timeout(deferred.resolve, 0);
                 } else {
                     $timeout(function(){deferred.reject();}, 0);
-                    $location.url(signinPath);
+                    service.signOut();
                 }
             })
             .error(function(data, status, headers, config) {
                 $timeout(function(){deferred.reject();}, 0);
-                $location.url(signinPath);
+                service.signOut();
             });
 
             return deferred.promise;
         }
+
     };
 
+    return service;
 }]);

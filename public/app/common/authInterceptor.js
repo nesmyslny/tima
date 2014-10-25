@@ -1,9 +1,9 @@
-angular.module('tima').factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', '$injector', function ($rootScope, $q, $window, $location, $injector) {
+angular.module('tima').factory('authInterceptor', ['$q', '$injector', 'sessionService', function ($q, $injector, sessionService) {
     return {
         request: function (config) {
             config.headers = config.headers || {};
-            if ($window.sessionStorage.token) {
-                config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+            if (sessionService.getToken()) {
+                config.headers.Authorization = 'Bearer ' + sessionService.getToken();
             }
             return config;
         },
