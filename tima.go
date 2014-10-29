@@ -1,11 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/nesmyslny/tima/controllers"
 	"github.com/nesmyslny/tima/dbaccess"
 	"github.com/nesmyslny/tima/services"
-	"net/http"
 )
 
 func main() {
@@ -24,7 +25,6 @@ func main() {
 	router := mux.NewRouter()
 	router.Handle("/signin", controllers.NewAnonHandler(userController.Signin)).Methods("POST")
 	router.Handle("/issignedin", controllers.NewAnonHandler(userController.IsSignedIn)).Methods("GET")
-	router.Handle("/secret", controllers.NewAuthHandler(userController.Secret, authService.AuthenticateRequest)).Methods("GET")
 	router.Handle("/upgrade", controllers.NewAnonHandler(migrationController.Upgrade)).Methods("POST")
 
 	router.Handle("/activities/{day}", controllers.NewAuthHandler(activitiesController.GetActivities, authService.AuthenticateRequest)).Methods("GET")

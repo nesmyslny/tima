@@ -8,8 +8,6 @@ angular.module('tima').controller('signinController', ['$scope', '$http', 'authS
         }
     };
 
-    $scope.secretData = null;
-
     $scope.signin = function() {
         $scope.$broadcast('show-errors-check-validity');
 
@@ -23,12 +21,4 @@ angular.module('tima').controller('signinController', ['$scope', '$http', 'authS
     $scope.signout = function(){
         authService.signOut();
     };
-
-    $scope.secret = function() {
-        $http.get('/secret')
-        .success(function(data, status, headers, config) {
-            $scope.secretData = data;
-        });
-    };
-
 }]);
