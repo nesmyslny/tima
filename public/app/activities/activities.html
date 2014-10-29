@@ -1,0 +1,55 @@
+
+<div class="row">
+    <div class="col-md-12"><h1>{{dayHeading}}</h1></div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="input-group">
+            <span class="btn-group">
+                <button class="btn btn-default" ng-click="navigateDay(false)"><i class="fa fa-arrow-circle-o-left fa-lg"></i></button>
+                <button class="btn btn-default" ng-click="navigateDay(true)"><i class="fa fa-arrow-circle-o-right fa-lg"></i></button>
+                <button class="btn btn-default" ng-click="today()"><i class="fa fa-undo fa-lg"></i></button>
+                <button class="btn btn-default" ng-click="openDatePicker($event)" ng-class="{active: datePickerOpened}"><i class="fa fa-calendar"></i></button>
+            </span>
+        </div>
+        <div datepicker-popup ng-model="day" show-button-bar="false" is-open="datePickerOpened">
+        </div>
+    </div>
+</div>
+
+<div class="row margin-top-20 margin-bottom-20">
+    <div class="col-md-12">
+        <form name="formAddActivity" class="form-inline" role="form" ng-submit="add()" novalidate>
+
+            <div class="form-group" show-errors>
+                <label class="sr-only" for="text">Text</label>
+                <input type="text" name="text" id="text" class="form-control inline-act-text" ng-model="formData.text" placeholder="Text" required />
+            </div>
+
+            <div class="form-group" show-errors>
+                <label class="sr-only" for="hours">Hours</label>
+                <input type="number" name="hours" id="hours" class="form-control inline-act-time" placeholder="Hours" min="0" max="23" step="1" ng-model="formData.hours" ng-required="!formData.minutes" />
+            </div>
+            <div class="form-group" show-errors>
+                <label class="sr-only" for="minutes">Minutes</label>
+                <input type="number" name="minutes" id="minutes" class="form-control inline-act-time" placeholder="Minutes" min="0" max="59" step="15" ng-model="formData.minutes" ng-required="!formData.hours" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-plus"></i> Add activity
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<div class="row col-md-12" ng-repeat="a in activities">
+    <div class="well">
+        <progressbar max="100" value="(a.duration * 100) / maxProgress">{{a.text}}</progressbar>
+        <div class="pull-right">Total Duration: {{maxProgress}}</div>
+        <label for="duration">Duration: </label>
+        <input type="number" placeholder="duration" ng-model="a.duration" />
+    </div>
+</div>
+

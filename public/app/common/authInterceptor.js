@@ -2,8 +2,8 @@ angular.module('tima').factory('authInterceptor', ['$q', '$injector', 'sessionSe
     return {
         request: function (config) {
             config.headers = config.headers || {};
-            if (sessionService.getToken()) {
-                config.headers.Authorization = 'Bearer ' + sessionService.getToken();
+            if (sessionService.token) {
+                config.headers.Authorization = 'Bearer ' + sessionService.token;
             }
             return config;
         },

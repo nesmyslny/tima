@@ -1,35 +1,29 @@
 angular.module('tima').factory('sessionService', ['$window', function($window) {
-
-    storage = {
-        token: $window.sessionStorage.token,
-        username: $window.sessionStorage.username,
-        set: function(token, username) {
-            this.token = token;
-            this.username = username;
+    function getUserOrNull() {
+        if ($window.sessionStorage.user) {
+            return JSON.parse($window.sessionStorage.user);
+        } else {
+            return null;
         }
-    };
+    }
 
-    return {
+    var service = {
+        user: getUserOrNull(),
+        token: $window.sessionStorage.token,
 
-        getToken: function() {
-            return storage.token;
-        },
-
-        getUsername: function() {
-            return storage.username;
-        },
-
-        init: function(token, username) {
-            storage.set(token, username);
-            $window.sessionStorage.token = token;
-            $window.sessionStorage.username = username;
+        init: function(token, user) {
+            $window.sessionStorage.token = service.token = token;
+            $window.sessionStorage.user = JSON.stringify(user);
+            service.user = user;
         },
 
         delete: function() {
-            storage.set('', '');
+            service.user = null;
+            service.token = '';
             delete $window.sessionStorage.token;
-            delete $window.sessionStorage.username;
+            delete $window.sessionStorage.user;
         }
-
     };
+
+    return service;
 }]);

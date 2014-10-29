@@ -1,12 +1,22 @@
 package models
 
+import "time"
+
 type User struct {
-	Id           int    `db:"id"`
-	Username     string `db:"username"`
-	PasswordHash []byte `db:"password_hash"`
-	FirstName    string `db:"first_name"`
-	LastName     string `db:"last_name"`
-	Email        string `db:"email"`
+	Id           int    `db:"id" json:"id"`
+	Username     string `db:"username" json:"username"`
+	PasswordHash []byte `db:"password_hash" json:"-"`
+	FirstName    string `db:"first_name" json:"firstName"`
+	LastName     string `db:"last_name" json:"lastName"`
+	Email        string `db:"email" json:"email"`
+}
+
+type Activity struct {
+	Id       int       `db:"id" json:"id"`
+	Day      time.Time `db:"day" json:"day"`
+	UserId   int       `db:"user_id" json:"userId"`
+	Text     string    `db:"text" json:"text"`
+	Duration int       `db:"duration" json:"duration"`
 }
 
 type UserSignin struct {
@@ -15,6 +25,6 @@ type UserSignin struct {
 }
 
 type JsonResult struct {
-	BoolResult   bool   `json:"BoolResult"`
-	StringResult string `json:"StringResult"`
+	BoolResult   bool   `json:"boolResult"`
+	StringResult string `json:"stringResult"`
 }
