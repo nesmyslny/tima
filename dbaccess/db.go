@@ -89,7 +89,7 @@ func (this *Db) SaveUser(user *models.User) error {
 func (this *Db) GetActivities(userId int, day time.Time) ([]models.Activity, error) {
 	var activities []models.Activity
 	_, err := this.dbMap.Select(&activities,
-		"select * from activities where user_id = ? and day = ?",
+		"select * from activities where user_id = ? and day = ? order by duration desc",
 		userId, day.Format(dateLayout))
 	if err != nil {
 		return nil, err
