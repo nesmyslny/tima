@@ -26,7 +26,20 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
         activities.forEach(function(activity) {
             totalDuration += activity.duration;
         });
-        return totalDuration;
+
+        return {
+            minutes: totalDuration,
+            formatted: getDurationFormatted(totalDuration)
+        };
+    }
+
+    function getDurationFormatted(duration) {
+        var m = moment.duration(duration, 'minutes');
+        var hours = m.hours();
+        var minutes = m.minutes();
+        var durationFormatted = hours > 0 ? hours + 'h' : '';
+        durationFormatted += minutes > 0 ? ' ' + minutes + 'min' : '';
+        return durationFormatted;
     }
 
     var service = {

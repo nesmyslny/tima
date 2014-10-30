@@ -1,8 +1,9 @@
 angular.module('tima').controller('activitiesController', ['activitiesService', '$scope', '$routeParams', '$location', function (activitiesService, $scope, $routeParams, $location) {
 
     $scope.day = $routeParams.day;
-    $scope.dayHeading = moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
-    $scope.maxProgress = 0;
+    $scope.dayHeader = moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
+    $scope.durationHeader = '';
+    $scope.totalDuration = 0;
     $scope.activities = [];
 
     $scope.formData = {
@@ -19,7 +20,8 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     $scope.list = function() {
         var promise = activitiesService.refreshActivities($scope.day, $scope.activities);
         promise.then(function(data) {
-            $scope.maxProgress = data.totalDuration;
+            $scope.totalDuration = data.totalDuration.minutes;
+            $scope.durationHeader = data.totalDuration.formatted;
         });
     };
     $scope.list();
