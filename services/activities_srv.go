@@ -37,3 +37,17 @@ func (this *ActivitiesService) AddActivity(activity *models.Activity) error {
 	activity.Id = -1
 	return this.db.SaveActivity(activity)
 }
+
+func (this *ActivitiesService) DeleteActivity(id int) error {
+	activity, err := this.db.GetActivity(id)
+	if err != nil {
+		return err
+	}
+
+	err = this.db.DeleteActivity(activity)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

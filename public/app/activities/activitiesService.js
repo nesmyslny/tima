@@ -1,22 +1,43 @@
 angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', function($http, $q, $filter) {
-    var service = {
 
+    function removeDeletedActivities(source, dest) {
+        dest.forEach(function(activity) {
+            var actFound = $filter('filter')(source, {id: activity.id}, true);
+            if (!actFound.length) {
+                var index = dest.indexOf(activity);
+                dest.splice(index, 1);
+            }
+        });
+    }
+
+    function mergeActivities(source, dest) {
+        source.forEach(function(activity) {
+            var actFound = $filter('filter')(dest, {id: activity.id}, true);
+            if (actFound.length) {
+                actFound[0].duration = activity.duration;
+            } else {
+                dest.push(activity);
+            }
+        });
+    }
+
+    function getTotalDuration(activities) {
+        var totalDuration = 0;
+        activities.forEach(function(activity) {
+            totalDuration += activity.duration;
+        });
+        return totalDuration;
+    }
+
+    var service = {
         refreshActivities: function(day, activities) {
             var deferred = $q.defer();
 
             $http.get('/activities/' + day)
             .success(function(data, status, headers, config) {
-                var totalDuration = 0;
-
-                data.forEach(function(activity) {
-                    var actFound = $filter('filter')(activities, {id: activity.id}, true);
-                    if (actFound.length) {
-                        actFound[0].duration = activity.duration;
-                    } else {
-                        activities.push(activity);
-                    }
-                    totalDuration += activity.duration;
-                });
+                removeDeletedActivities(data, activities);
+                mergeActivities(data, activities);
+                var totalDuration = getTotalDuration(activities);
 
                 deferred.resolve({
                     totalDuration: totalDuration
@@ -48,8 +69,22 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             });
 
             return deferred.promise;
-        }
+        },
 
+        deleteActivity: function(id) {
+            var deferred = $q.defer();
+
+            $http.delete('/activities/' + id)
+            .success(function() {
+                deferred.resolve();
+            })
+            .error(function(data, status) {
+                // todo: error handling
+                deferred.reject(data, status);
+            });
+
+            return deferred.promise;
+        }
     };
 
     return service;

@@ -39,6 +39,13 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
         $scope.$broadcast('show-errors-reset');
     };
 
+    $scope.delete = function(id) {
+        activitiesService.deleteActivity(id)
+        .then(function() {
+            $scope.list();
+        });
+    };
+
     $scope.openDatePicker = function($event) {
         $event.preventDefault();
         $event.stopPropagation();

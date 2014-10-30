@@ -23,13 +23,16 @@ func main() {
 	activitiesController := controllers.NewActivitiesController(activitiesService)
 
 	router := mux.NewRouter()
+
+	// todo: secure upgrade route (-> implement installation/upgrading)
+	router.Handle("/upgrade", controllers.NewAnonHandler(migrationController.Upgrade)).Methods("POST")
+
 	router.Handle("/signin", controllers.NewAnonHandler(userController.Signin)).Methods("POST")
 	router.Handle("/issignedin", controllers.NewAnonHandler(userController.IsSignedIn)).Methods("GET")
-	router.Handle("/upgrade", controllers.NewAnonHandler(migrationController.Upgrade)).Methods("POST")
 
 	router.Handle("/activities/{day}", controllers.NewAuthHandler(activitiesController.GetActivities, authService.AuthenticateRequest)).Methods("GET")
 	router.Handle("/activities", controllers.NewAuthHandler(activitiesController.AddActivity, authService.AuthenticateRequest)).Methods("POST")
-	// router.Handle("/activities", controllers.CtrlHandlerStruct{activityController.DeleteActivity, authService.ValidateToken}).Methods("DELETE")
+	router.Handle("/activities/{id}", controllers.NewAuthHandler(activitiesController.DeleteActivity, authService.AuthenticateRequest)).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)

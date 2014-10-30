@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/nesmyslny/tima/models"
@@ -34,11 +34,25 @@ func (this *ActivitiesController) GetActivities(w http.ResponseWriter, r *http.R
 func (this *ActivitiesController) AddActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
 	var activity models.Activity
 	unmarshalJson(r.Body, &activity)
-	log.Print(activity.Day)
 	activity.UserId = user.Id
 	err := this.activitiesService.AddActivity(&activity)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
 	}
+	return jsonResultBool(true)
+}
+
+func (this *ActivitiesController) DeleteActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
+	idString := getRouteVar(r, "id")
+	id, err := strconv.ParseInt(idString, 0, 32)
+	if err != nil {
+		return nil, &CtrlHandlerError{err, "invalid parameter: id", http.StatusBadRequest}
+	}
+
+	err = this.activitiesService.DeleteActivity(int(id))
+	if err != nil {
+		return nil, &CtrlHandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
+	}
+
 	return jsonResultBool(true)
 }

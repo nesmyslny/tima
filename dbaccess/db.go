@@ -97,6 +97,14 @@ func (this *Db) GetActivities(userId int, day time.Time) ([]models.Activity, err
 	return activities, nil
 }
 
+func (this *Db) GetActivity(id int) (*models.Activity, error) {
+	obj, err := this.dbMap.Get(models.Activity{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*models.Activity), nil
+}
+
 func (this *Db) SaveActivity(activity *models.Activity) error {
 	var err error
 	if activity.Id < 0 {
@@ -122,4 +130,13 @@ func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*models.
 	}
 
 	return activity, nil
+}
+
+func (this *Db) DeleteActivity(activity *models.Activity) error {
+	_, err := this.dbMap.Delete(activity)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
