@@ -38,6 +38,18 @@
     width: 100px;
 }
 
+.form-inline .input-group .inline-act-time-sm {
+    width: 55px;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.progress-slim {
+    margin-bottom: 0;
+}
+
 /*
 angular-bootstrap uses glyphicons (e.g. datepicker). -> replace with font awesome
 https://github.com/angular-ui/bootstrap/issues/2475
