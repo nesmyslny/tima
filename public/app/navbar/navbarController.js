@@ -1,4 +1,4 @@
-angular.module('tima').controller('NavbarController', ['$scope', 'authService', function ($scope, authService) {
+angular.module('tima').controller('navbarController', ['$scope', 'authService', function ($scope, authService) {
     $scope.username = '';
     $scope.isSignedIn = false;
     $scope.$watch(authService.getUser, usernameWatchCallback, true);
