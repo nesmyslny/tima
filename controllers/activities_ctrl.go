@@ -17,38 +17,38 @@ func NewActivitiesController(activitiesService *services.ActivitiesService) *Act
 	return &ActivitiesController{activitiesService}
 }
 
-func (this *ActivitiesController) GetActivities(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesController) GetByDay(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
 	dayString := getRouteVar(r, "day")
 	day, err := time.Parse("2006-01-02", dayString)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, "invalid parameter: day", http.StatusBadRequest}
 	}
 
-	activities, err := this.activitiesService.GetActivities(user.Id, day)
+	activities, err := this.activitiesService.GetByDay(user.Id, day)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, "couldn't retrieve activities", http.StatusInternalServerError}
 	}
 	return activities, nil
 }
 
-func (this *ActivitiesController) SaveActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesController) Save(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
 	var activity models.Activity
 	unmarshalJson(r.Body, &activity)
-	err := this.activitiesService.SaveActivity(&activity)
+	err := this.activitiesService.Save(&activity)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 	return jsonResultBool(true)
 }
 
-func (this *ActivitiesController) DeleteActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesController) Delete(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
 	idString := getRouteVar(r, "id")
 	id, err := strconv.ParseInt(idString, 0, 32)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, "invalid parameter: id", http.StatusBadRequest}
 	}
 
-	err = this.activitiesService.DeleteActivity(int(id))
+	err = this.activitiesService.Delete(int(id))
 	if err != nil {
 		return nil, &CtrlHandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
 	}

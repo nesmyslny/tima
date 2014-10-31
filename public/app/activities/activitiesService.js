@@ -51,7 +51,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
     }
 
     var service = {
-        refreshActivities: function(day, activities) {
+        refresh: function(day, activities) {
             var deferred = $q.defer();
 
             $http.get('/activities/' + day)
@@ -73,7 +73,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        saveActivity: function(activity) {
+        save: function(activity) {
             var deferred = $q.defer();
 
             $http.post('/activities', activity)
@@ -88,7 +88,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        deleteActivity: function(id) {
+        delete: function(id) {
             var deferred = $q.defer();
 
             $http.delete('/activities/' + id)
@@ -103,7 +103,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        createNewActivity: function(day, userId, text, hours, minutes) {
+        createNew: function(day, userId, text, hours, minutes) {
             return {
                 id: -1,
                 day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),

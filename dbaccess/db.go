@@ -86,7 +86,7 @@ func (this *Db) SaveUser(user *models.User) error {
 	return err
 }
 
-func (this *Db) GetActivities(userId int, day time.Time) ([]models.Activity, error) {
+func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]models.Activity, error) {
 	var activities []models.Activity
 	_, err := this.dbMap.Select(&activities,
 		"select * from activities where user_id = ? and day = ? order by duration desc",

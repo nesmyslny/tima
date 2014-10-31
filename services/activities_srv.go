@@ -15,15 +15,15 @@ func NewActivitiesService(db *DbAccess.Db) *ActivitiesService {
 	return &ActivitiesService{db}
 }
 
-func (this *ActivitiesService) GetActivities(userId int, day time.Time) ([]models.Activity, error) {
-	activities, err := this.db.GetActivities(userId, day)
+func (this *ActivitiesService) GetByDay(userId int, day time.Time) ([]models.Activity, error) {
+	activities, err := this.db.GetActivitiesByDay(userId, day)
 	if err != nil {
 		return nil, err
 	}
 	return activities, nil
 }
 
-func (this *ActivitiesService) SaveActivity(activity *models.Activity) error {
+func (this *ActivitiesService) Save(activity *models.Activity) error {
 	var err error
 	var existingActivity *models.Activity
 
@@ -42,7 +42,7 @@ func (this *ActivitiesService) SaveActivity(activity *models.Activity) error {
 	return this.db.SaveActivity(activity)
 }
 
-func (this *ActivitiesService) DeleteActivity(id int) error {
+func (this *ActivitiesService) Delete(id int) error {
 	activity, err := this.db.GetActivity(id)
 	if err != nil {
 		return err

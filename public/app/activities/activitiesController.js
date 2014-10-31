@@ -18,7 +18,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.list = function() {
-        var promise = activitiesService.refreshActivities($scope.day, $scope.activities);
+        var promise = activitiesService.refresh($scope.day, $scope.activities);
         promise.then(function(data) {
             $scope.totalDuration = data.totalDuration.minutes;
             $scope.durationHeader = data.totalDuration.formatted;
@@ -32,8 +32,8 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             return;
         }
 
-        var activity = activitiesService.createNewActivity($scope.day, authService.getUser().id, $scope.formData.text, $scope.formData.hours, $scope.formData.minutes);
-        activitiesService.saveActivity(activity)
+        var activity = activitiesService.createNew($scope.day, authService.getUser().id, $scope.formData.text, $scope.formData.hours, $scope.formData.minutes);
+        activitiesService.save(activity)
         .then(function() {
             $scope.list();
         });
@@ -43,7 +43,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.delete = function(id) {
-        activitiesService.deleteActivity(id)
+        activitiesService.delete(id)
         .then(function() {
             $scope.list();
         });
@@ -51,7 +51,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
 
     $scope.changeDuration = function(activity) {
         activity.duration = activitiesService.calculateDuration(activity.durationHours, activity.durationMinutes);
-        activitiesService.saveActivity(activity)
+        activitiesService.save(activity)
         .then(function() {
             $scope.list();
         });
