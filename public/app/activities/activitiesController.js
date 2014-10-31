@@ -48,6 +48,13 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
         });
     };
 
+    $scope.changeDuration = function(activity) {
+        activitiesService.changeActivityDuration(activity)
+        .then(function() {
+            $scope.list();
+        });
+    };
+
     $scope.openDatePicker = function($event) {
         $event.preventDefault();
         $event.stopPropagation();

@@ -31,7 +31,7 @@
 
             <div class="form-group" show-errors>
                 <label class="sr-only" for="hours">Hours</label>
-                <input type="number" name="hours" id="hours" class="form-control inline-act-time" placeholder="Hours" min="0" max="23" step="1" ng-model="formData.hours" ng-required="!formData.minutes" />
+                <input type="number" name="hours" id="hours" class="form-control inline-act-time" placeholder="Hours" min="0" max="23" ng-model="formData.hours" ng-required="!formData.minutes" />
             </div>
             <div class="form-group" show-errors>
                 <label class="sr-only" for="minutes">Minutes</label>
@@ -50,9 +50,16 @@
     <div class="well">
         <progressbar max="100" value="(a.duration * 100) / totalDuration">{{a.text}}</progressbar>
         <div class="pull-right">Total Duration: {{totalDuration}}</div>
-        <label for="duration">Duration: </label>
-        <input type="number" placeholder="duration" ng-model="a.duration" />
-        <button class="btn btn-default" ng-click="delete(a.id)"><i class="fa fa-remove fa-lg"></i></button>
+        <ng-form name="formActivity" class="form-inline">
+            <div class="form-group" show-errors>
+                <input type="number" class="form-control" name="actHours" placeholder="Hours"  min="0" max="23" ng-model="a.durationHours" ng-required="!a.durationMinutes" />
+            </div>
+            <div class="form-group" show-errors>
+                <input type="number" class="form-control" name="actMinutes" placeholder="Minutes" ng-model="a.durationMinutes" ng-required="!a.durationHours" />
+            </div>
+            <button class="btn btn-default" ng-click="changeDuration(a)" ng-disabled="formActivity.actHours.$invalid || formActivity.actMinutes.$invalid"><i class="fa fa-check fa-lg"></i></button>
+            <button class="btn btn-default" ng-click="delete(a.id)"><i class="fa fa-remove fa-lg"></i></button>
+        </ng-form>
     </div>
 </div>
 

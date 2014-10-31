@@ -21,6 +21,14 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
         });
     }
 
+    function refreshActivitiesViewValues(activities) {
+        activities.forEach(function(activity) {
+            var m = moment.duration(activity.duration, 'minutes');
+            activity.durationHours = m.hours();
+            activity.durationMinutes = m.minutes();
+        });
+    }
+
     function getTotalDuration(activities) {
         var totalDuration = 0;
         activities.forEach(function(activity) {
@@ -50,6 +58,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             .success(function(data, status, headers, config) {
                 removeDeletedActivities(data, activities);
                 mergeActivities(data, activities);
+                refreshActivitiesViewValues(activities);
                 var totalDuration = getTotalDuration(activities);
 
                 deferred.resolve({
@@ -72,7 +81,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
                 duration: hours * 60 + minutes
             };
 
-            $http.post('/activities', activity)
+            $http.post('/activities/add', activity)
             .success(function(data, status, headers, config) {
                 deferred.resolve();
             })
@@ -92,6 +101,22 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
                 deferred.resolve();
             })
             .error(function(data, status) {
+                // todo: error handling
+                deferred.reject(data, status);
+            });
+
+            return deferred.promise;
+        },
+
+        changeActivityDuration: function(activity) {
+            var deferred = $q.defer();
+            activity.duration = activity.durationHours * 60 + activity.durationMinutes;
+
+            $http.post('/activities/save', activity)
+            .success(function(data, status, headers, config) {
+                deferred.resolve();
+            })
+            .error(function(data, status, header, config) {
                 // todo: error handling
                 deferred.reject(data, status);
             });
