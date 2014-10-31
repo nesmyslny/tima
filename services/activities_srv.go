@@ -23,20 +23,22 @@ func (this *ActivitiesService) GetActivities(userId int, day time.Time) ([]model
 	return activities, nil
 }
 
-func (this *ActivitiesService) AddActivity(activity *models.Activity) error {
-	existingActivity, err := this.db.TryGetActivity(activity.UserId, activity.Day, activity.Text)
-	if err != nil {
-		return err
+func (this *ActivitiesService) SaveActivity(activity *models.Activity) error {
+	var err error
+	var existingActivity *models.Activity
+
+	if activity.Id == -1 {
+		existingActivity, err = this.db.TryGetActivity(activity.UserId, activity.Day, activity.Text)
+		if err != nil {
+			return err
+		}
 	}
+
 	if existingActivity != nil {
 		existingActivity.Duration += activity.Duration
 		return this.db.SaveActivity(existingActivity)
 	}
-	activity.Id = -1
-	return this.db.SaveActivity(activity)
-}
 
-func (this *ActivitiesService) SaveActivity(activity *models.Activity) error {
 	return this.db.SaveActivity(activity)
 }
 

@@ -1,4 +1,4 @@
-angular.module('tima').controller('activitiesController', ['activitiesService', '$scope', '$routeParams', '$location', function (activitiesService, $scope, $routeParams, $location) {
+angular.module('tima').controller('activitiesController', ['activitiesService', '$scope', '$routeParams', '$location', 'authService', function (activitiesService, $scope, $routeParams, $location, authService) {
 
     $scope.day = $routeParams.day;
     $scope.dayHeader = moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
@@ -32,7 +32,8 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             return;
         }
 
-        activitiesService.saveActivity($scope.day, $scope.formData.text, $scope.formData.hours, $scope.formData.minutes)
+        var activity = activitiesService.createNewActivity($scope.day, authService.getUser().id, $scope.formData.text, $scope.formData.hours, $scope.formData.minutes);
+        activitiesService.saveActivity(activity)
         .then(function() {
             $scope.list();
         });
@@ -49,7 +50,8 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.changeDuration = function(activity) {
-        activitiesService.changeActivityDuration(activity)
+        activity.duration = activitiesService.calculateDuration(activity.durationHours, activity.durationMinutes);
+        activitiesService.saveActivity(activity)
         .then(function() {
             $scope.list();
         });

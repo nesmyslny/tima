@@ -31,17 +31,6 @@ func (this *ActivitiesController) GetActivities(w http.ResponseWriter, r *http.R
 	return activities, nil
 }
 
-func (this *ActivitiesController) AddActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
-	var activity models.Activity
-	unmarshalJson(r.Body, &activity)
-	activity.UserId = user.Id
-	err := this.activitiesService.AddActivity(&activity)
-	if err != nil {
-		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
-	}
-	return jsonResultBool(true)
-}
-
 func (this *ActivitiesController) SaveActivity(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError) {
 	var activity models.Activity
 	unmarshalJson(r.Body, &activity)

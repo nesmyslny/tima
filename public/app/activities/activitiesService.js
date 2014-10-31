@@ -73,15 +73,10 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        saveActivity: function(day, text, hours, minutes) {
+        saveActivity: function(activity) {
             var deferred = $q.defer();
-            var activity = {
-                day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
-                text: text,
-                duration: hours * 60 + minutes
-            };
 
-            $http.post('/activities/add', activity)
+            $http.post('/activities', activity)
             .success(function(data, status, headers, config) {
                 deferred.resolve();
             })
@@ -108,20 +103,18 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        changeActivityDuration: function(activity) {
-            var deferred = $q.defer();
-            activity.duration = activity.durationHours * 60 + activity.durationMinutes;
+        createNewActivity: function(day, userId, text, hours, minutes) {
+            return {
+                id: -1,
+                day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
+                userId: userId,
+                text: text,
+                duration: service.calculateDuration(hours, minutes)
+            };
+        },
 
-            $http.post('/activities/save', activity)
-            .success(function(data, status, headers, config) {
-                deferred.resolve();
-            })
-            .error(function(data, status, header, config) {
-                // todo: error handling
-                deferred.reject(data, status);
-            });
-
-            return deferred.promise;
+        calculateDuration: function(hours, minutes) {
+            return hours * 60 + minutes;
         }
     };
 

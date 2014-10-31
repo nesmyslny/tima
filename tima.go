@@ -31,8 +31,7 @@ func main() {
 	router.Handle("/issignedin", controllers.NewAnonHandler(userController.IsSignedIn)).Methods("GET")
 
 	router.Handle("/activities/{day}", controllers.NewAuthHandler(activitiesController.GetActivities, authService.AuthenticateRequest)).Methods("GET")
-	router.Handle("/activities/add", controllers.NewAuthHandler(activitiesController.AddActivity, authService.AuthenticateRequest)).Methods("POST")
-	router.Handle("/activities/save", controllers.NewAuthHandler(activitiesController.SaveActivity, authService.AuthenticateRequest)).Methods("POST")
+	router.Handle("/activities", controllers.NewAuthHandler(activitiesController.SaveActivity, authService.AuthenticateRequest)).Methods("POST")
 	router.Handle("/activities/{id}", controllers.NewAuthHandler(activitiesController.DeleteActivity, authService.AuthenticateRequest)).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
