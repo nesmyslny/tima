@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/nesmyslny/tima/models"
 	"github.com/nesmyslny/tima/services"
-	"net/http"
-	"time"
 )
 
 type UserController struct {
@@ -34,8 +34,4 @@ func (this *UserController) Signin(w http.ResponseWriter, r *http.Request) (inte
 func (this *UserController) IsSignedIn(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
 	signedIn := this.authService.ValidateToken(r)
 	return jsonResultBool(signedIn)
-}
-
-func (this *UserController) Secret(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
-	return jsonResult(true, time.Now().String())
 }

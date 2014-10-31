@@ -11,10 +11,10 @@
 <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'" ng-if="isSignedIn">
     <ul class="nav navbar-nav">
         <li class="dropdown">
-            <a href="#" class="dropdown-toggle" role="button"><i class="fa fa-tasks fa-fw"></i> Activity <i class="fa fa-caret-down"></i></b></a>
+            <a href="#" class="dropdown-toggle" role="button"><i class="fa fa-tasks fa-fw"></i> Activities <i class="fa fa-caret-down"></i></b></a>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="#">
+                    <a ng-href="#/{{activitiesPathToday}}">
                         <span class="fa-stack">
                             <i class="fa fa-calendar-o fa-stack-1x"></i>
                             <strong class="fa fa-stack-1x calendar-text">1</strong>

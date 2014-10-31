@@ -1,11 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/nesmyslny/tima/controllers"
 	"github.com/nesmyslny/tima/dbaccess"
 	"github.com/nesmyslny/tima/services"
-	"net/http"
 )
 
 func main() {
@@ -14,18 +15,30 @@ func main() {
 	defer db.Close()
 
 	authService := services.NewAuthService(db)
-	authService = services.NewAuthService(db)
 	userService := services.NewUserService(db)
+	activitiesService := services.NewActivitiesService(db)
 	migrationService := services.NewMigrationService(db, userService)
 	migrationController := controllers.NewMigrationController(migrationService)
 	userController := controllers.NewUserController(authService, userService)
+	activitiesController := controllers.NewActivitiesController(activitiesService)
 
 	router := mux.NewRouter()
-	router.Handle("/signin", controllers.CtrlHandlerStruct{userController.Signin, nil}).Methods("POST")
-	router.Handle("/issignedin", controllers.CtrlHandlerStruct{userController.IsSignedIn, nil}).Methods("GET")
-	router.Handle("/secret", controllers.CtrlHandlerStruct{userController.Secret, authService.ValidateToken}).Methods("GET")
-	router.Handle("/upgrade", controllers.CtrlHandlerStruct{migrationController.Upgrade, nil}).Methods("POST")
+
+	// todo: secure upgrade route (-> implement installation/upgrading)
+	router.Handle("/upgrade", controllers.NewAnonHandler(migrationController.Upgrade)).Methods("POST")
+
+	router.Handle("/signin", controllers.NewAnonHandler(userController.Signin)).Methods("POST")
+	router.Handle("/issignedin", controllers.NewAnonHandler(userController.IsSignedIn)).Methods("GET")
+
+	router.Handle("/activities/{day}", controllers.NewAuthHandler(activitiesController.GetByDay, authService.AuthenticateRequest)).Methods("GET")
+	router.Handle("/activities", controllers.NewAuthHandler(activitiesController.Save, authService.AuthenticateRequest)).Methods("POST")
+	router.Handle("/activities/{id}", controllers.NewAuthHandler(activitiesController.Delete, authService.AuthenticateRequest)).Methods("DELETE")
+
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
+}
+
+func blub(user string) error {
+	return nil
 }

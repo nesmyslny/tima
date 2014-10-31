@@ -1,16 +1,14 @@
 angular.module('tima').factory('authService', ['$http', '$location', 'sessionService', function($http, $location, sessionService) {
-
     var service = {
-
-        getUsername: function() {
-            return sessionService.getUsername();
+        getUser: function() {
+            return sessionService.user;
         },
 
         signIn: function(credentials, redirectPath) {
             $http.post('/signin', credentials)
             .success(function(data, status, headers, config) {
-                var tokenData = jwt_decode(data.StringResult);
-                sessionService.init(data.StringResult, tokenData.username);
+                var tokenData = jwt_decode(data.stringResult);
+                sessionService.init(data.stringResult, tokenData.user);
                 $location.path(redirectPath);
                 credentials.clear();
             })
@@ -29,7 +27,7 @@ angular.module('tima').factory('authService', ['$http', '$location', 'sessionSer
             var deferred = $q.defer();
             $http.get('/issignedin')
             .success(function(data, status, headers, config) {
-                if (data.BoolResult) {
+                if (data.boolResult) {
                     $timeout(deferred.resolve, 0);
                 } else {
                     $timeout(function(){deferred.reject();}, 0);
@@ -40,10 +38,8 @@ angular.module('tima').factory('authService', ['$http', '$location', 'sessionSer
                 $timeout(function(){deferred.reject();}, 0);
                 service.signOut();
             });
-
             return deferred.promise;
         }
-
     };
 
     return service;

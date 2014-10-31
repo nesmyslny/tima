@@ -19,17 +19,22 @@
         <script src="assets/js/ui-bootstrap-tpls-0.11.2.min.js"></script>
         <script src="assets/js/showErrors.min.js"></script>
         <script src="assets/js/jwt-decode.min.js"></script>
+        <script src="assets/js/moment.min.js"></script>
 
         <script src="app/app.module.js"></script>
         <script src="app/signin/signinController.js"></script>
         <script src="app/navbar/navbarController.js"></script>
+        <script src="app/activities/activitiesController.js"></script>
+        <script src="app/activities/activitiesService.js"></script>
         <script src="app/common/authInterceptor.js"></script>
         <script src="app/common/authService.js"></script>
         <script src="app/common/sessionService.js"></script>
     </head>
     <body>
         <div ng-include="'app/navbar/navbar.html'"></div>
-        <div ng-view></div>
+        <div class="container">
+                <div ng-view></div>
+        </div>
         <div class="footer"></div>
     </body>
 </html>
