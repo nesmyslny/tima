@@ -26,6 +26,7 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             var m = moment.duration(activity.duration, 'minutes');
             activity.durationHours = m.hours();
             activity.durationMinutes = m.minutes();
+            activity.durationFormatted = getTimeFormatted(activity.durationHours, activity.durationMinutes);
         });
     }
 
@@ -43,8 +44,10 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
 
     function getDurationFormatted(duration) {
         var m = moment.duration(duration, 'minutes');
-        var hours = m.hours();
-        var minutes = m.minutes();
+        return getTimeFormatted(m.hours(), m.minutes());
+    }
+
+    function getTimeFormatted(hours, minutes) {
         var durationFormatted = hours > 0 ? hours + 'h' : '';
         durationFormatted += minutes > 0 ? ' ' + minutes + 'min' : '';
         return durationFormatted;
