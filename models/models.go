@@ -19,7 +19,7 @@ type Activity struct {
 	Duration int       `db:"duration" json:"duration"`
 }
 
-type UserSignin struct {
+type UserCredentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

@@ -17,13 +17,13 @@ func NewUserController(authService *services.AuthService, userService *services.
 }
 
 func (this *UserController) Signin(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
-	var formData models.UserSignin
-	err := unmarshalJson(r.Body, &formData)
+	var credentials models.UserCredentials
+	err := unmarshalJson(r.Body, &credentials)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	token, err := this.authService.Authenticate(formData.Username, formData.Password)
+	token, err := this.authService.Authenticate(credentials.Username, credentials.Password)
 	if err != nil {
 		return nil, &CtrlHandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
