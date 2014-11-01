@@ -18,7 +18,12 @@ func (this *UserApi) SigninHandler(w http.ResponseWriter, r *http.Request) (inte
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	token, err := this.auth.Authenticate(credentials.Username, credentials.Password)
+	user := this.db.GetUserByName(credentials.Username)
+	if user == nil {
+		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
+	}
+
+	token, err := this.auth.Authenticate(user, credentials.Password)
 	if err != nil {
 		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}

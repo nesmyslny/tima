@@ -15,12 +15,11 @@ import (
 )
 
 type Auth struct {
-	db         *Db
 	privateKey []byte
 	publicKey  []byte
 }
 
-func NewAuth(db *Db) *Auth {
+func NewAuth() *Auth {
 	// todo: configuration of paths (private/public key)
 	// todo: error handling (when keys not present)
 	privKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa")
@@ -33,15 +32,10 @@ func NewAuth(db *Db) *Auth {
 		log.Fatal(err)
 	}
 
-	return &Auth{db, privKey, pubKey}
+	return &Auth{privKey, pubKey}
 }
 
-func (this *Auth) Authenticate(username string, pwd string) (string, error) {
-	user := this.db.GetUserByName(username)
-	if user == nil {
-		return "", errors.New("invalid username")
-	}
-
+func (this *Auth) Authenticate(user *User, pwd string) (string, error) {
 	err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pwd))
 	if err != nil {
 		return "", errors.New("invalid password")

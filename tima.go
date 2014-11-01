@@ -12,7 +12,7 @@ func main() {
 	db := server.NewDb("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
 	defer db.Close()
 
-	auth := server.NewAuth(db)
+	auth := server.NewAuth()
 	userApi := server.NewUserApi(db, auth)
 	migrationApi := server.NewMigrationApi(db, userApi)
 	activitiesApi := server.NewActivitiesApi(db)
