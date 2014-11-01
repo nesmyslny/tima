@@ -132,3 +132,12 @@ func (this *Auth) extractUser(token string) (*User, error) {
 
 	return user, nil
 }
+
+func (this *Auth) GeneratePasswordHash(pwd string) ([]byte, error) {
+	const bcryptCost int = 13
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcryptCost)
+	if err != nil {
+		return nil, err
+	}
+	return pwdHash, nil
+}

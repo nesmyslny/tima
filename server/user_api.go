@@ -1,17 +1,11 @@
 package server
 
-import (
-	"net/http"
-
-	"code.google.com/p/go.crypto/bcrypt"
-)
+import "net/http"
 
 type UserApi struct {
 	db   *Db
 	auth *Auth
 }
-
-const bcryptCost int = 13
 
 func NewUserApi(db *Db, auth *Auth) *UserApi {
 	return &UserApi{db, auth}
@@ -38,7 +32,7 @@ func (this *UserApi) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (
 }
 
 func (this *UserApi) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
-	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcryptCost)
+	pwdHash, err := this.auth.GeneratePasswordHash(pwd)
 	if err != nil {
 		return nil, err
 	}
