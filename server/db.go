@@ -1,4 +1,4 @@
-package DbAccess
+package server
 
 import (
 	"database/sql"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/coopernurse/gorp"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/nesmyslny/tima/models"
 	"github.com/rubenv/sql-migrate"
 )
 
@@ -20,7 +19,7 @@ type Db struct {
 
 const dateLayout string = "2006-01-02"
 
-func New(connectionString string) *Db {
+func NewDb(connectionString string) *Db {
 	dbAccess := &Db{
 		connectionString: connectionString,
 		dialect:          "mysql",
@@ -35,8 +34,8 @@ func New(connectionString string) *Db {
 	}
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
-	dbAccess.dbMap.AddTableWithName(models.User{}, "users").SetKeys(true, "Id")
-	dbAccess.dbMap.AddTableWithName(models.Activity{}, "activities").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
 }
@@ -67,8 +66,8 @@ func (this *Db) GetNumberOfUsers() (int, error) {
 	return int(count), err
 }
 
-func (this *Db) GetUserByName(username string) *models.User {
-	var user *models.User
+func (this *Db) GetUserByName(username string) *User {
+	var user *User
 	err := this.dbMap.SelectOne(&user, "select * from users where username = ?", username)
 	if err != nil {
 		return nil
@@ -76,7 +75,7 @@ func (this *Db) GetUserByName(username string) *models.User {
 	return user
 }
 
-func (this *Db) SaveUser(user *models.User) error {
+func (this *Db) SaveUser(user *User) error {
 	var err error
 	if user.Id < 0 {
 		err = this.dbMap.Insert(user)
@@ -86,8 +85,8 @@ func (this *Db) SaveUser(user *models.User) error {
 	return err
 }
 
-func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]models.Activity, error) {
-	var activities []models.Activity
+func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]Activity, error) {
+	var activities []Activity
 	_, err := this.dbMap.Select(&activities,
 		"select * from activities where user_id = ? and day = ? order by duration desc",
 		userId, day.Format(dateLayout))
@@ -97,15 +96,15 @@ func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]models.Activity
 	return activities, nil
 }
 
-func (this *Db) GetActivity(id int) (*models.Activity, error) {
-	obj, err := this.dbMap.Get(models.Activity{}, id)
+func (this *Db) GetActivity(id int) (*Activity, error) {
+	obj, err := this.dbMap.Get(Activity{}, id)
 	if err != nil {
 		return nil, err
 	}
-	return obj.(*models.Activity), nil
+	return obj.(*Activity), nil
 }
 
-func (this *Db) SaveActivity(activity *models.Activity) error {
+func (this *Db) SaveActivity(activity *Activity) error {
 	var err error
 	if activity.Id < 0 {
 		err = this.dbMap.Insert(activity)
@@ -115,8 +114,8 @@ func (this *Db) SaveActivity(activity *models.Activity) error {
 	return err
 }
 
-func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*models.Activity, error) {
-	var activity *models.Activity
+func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*Activity, error) {
+	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
 		"select * from activities where user_id = ? and day = ? and text = ?",
 		userId, day.Format(dateLayout), text)
@@ -132,7 +131,7 @@ func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*models.
 	return activity, nil
 }
 
-func (this *Db) DeleteActivity(activity *models.Activity) error {
+func (this *Db) DeleteActivity(activity *Activity) error {
 	_, err := this.dbMap.Delete(activity)
 	if err != nil {
 		return err

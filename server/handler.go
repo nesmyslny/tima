@@ -1,14 +1,8 @@
-package controllers
+package server
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
-	"io/ioutil"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"github.com/nesmyslny/tima/models"
 )
 
 type CtrlHandlerError struct {
@@ -22,8 +16,8 @@ type anonHandler struct {
 }
 
 type authHandler struct {
-	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError)
-	AuthFunc    func(r *http.Request) (bool, *models.User)
+	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError)
+	AuthFunc    func(r *http.Request) (bool, *User)
 }
 
 func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError)) anonHandler {
@@ -31,8 +25,8 @@ func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (in
 }
 
 func NewAuthHandler(
-	handlerFunc func(w http.ResponseWriter, r *http.Request, user *models.User) (interface{}, *CtrlHandlerError),
-	authFunc func(r *http.Request) (bool, *models.User)) authHandler {
+	handlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError),
+	authFunc func(r *http.Request) (bool, *User)) authHandler {
 	return authHandler{handlerFunc, authFunc}
 }
 
@@ -73,35 +67,4 @@ func serveHTTP(w http.ResponseWriter, response interface{}, handlerError *CtrlHa
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(bytes)
-}
-
-func jsonResult(boolResult bool, stringResult string) (interface{}, *CtrlHandlerError) {
-	return models.JsonResult{boolResult, stringResult}, nil
-}
-
-func jsonResultBool(boolResult bool) (interface{}, *CtrlHandlerError) {
-	return models.JsonResult{BoolResult: boolResult}, nil
-}
-
-func jsonResultString(stringResult string) (interface{}, *CtrlHandlerError) {
-	return models.JsonResult{StringResult: stringResult}, nil
-}
-
-func unmarshalJson(body io.Reader, model interface{}) error {
-	data, err := ioutil.ReadAll(body)
-	if err != nil {
-		return errors.New("invalid request")
-	}
-
-	err = json.Unmarshal(data, model)
-	if err != nil {
-		return errors.New("invalid data")
-	}
-
-	return nil
-}
-
-func getRouteVar(r *http.Request, name string) string {
-	vars := mux.Vars(r)
-	return vars[name]
 }

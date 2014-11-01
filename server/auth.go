@@ -1,4 +1,4 @@
-package services
+package server
 
 import (
 	"encoding/json"
@@ -12,17 +12,15 @@ import (
 
 	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/nesmyslny/tima/dbaccess"
-	"github.com/nesmyslny/tima/models"
 )
 
-type AuthService struct {
-	db         *DbAccess.Db
+type Auth struct {
+	db         *Db
 	privateKey []byte
 	publicKey  []byte
 }
 
-func NewAuthService(db *DbAccess.Db) *AuthService {
+func NewAuth(db *Db) *Auth {
 	// todo: configuration of paths (private/public key)
 	// todo: error handling (when keys not present)
 	privKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa")
@@ -35,10 +33,10 @@ func NewAuthService(db *DbAccess.Db) *AuthService {
 		log.Fatal(err)
 	}
 
-	return &AuthService{db, privKey, pubKey}
+	return &Auth{db, privKey, pubKey}
 }
 
-func (this *AuthService) Authenticate(username string, pwd string) (string, error) {
+func (this *Auth) Authenticate(username string, pwd string) (string, error) {
 	user := this.db.GetUserByName(username)
 	if user == nil {
 		return "", errors.New("invalid username")
@@ -57,7 +55,7 @@ func (this *AuthService) Authenticate(username string, pwd string) (string, erro
 	return token, nil
 }
 
-func (this *AuthService) createToken(user *models.User) (string, error) {
+func (this *Auth) createToken(user *User) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = user
 	// todo: exp -> config
@@ -65,7 +63,7 @@ func (this *AuthService) createToken(user *models.User) (string, error) {
 	return token.SignedString(this.privateKey)
 }
 
-func (this *AuthService) getValidToken(r *http.Request) *jwt.Token {
+func (this *Auth) getValidToken(r *http.Request) *jwt.Token {
 	token, err := jwt.ParseFromRequest(r, func(token *jwt.Token) (interface{}, error) {
 		return this.privateKey, nil
 	})
@@ -75,7 +73,7 @@ func (this *AuthService) getValidToken(r *http.Request) *jwt.Token {
 	return nil
 }
 
-func (this *AuthService) ValidateToken(r *http.Request) bool {
+func (this *Auth) ValidateToken(r *http.Request) bool {
 	token := this.getValidToken(r)
 	if token == nil {
 		return false
@@ -83,7 +81,7 @@ func (this *AuthService) ValidateToken(r *http.Request) bool {
 	return true
 }
 
-func (this *AuthService) AuthenticateRequest(r *http.Request) (bool, *models.User) {
+func (this *Auth) AuthenticateRequest(r *http.Request) (bool, *User) {
 	token := this.getValidToken(r)
 	if token != nil {
 		user, err := this.extractUser(token.Raw)
@@ -95,7 +93,7 @@ func (this *AuthService) AuthenticateRequest(r *http.Request) (bool, *models.Use
 	return false, nil
 }
 
-func (this *AuthService) extractUser(token string) (*models.User, error) {
+func (this *Auth) extractUser(token string) (*User, error) {
 	// todo: rethink: how to get user struct out of token?
 	// this seems lika a ridiculous solution:
 	// 1. get part of token, which contains claims (middle part):
@@ -126,7 +124,7 @@ func (this *AuthService) extractUser(token string) (*models.User, error) {
 	}
 
 	jsonUser := matches[1]
-	var user *models.User
+	var user *User
 	err = json.Unmarshal([]byte(jsonUser), &user)
 	if err != nil {
 		return nil, err

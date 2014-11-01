@@ -4,41 +4,32 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/nesmyslny/tima/controllers"
-	"github.com/nesmyslny/tima/dbaccess"
-	"github.com/nesmyslny/tima/services"
+	"github.com/nesmyslny/tima/server"
 )
 
 func main() {
 	// todo: configuration
-	db := DbAccess.New("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
+	db := server.NewDb("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
 	defer db.Close()
 
-	authService := services.NewAuthService(db)
-	userService := services.NewUserService(db)
-	activitiesService := services.NewActivitiesService(db)
-	migrationService := services.NewMigrationService(db, userService)
-	migrationController := controllers.NewMigrationController(migrationService)
-	userController := controllers.NewUserController(authService, userService)
-	activitiesController := controllers.NewActivitiesController(activitiesService)
+	auth := server.NewAuth(db)
+	userApi := server.NewUserApi(db, auth)
+	migrationApi := server.NewMigrationApi(db, userApi)
+	activitiesApi := server.NewActivitiesApi(db)
 
 	router := mux.NewRouter()
 
 	// todo: secure upgrade route (-> implement installation/upgrading)
-	router.Handle("/upgrade", controllers.NewAnonHandler(migrationController.Upgrade)).Methods("POST")
+	router.Handle("/upgrade", server.NewAnonHandler(migrationApi.UpgradeHandler)).Methods("POST")
 
-	router.Handle("/signin", controllers.NewAnonHandler(userController.Signin)).Methods("POST")
-	router.Handle("/issignedin", controllers.NewAnonHandler(userController.IsSignedIn)).Methods("GET")
+	router.Handle("/signin", server.NewAnonHandler(userApi.SigninHandler)).Methods("POST")
+	router.Handle("/issignedin", server.NewAnonHandler(userApi.IsSignedInHandler)).Methods("GET")
 
-	router.Handle("/activities/{day}", controllers.NewAuthHandler(activitiesController.GetByDay, authService.AuthenticateRequest)).Methods("GET")
-	router.Handle("/activities", controllers.NewAuthHandler(activitiesController.Save, authService.AuthenticateRequest)).Methods("POST")
-	router.Handle("/activities/{id}", controllers.NewAuthHandler(activitiesController.Delete, authService.AuthenticateRequest)).Methods("DELETE")
+	router.Handle("/activities/{day}", server.NewAuthHandler(activitiesApi.GetByDayHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/activities", server.NewAuthHandler(activitiesApi.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
+	router.Handle("/activities/{id}", server.NewAuthHandler(activitiesApi.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
-}
-
-func blub(user string) error {
-	return nil
 }
