@@ -17,22 +17,22 @@ func NewUserApi(db *Db, auth *Auth) *UserApi {
 	return &UserApi{db, auth}
 }
 
-func (this *UserApi) SigninHandler(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
+func (this *UserApi) SigninHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
 	var credentials UserCredentials
 	err := unmarshalJson(r.Body, &credentials)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
 	token, err := this.auth.Authenticate(credentials.Username, credentials.Password)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, "Invalid username/password", http.StatusBadRequest}
+		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
 
 	return jsonResultString(token)
 }
 
-func (this *UserApi) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
+func (this *UserApi) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
 	signedIn := this.auth.ValidateToken(r)
 	return jsonResultBool(signedIn)
 }

@@ -5,27 +5,27 @@ import (
 	"net/http"
 )
 
-type CtrlHandlerError struct {
+type HandlerError struct {
 	Error   error
 	Message string
 	Code    int
 }
 
 type anonHandler struct {
-	HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError)
+	HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)
 }
 
 type authHandler struct {
-	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError)
+	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError)
 	AuthFunc    func(r *http.Request) (bool, *User)
 }
 
-func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError)) anonHandler {
+func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)) anonHandler {
 	return anonHandler{handlerFunc}
 }
 
 func NewAuthHandler(
-	handlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError),
+	handlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError),
 	authFunc func(r *http.Request) (bool, *User)) authHandler {
 	return authHandler{handlerFunc, authFunc}
 }
@@ -47,7 +47,7 @@ func (this authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	serveHTTP(w, response, hErr)
 }
 
-func serveHTTP(w http.ResponseWriter, response interface{}, handlerError *CtrlHandlerError) {
+func serveHTTP(w http.ResponseWriter, response interface{}, handlerError *HandlerError) {
 	if handlerError != nil {
 		http.Error(w, handlerError.Message, handlerError.Code)
 		return

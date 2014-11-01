@@ -13,13 +13,13 @@ func NewMigrationApi(db *Db, userApi *UserApi) *MigrationApi {
 	return &MigrationApi{db, userApi}
 }
 
-func (this *MigrationApi) UpgradeHandler(w http.ResponseWriter, r *http.Request) (interface{}, *CtrlHandlerError) {
+func (this *MigrationApi) UpgradeHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
 	err := this.migrate()
 	if err != nil {
 		// todo: logging
 		// in this case, the internal error is directly exposed to the user.
 		// upgrading is an admin task and the internal error is needed to resolve issues.
-		return nil, &CtrlHandlerError{err, err.Error(), http.StatusInternalServerError}
+		return nil, &HandlerError{err, err.Error(), http.StatusInternalServerError}
 	}
 
 	return jsonResultBool(true)

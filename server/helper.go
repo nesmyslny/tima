@@ -10,15 +10,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func jsonResult(boolResult bool, stringResult string) (interface{}, *CtrlHandlerError) {
+func jsonResult(boolResult bool, stringResult string) (interface{}, *HandlerError) {
 	return JsonResult{boolResult, stringResult}, nil
 }
 
-func jsonResultBool(boolResult bool) (interface{}, *CtrlHandlerError) {
+func jsonResultBool(boolResult bool) (interface{}, *HandlerError) {
 	return JsonResult{BoolResult: boolResult}, nil
 }
 
-func jsonResultString(stringResult string) (interface{}, *CtrlHandlerError) {
+func jsonResultString(stringResult string) (interface{}, *HandlerError) {
 	return JsonResult{StringResult: stringResult}, nil
 }
 

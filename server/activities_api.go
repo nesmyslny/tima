@@ -14,40 +14,40 @@ func NewActivitiesApi(db *Db) *ActivitiesApi {
 	return &ActivitiesApi{db}
 }
 
-func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	dayString := getRouteVar(r, "day")
 	day, err := time.Parse("2006-01-02", dayString)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, "invalid parameter: day", http.StatusBadRequest}
+		return nil, &HandlerError{err, "invalid parameter: day", http.StatusBadRequest}
 	}
 
 	activities, err := this.getByDay(user.Id, day)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, "couldn't retrieve activities", http.StatusInternalServerError}
+		return nil, &HandlerError{err, "couldn't retrieve activities", http.StatusInternalServerError}
 	}
 	return activities, nil
 }
 
-func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activity Activity
 	unmarshalJson(r.Body, &activity)
 	err := this.save(&activity)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, err.Error(), http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 	return jsonResultBool(true)
 }
 
-func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *CtrlHandlerError) {
+func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	idString := getRouteVar(r, "id")
 	id, err := strconv.ParseInt(idString, 0, 32)
 	if err != nil {
-		return nil, &CtrlHandlerError{err, "invalid parameter: id", http.StatusBadRequest}
+		return nil, &HandlerError{err, "invalid parameter: id", http.StatusBadRequest}
 	}
 
 	err = this.delete(int(id))
 	if err != nil {
-		return nil, &CtrlHandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
+		return nil, &HandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
 	}
 
 	return jsonResultBool(true)
