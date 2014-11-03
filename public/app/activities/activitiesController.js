@@ -7,13 +7,13 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     $scope.activities = [];
 
     $scope.formData = {
-        text: '',
+        projectId: null,
         hours: null,
         minutes: null,
         clear: function() {
-            this.text = '';
-            this.hours = '';
-            this.minutes = '';
+            this.projectId = null;
+            this.hours = null;
+            this.minutes = null;
         }
     };
 
@@ -32,7 +32,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             return;
         }
 
-        var activity = activitiesService.createNew($scope.day, authService.getUser().id, $scope.formData.text, $scope.formData.hours, $scope.formData.minutes);
+        var activity = activitiesService.createNew($scope.day, authService.getUser().id, $scope.formData.projectId, $scope.formData.hours, $scope.formData.minutes);
         activitiesService.save(activity)
         .then(function() {
             $scope.list();

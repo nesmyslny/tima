@@ -115,11 +115,11 @@ func (this *Db) SaveActivity(activity *Activity) error {
 	return err
 }
 
-func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*Activity, error) {
+func (this *Db) TryGetActivity(day time.Time, userId int, projectId int) (*Activity, error) {
 	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
-		"select * from activities where user_id = ? and day = ? and text = ?",
-		userId, day.Format(dateLayout), text)
+		"select * from activities where user_id = ? and day = ? and project_id = ?",
+		userId, day.Format(dateLayout), projectId)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

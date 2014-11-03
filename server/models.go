@@ -21,7 +21,6 @@ type Activity struct {
 	Day       time.Time `db:"day" json:"day"`
 	UserId    int       `db:"user_id" json:"userId"`
 	ProjectId int       `db:"project_id" json:"projectId"`
-	Text      string    `db:"text" json:"text"`
 	Duration  int       `db:"duration" json:"duration"`
 }
 

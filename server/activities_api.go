@@ -35,7 +35,7 @@ func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, u
 
 	err = this.save(&activity)
 	if err != nil {
-		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+		return nil, &HandlerError{err, "couldn't save activity", http.StatusInternalServerError}
 	}
 	return jsonResultBool(true)
 }
@@ -67,7 +67,7 @@ func (this *ActivitiesApi) save(activity *Activity) error {
 	var existingActivity *Activity
 
 	if activity.Id == -1 {
-		existingActivity, err = this.db.TryGetActivity(activity.UserId, activity.Day, activity.Text)
+		existingActivity, err = this.db.TryGetActivity(activity.Day, activity.UserId, activity.ProjectId)
 		if err != nil {
 			return err
 		}

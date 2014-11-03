@@ -106,12 +106,12 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        createNew: function(day, userId, text, hours, minutes) {
+        createNew: function(day, userId, projectId, hours, minutes) {
             return {
                 id: -1,
                 day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
                 userId: userId,
-                text: text,
+                projectId: projectId,
                 duration: service.calculateDuration(hours, minutes)
             };
         },
