@@ -1,0 +1,22 @@
+
+<div class="row margin-bottom-20">
+    <div class="col-md-12">
+        <h1>Projects</h1>
+    </div>
+</div>
+
+<div class="row margin-bottom-20">
+    <div class="col-md-8">
+        <button class="btn btn-primary pull-right" ng-click="new()"><i class="fa fa-plus"></i> New project</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="list-group">
+            <a href='#/projects/{{p.id}}' class="list-group-item" ng-repeat="p in projects">
+                {{p.title}}
+            </a>
+        </div>
+    </div>
+</div>

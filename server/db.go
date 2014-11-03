@@ -35,6 +35,7 @@ func NewDb(connectionString string) *Db {
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
@@ -138,4 +139,31 @@ func (this *Db) DeleteActivity(activity *Activity) error {
 	}
 
 	return nil
+}
+
+func (this *Db) GetProject(id int) (*Project, error) {
+	obj, err := this.dbMap.Get(Project{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*Project), nil
+}
+
+func (this *Db) GetProjects() ([]Project, error) {
+	var projects []Project
+	_, err := this.dbMap.Select(&projects, "select * from projects order by title")
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func (this *Db) SaveProject(project *Project) error {
+	var err error
+	if project.Id < 0 {
+		err = this.dbMap.Insert(project)
+	} else {
+		_, err = this.dbMap.Update(project)
+	}
+	return err
 }

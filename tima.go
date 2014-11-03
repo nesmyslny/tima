@@ -14,8 +14,9 @@ func main() {
 
 	auth := server.NewAuth()
 	userApi := server.NewUserApi(db, auth)
-	migrationApi := server.NewMigrationApi(db, userApi)
+	projectsApi := server.NewProjectsApi(db)
 	activitiesApi := server.NewActivitiesApi(db)
+	migrationApi := server.NewMigrationApi(db, userApi)
 
 	router := mux.NewRouter()
 
@@ -28,6 +29,10 @@ func main() {
 	router.Handle("/activities/{day}", server.NewAuthHandler(activitiesApi.GetByDayHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/activities", server.NewAuthHandler(activitiesApi.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/activities/{id}", server.NewAuthHandler(activitiesApi.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+
+	router.Handle("/projects", server.NewAuthHandler(projectsApi.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projects/{id}", server.NewAuthHandler(projectsApi.GetHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projects", server.NewAuthHandler(projectsApi.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)

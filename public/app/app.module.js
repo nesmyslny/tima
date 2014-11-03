@@ -18,6 +18,20 @@ angular
             signedIn: checkSignedIn
         }
     })
+    .when('/projects', {
+        templateUrl: 'app/projects/projectList.html',
+        controller: 'projectListController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
+    .when('/projects/:id', {
+        templateUrl: 'app/projects/project.html',
+        controller: 'projectController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')
     })

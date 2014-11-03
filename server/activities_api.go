@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -15,10 +14,9 @@ func NewActivitiesApi(db *Db) *ActivitiesApi {
 }
 
 func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	dayString := getRouteVar(r, "day")
-	day, err := time.Parse("2006-01-02", dayString)
+	day, err := getRouteVarTime(r, "day", "2006-01-02")
 	if err != nil {
-		return nil, &HandlerError{err, "invalid parameter: day", http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
 	activities, err := this.getByDay(user.Id, day)
@@ -30,8 +28,12 @@ func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Reques
 
 func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activity Activity
-	unmarshalJson(r.Body, &activity)
-	err := this.save(&activity)
+	err := unmarshalJson(r.Body, &activity)
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	err = this.save(&activity)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -39,13 +41,12 @@ func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, u
 }
 
 func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	idString := getRouteVar(r, "id")
-	id, err := strconv.ParseInt(idString, 0, 32)
+	id, err := getRouteVarInt(r, "id")
 	if err != nil {
-		return nil, &HandlerError{err, "invalid parameter: id", http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.delete(int(id))
+	err = this.delete(id)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
 	}

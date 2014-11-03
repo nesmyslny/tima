@@ -6,12 +6,14 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
-func jsonResult(boolResult bool, stringResult string) (interface{}, *HandlerError) {
-	return JsonResult{boolResult, stringResult}, nil
+func jsonResult(boolResult bool, stringResult string, intResult int) (interface{}, *HandlerError) {
+	return JsonResult{boolResult, stringResult, intResult}, nil
 }
 
 func jsonResultBool(boolResult bool) (interface{}, *HandlerError) {
@@ -20,6 +22,10 @@ func jsonResultBool(boolResult bool) (interface{}, *HandlerError) {
 
 func jsonResultString(stringResult string) (interface{}, *HandlerError) {
 	return JsonResult{StringResult: stringResult}, nil
+}
+
+func jsonResultInt(intResult int) (interface{}, *HandlerError) {
+	return JsonResult{IntResult: intResult}, nil
 }
 
 func unmarshalJson(body io.Reader, model interface{}) error {
@@ -36,7 +42,38 @@ func unmarshalJson(body io.Reader, model interface{}) error {
 	return nil
 }
 
-func getRouteVar(r *http.Request, name string) string {
+func getRouteVarString(r *http.Request, name string) (string, error) {
 	vars := mux.Vars(r)
-	return vars[name]
+	if val, ok := vars[name]; ok {
+		return val, nil
+	}
+	return "", errors.New("invalid parameter: " + name)
+}
+
+func getRouteVarInt(r *http.Request, name string) (int, error) {
+	str, err := getRouteVarString(r, name)
+	if err != nil {
+		return 0, err
+	}
+
+	i, err := strconv.ParseInt(str, 0, 32)
+	if err != nil {
+		return 0, errors.New("invalid parameter: " + name)
+	}
+
+	return int(i), nil
+}
+
+func getRouteVarTime(r *http.Request, name string, layout string) (time.Time, error) {
+	str, err := getRouteVarString(r, name)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	t, err := time.Parse(layout, str)
+	if err != nil {
+		return time.Time{}, errors.New("invalid parameter: " + name)
+	}
+
+	return t, nil
 }
