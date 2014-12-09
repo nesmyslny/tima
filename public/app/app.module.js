@@ -1,6 +1,8 @@
 angular
-.module('tima', ['ngRoute', 'ui.bootstrap', 'ui.bootstrap.showErrors'])
-.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
+.module('tima', ['ngRoute', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ngSanitize', 'ui.select'])
+.config(['$routeProvider', '$httpProvider', 'uiSelectConfig', function($routeProvider, $httpProvider, uiSelectConfig) {
+
+    uiSelectConfig.theme = 'bootstrap';
 
     var checkSignedIn = function(authService, $q, $timeout, $http, $location, $rootScope) {
         return authService.isSignedIn($q, $timeout, $http, $location, $rootScope);

@@ -59,7 +59,23 @@ func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]Activity, erro
 	if err != nil {
 		return nil, err
 	}
+	err = this.setProjectTitle(activities)
+	if err != nil {
+		return nil, err
+	}
 	return activities, nil
+}
+
+func (this *ActivitiesApi) setProjectTitle(activities []Activity) error {
+	for i := 0; i < len(activities); i++ {
+		projectId := activities[i].ProjectId
+		project, err := this.db.GetProject(projectId)
+		if err != nil {
+			return err
+		}
+		activities[i].ProjectTitle = project.Title
+	}
+	return nil
 }
 
 func (this *ActivitiesApi) save(activity *Activity) error {

@@ -68,7 +68,22 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
                     totalDuration: totalDuration
                 });
             })
-            .error(function(data, status, header, config){
+            .error(function(data, status, header, config) {
+                // todo: error handling
+                deferred.reject(data, status);
+            });
+
+            return deferred.promise;
+        },
+
+        getProjects: function() {
+            var deferred = $q.defer();
+
+            $http.get('/projects')
+            .success(function(data) {
+                deferred.resolve(data);
+            })
+            .error(function(data, status) {
                 // todo: error handling
                 deferred.reject(data, status);
             });

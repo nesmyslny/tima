@@ -5,13 +5,14 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     $scope.durationHeader = '';
     $scope.totalDuration = 0;
     $scope.activities = [];
+    $scope.projects = [];
 
     $scope.formData = {
-        projectId: null,
+        project: null,
         hours: null,
         minutes: null,
         clear: function() {
-            this.projectId = null;
+            this.project = null;
             this.hours = null;
             this.minutes = null;
         }
@@ -26,13 +27,21 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
     $scope.list();
 
+    $scope.fetchProjects = function() {
+        activitiesService.getProjects()
+        .then(function(data) {
+            $scope.projects = data;
+        });
+    };
+    $scope.fetchProjects();
+
     $scope.add = function() {
         $scope.$broadcast('show-errors-check-validity');
         if (!$scope.formAddActivity.$valid) {
             return;
         }
 
-        var activity = activitiesService.createNew($scope.day, authService.getUser().id, $scope.formData.projectId, $scope.formData.hours, $scope.formData.minutes);
+        var activity = activitiesService.createNew($scope.day, authService.getUser().id, $scope.formData.project.selected.id, $scope.formData.hours, $scope.formData.minutes);
         activitiesService.save(activity)
         .then(function() {
             $scope.list();
@@ -40,6 +49,10 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
 
         $scope.formData.clear();
         $scope.$broadcast('show-errors-reset');
+
+        // workaround: ui-select doesn't play nice with showErrors.js
+        // todo: find solution (replace/remove showErrors.js? fix/enahnce showErrors.js? replace ui-select?)
+        $scope.formAddActivity.$setPristine();
     };
 
     $scope.delete = function(id) {

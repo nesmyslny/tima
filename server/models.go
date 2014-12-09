@@ -17,11 +17,12 @@ type Project struct {
 }
 
 type Activity struct {
-	Id        int       `db:"id" json:"id"`
-	Day       time.Time `db:"day" json:"day"`
-	UserId    int       `db:"user_id" json:"userId"`
-	ProjectId int       `db:"project_id" json:"projectId"`
-	Duration  int       `db:"duration" json:"duration"`
+	Id           int       `db:"id" json:"id"`
+	Day          time.Time `db:"day" json:"day"`
+	UserId       int       `db:"user_id" json:"userId"`
+	ProjectId    int       `db:"project_id" json:"projectId"`
+	Duration     int       `db:"duration" json:"duration"`
+	ProjectTitle string    `db:"-" json:"projectTitle"`
 }
 
 type UserCredentials struct {

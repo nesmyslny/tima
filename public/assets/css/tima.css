@@ -26,6 +26,13 @@
 
 .form-inline .form-group .inline-act-text {
     min-width: 300px;
+    padding: 0;
+    border: 0;
+}
+
+.form-inline .form-group .inline-act-text .ui-select-match,
+.form-inline .form-group .inline-act-text .ui-select-search {
+    width: 100%;
 }
 
 .form-inline .form-group .inline-act-time {
