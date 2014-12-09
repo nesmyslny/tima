@@ -25,11 +25,12 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
 
         $http.post('/projects', $scope.project)
         .success(function(data, status, headers, config) {
-            // success message
-            if ($scope.project.id == -1) {
-                $location.path('/projects/' + data.intResult);
-            }
+            $location.path('/projects');
         });
+    };
+
+    $scope.cancel = function() {
+        $location.path('/projects');
     };
 
 }]);

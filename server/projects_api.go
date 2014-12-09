@@ -45,6 +45,20 @@ func (this *ProjectsApi) SaveHandler(w http.ResponseWriter, r *http.Request, use
 	return jsonResultInt(project.Id)
 }
 
+func (this *ProjectsApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	id, err := getRouteVarInt(r, "id")
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	err = this.delete(id)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't delete project", http.StatusInternalServerError}
+	}
+
+	return jsonResultBool(true)
+}
+
 func (this *ProjectsApi) get(id int) (*Project, error) {
 	project, err := this.db.GetProject(id)
 	if err != nil {
@@ -63,4 +77,18 @@ func (this *ProjectsApi) getList() ([]Project, error) {
 
 func (this *ProjectsApi) save(project *Project) error {
 	return this.db.SaveProject(project)
+}
+
+func (this *ProjectsApi) delete(id int) error {
+	project, err := this.db.GetProject(id)
+	if err != nil {
+		return err
+	}
+
+	err = this.db.DeleteProject(project)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

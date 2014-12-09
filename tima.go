@@ -33,6 +33,7 @@ func main() {
 	router.Handle("/projects", server.NewAuthHandler(projectsApi.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/projects/{id}", server.NewAuthHandler(projectsApi.GetHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/projects", server.NewAuthHandler(projectsApi.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
+	router.Handle("/projects/{id}", server.NewAuthHandler(projectsApi.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)

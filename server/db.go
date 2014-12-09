@@ -167,3 +167,12 @@ func (this *Db) SaveProject(project *Project) error {
 	}
 	return err
 }
+
+func (this *Db) DeleteProject(project *Project) error {
+	_, err := this.dbMap.Delete(project)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
