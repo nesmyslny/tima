@@ -29,8 +29,4 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         });
     };
 
-    $scope.cancel = function() {
-        $location.path('/projects');
-    };
-
 }]);
