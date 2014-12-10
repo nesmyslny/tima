@@ -10,10 +10,6 @@ angular.module('tima').controller('projectListController', ['$scope', '$http', '
     };
     $scope.list();
 
-    $scope.new = function() {
-        $location.path('projects/-1');
-    };
-
     $scope.delete = function(id) {
         $http.delete('/projects/' + id)
         .success(function() {
