@@ -34,12 +34,15 @@
         <script src="app/common/authInterceptor.js"></script>
         <script src="app/common/authService.js"></script>
         <script src="app/common/sessionService.js"></script>
+        <script src="app/common/messageService.js"></script>
         <script src="app/common/filters.js"></script>
+        <script src="app/common/timaMessageDirective.js"></script>
     </head>
     <body>
         <div ng-include="'app/navbar/navbar.html'"></div>
         <div class="container">
-                <div ng-view></div>
+            <div tima-messages class="tima-messages-container"></div>
+            <div ng-view></div>
         </div>
         <hr />
     </body>

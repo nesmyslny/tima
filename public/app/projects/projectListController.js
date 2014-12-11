@@ -1,4 +1,4 @@
-angular.module('tima').controller('projectListController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
+angular.module('tima').controller('projectListController', ['$scope', '$http', 'messageService', function ($scope, $http, messageService) {
 
     $scope.projects = [];
 
@@ -16,7 +16,7 @@ angular.module('tima').controller('projectListController', ['$scope', '$http', '
             $scope.list();
         })
         .error(function(data, status) {
-            // todo: error handling
+            messageService.add('danger', data);
         });
     };
 

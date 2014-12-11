@@ -54,9 +54,9 @@ func (this *ProjectsApi) DeleteHandler(w http.ResponseWriter, r *http.Request, u
 	err = this.delete(id)
 	if err != nil {
 		if err == ErrItemInUse {
-			return nil, &HandlerError{err, "Project is already in use", http.StatusBadRequest}
+			return nil, &HandlerError{err, "Error: It is not possible to delete a project that is already in use.", http.StatusBadRequest}
 		} else {
-			return nil, &HandlerError{err, "couldn't delete project", http.StatusInternalServerError}
+			return nil, &HandlerError{err, "Error: Project could not deleted.", http.StatusInternalServerError}
 		}
 	}
 
