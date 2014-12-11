@@ -53,7 +53,11 @@ func (this *ProjectsApi) DeleteHandler(w http.ResponseWriter, r *http.Request, u
 
 	err = this.delete(id)
 	if err != nil {
-		return nil, &HandlerError{err, "couldn't delete project", http.StatusInternalServerError}
+		if err == ErrItemInUse {
+			return nil, &HandlerError{err, "Project is already in use", http.StatusBadRequest}
+		} else {
+			return nil, &HandlerError{err, "couldn't delete project", http.StatusInternalServerError}
+		}
 	}
 
 	return jsonResultBool(true)
@@ -80,6 +84,13 @@ func (this *ProjectsApi) save(project *Project) error {
 }
 
 func (this *ProjectsApi) delete(id int) error {
+	isReferenced, err := this.db.IsProjectReferenced(id)
+	if err != nil {
+		return err
+	} else if isReferenced {
+		return ErrItemInUse
+	}
+
 	project, err := this.db.GetProject(id)
 	if err != nil {
 		return err

@@ -132,6 +132,15 @@ func (this *Db) TryGetActivity(day time.Time, userId int, projectId int) (*Activ
 	return activity, nil
 }
 
+func (this *Db) IsProjectReferenced(id int) (bool, error) {
+	exists, err := this.dbMap.SelectInt("select exists(select id from activities where project_id = ?)", id)
+	if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
+}
+
 func (this *Db) DeleteActivity(activity *Activity) error {
 	_, err := this.dbMap.Delete(activity)
 	if err != nil {

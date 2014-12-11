@@ -12,6 +12,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var ErrItemInUse = errors.New("Item is already in use")
+
 func jsonResult(boolResult bool, stringResult string, intResult int) (interface{}, *HandlerError) {
 	return JsonResult{boolResult, stringResult, intResult}, nil
 }
