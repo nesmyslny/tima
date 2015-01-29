@@ -1,4 +1,4 @@
-angular.module('tima').controller('projectListController', ['$scope', '$http', 'messageService', function ($scope, $http, messageService) {
+angular.module('tima').controller('projectListController', ['$scope', '$http', 'messageService', 'popupService', function ($scope, $http, messageService, popupService) {
 
     $scope.projects = [];
 
@@ -11,12 +11,15 @@ angular.module('tima').controller('projectListController', ['$scope', '$http', '
     $scope.list();
 
     $scope.delete = function(id) {
-        $http.delete('/projects/' + id)
-        .success(function() {
-            $scope.list();
-        })
-        .error(function(data, status) {
-            messageService.add('danger', data);
+        popupService.show('Delete Project', 'Do you really want to delete this project?', 'Delete', 'Cancel')
+        .result.then(function() {
+            $http.delete('/projects/' + id)
+            .success(function() {
+                $scope.list();
+            })
+            .error(function(data, status) {
+                messageService.add('danger', data);
+            });
         });
     };
 
