@@ -35,6 +35,7 @@ func NewDb(connectionString string) *Db {
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
@@ -114,11 +115,11 @@ func (this *Db) SaveActivity(activity *Activity) error {
 	return err
 }
 
-func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*Activity, error) {
+func (this *Db) TryGetActivity(day time.Time, userId int, projectId int) (*Activity, error) {
 	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
-		"select * from activities where user_id = ? and day = ? and text = ?",
-		userId, day.Format(dateLayout), text)
+		"select * from activities where user_id = ? and day = ? and project_id = ?",
+		userId, day.Format(dateLayout), projectId)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -131,8 +132,53 @@ func (this *Db) TryGetActivity(userId int, day time.Time, text string) (*Activit
 	return activity, nil
 }
 
+func (this *Db) IsProjectReferenced(id int) (bool, error) {
+	exists, err := this.dbMap.SelectInt("select exists(select id from activities where project_id = ?)", id)
+	if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
+}
+
 func (this *Db) DeleteActivity(activity *Activity) error {
 	_, err := this.dbMap.Delete(activity)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *Db) GetProject(id int) (*Project, error) {
+	obj, err := this.dbMap.Get(Project{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*Project), nil
+}
+
+func (this *Db) GetProjects() ([]Project, error) {
+	var projects []Project
+	_, err := this.dbMap.Select(&projects, "select * from projects order by title")
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func (this *Db) SaveProject(project *Project) error {
+	var err error
+	if project.Id < 0 {
+		err = this.dbMap.Insert(project)
+	} else {
+		_, err = this.dbMap.Update(project)
+	}
+	return err
+}
+
+func (this *Db) DeleteProject(project *Project) error {
+	_, err := this.dbMap.Delete(project)
 	if err != nil {
 		return err
 	}

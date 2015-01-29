@@ -11,12 +11,18 @@ type User struct {
 	Email        string `db:"email" json:"email"`
 }
 
+type Project struct {
+	Id    int    `db:"id" json:"id"`
+	Title string `db:"title" json:"title"`
+}
+
 type Activity struct {
-	Id       int       `db:"id" json:"id"`
-	Day      time.Time `db:"day" json:"day"`
-	UserId   int       `db:"user_id" json:"userId"`
-	Text     string    `db:"text" json:"text"`
-	Duration int       `db:"duration" json:"duration"`
+	Id           int       `db:"id" json:"id"`
+	Day          time.Time `db:"day" json:"day"`
+	UserId       int       `db:"user_id" json:"userId"`
+	ProjectId    int       `db:"project_id" json:"projectId"`
+	Duration     int       `db:"duration" json:"duration"`
+	ProjectTitle string    `db:"-" json:"projectTitle"`
 }
 
 type UserCredentials struct {
@@ -27,4 +33,5 @@ type UserCredentials struct {
 type JsonResult struct {
 	BoolResult   bool   `json:"boolResult"`
 	StringResult string `json:"stringResult"`
+	IntResult    int    `json:"intResult"`
 }

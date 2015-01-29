@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -15,10 +14,9 @@ func NewActivitiesApi(db *Db) *ActivitiesApi {
 }
 
 func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	dayString := getRouteVar(r, "day")
-	day, err := time.Parse("2006-01-02", dayString)
+	day, err := getRouteVarTime(r, "day", "2006-01-02")
 	if err != nil {
-		return nil, &HandlerError{err, "invalid parameter: day", http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
 	activities, err := this.getByDay(user.Id, day)
@@ -30,22 +28,25 @@ func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Reques
 
 func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activity Activity
-	unmarshalJson(r.Body, &activity)
-	err := this.save(&activity)
+	err := unmarshalJson(r.Body, &activity)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	err = this.save(&activity)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't save activity", http.StatusInternalServerError}
 	}
 	return jsonResultBool(true)
 }
 
 func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	idString := getRouteVar(r, "id")
-	id, err := strconv.ParseInt(idString, 0, 32)
+	id, err := getRouteVarInt(r, "id")
 	if err != nil {
-		return nil, &HandlerError{err, "invalid parameter: id", http.StatusBadRequest}
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.delete(int(id))
+	err = this.delete(id)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
 	}
@@ -58,7 +59,23 @@ func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]Activity, erro
 	if err != nil {
 		return nil, err
 	}
+	err = this.setProjectTitle(activities)
+	if err != nil {
+		return nil, err
+	}
 	return activities, nil
+}
+
+func (this *ActivitiesApi) setProjectTitle(activities []Activity) error {
+	for i := 0; i < len(activities); i++ {
+		projectId := activities[i].ProjectId
+		project, err := this.db.GetProject(projectId)
+		if err != nil {
+			return err
+		}
+		activities[i].ProjectTitle = project.Title
+	}
+	return nil
 }
 
 func (this *ActivitiesApi) save(activity *Activity) error {
@@ -66,7 +83,7 @@ func (this *ActivitiesApi) save(activity *Activity) error {
 	var existingActivity *Activity
 
 	if activity.Id == -1 {
-		existingActivity, err = this.db.TryGetActivity(activity.UserId, activity.Day, activity.Text)
+		existingActivity, err = this.db.TryGetActivity(activity.Day, activity.UserId, activity.ProjectId)
 		if err != nil {
 			return err
 		}

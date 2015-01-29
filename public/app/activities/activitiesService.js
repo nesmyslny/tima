@@ -68,7 +68,22 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
                     totalDuration: totalDuration
                 });
             })
-            .error(function(data, status, header, config){
+            .error(function(data, status, header, config) {
+                // todo: error handling
+                deferred.reject(data, status);
+            });
+
+            return deferred.promise;
+        },
+
+        getProjects: function() {
+            var deferred = $q.defer();
+
+            $http.get('/projects')
+            .success(function(data) {
+                deferred.resolve(data);
+            })
+            .error(function(data, status) {
                 // todo: error handling
                 deferred.reject(data, status);
             });
@@ -106,12 +121,12 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        createNew: function(day, userId, text, hours, minutes) {
+        createNew: function(day, userId, projectId, hours, minutes) {
             return {
                 id: -1,
                 day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
                 userId: userId,
-                text: text,
+                projectId: projectId,
                 duration: service.calculateDuration(hours, minutes)
             };
         },

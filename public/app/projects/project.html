@@ -1,0 +1,25 @@
+
+<div class="row margin-bottom-20">
+    <div class="col-md-12">
+        <h1>Project <small>{{project.title}}</small></h1>
+    </div>
+</div>
+
+<form name="formProject" class="form-horizontal" role="form" ng-submit="save()" novalidate>
+    <div class="row form-group" show-errors>
+        <label for="title" class="col-md-1 control-label">Title</label>
+        <div class="col-md-7">
+            <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" required />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="pull-right">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                <a href="#/projects" class="btn btn-default">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
