@@ -21,7 +21,7 @@
 <div class="row">
     <div class="col-md-8">
         <ul class="list-group">
-            <li class="list-group-item project-list-item" ng-repeat="p in projects | filter:searchItem">
+            <li class="list-group-item project-list-item" ng-repeat="p in filteredProjects = (projects | filter:searchItem) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage">
                 <span>{{p.title}}</span>
                 <div class="btn-group pull-right btn-project-list-item" role="group">
                     <a href="#/projects/{{p.id}}" class="btn btn-sm btn-primary" role="button"><i class="fa fa-pencil"> Edit</i></a>
@@ -30,5 +30,6 @@
                 <div class="clearfix"></div>
             </li>
         </ul>
+        <pagination ng-model="currentPage" max-size="10" total-items="filteredProjects.length" items-per-page="itemsPerPage"></pagination>
     </div>
 </div>
