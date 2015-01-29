@@ -11,7 +11,7 @@ angular.module('tima').controller('projectListController', ['$scope', '$http', '
     $scope.list();
 
     $scope.delete = function(id) {
-        popupService.show('Delete Project', 'Do you really want to delete this project?', 'Delete', 'Cancel')
+        popupService.show('Delete project', 'Do you really want to delete this project?', 'Delete', 'Cancel')
         .result.then(function() {
             $http.delete('/projects/' + id)
             .success(function() {
