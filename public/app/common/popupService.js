@@ -7,7 +7,7 @@ angular.module('tima').factory('popupService', ['$modal', function($modal) {
                 controller: 'popupController',
                 resolve: {
                     title: function() { return title; },
-                    body: function() { return body },
+                    body: function() { return body; },
                     acceptButton: function() { return acceptButton; },
                     cancelButton: function() { return cancelButton; }
                 }

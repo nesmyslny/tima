@@ -36,5 +36,5 @@ angular.module('tima').filter('startFrom', function() {
             return input.slice(start);
         }
         return [];
-    }
+    };
 });

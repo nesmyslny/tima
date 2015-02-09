@@ -28,7 +28,7 @@ angular.module('tima').controller('projectListController', ['$scope', '$http', '
         $scope.currentPage = 1;
         $scope.totalItems = $scope.projects.length;
         $scope.itemsPerPage = 10;
-    }
+    };
 
     $scope.$watch('filteredProjects', function(newVal, oldVal) {
         $scope.currentPage = 1;
