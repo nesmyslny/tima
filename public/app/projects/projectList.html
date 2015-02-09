@@ -21,11 +21,11 @@
 <div class="row">
     <div class="col-md-8">
         <ul class="list-group">
-            <li class="list-group-item project-list-item"
+            <li class="list-group-item admin-list-item"
             ng-repeat="p in filteredProjects = (projects | filter:searchItem) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
             ng-mouseenter="hover = true" ng-mouseleave="hover = false">
                 <span>{{p.title}}</span>
-                <div class="btn-group pull-right btn-project-list-item" role="group">
+                <div class="btn-group pull-right btn-admin-list-item" role="group">
                     <a href="#/projects/{{p.id}}" class="btn btn-sm" ng-class="{'btn-primary': hover, 'btn-default': !hover}" role="button"><i class="fa fa-pencil"> Edit</i></a>
                     <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="delete(p.id)"><i class="fa fa-times"></i></button>
                 </div>
