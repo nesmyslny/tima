@@ -16,6 +16,11 @@ type Project struct {
 	Title string `db:"title" json:"title"`
 }
 
+type ActivityType struct {
+	Id    int    `db:"id" json:"id"`
+	Title string `db:"title" json:"title"`
+}
+
 type Activity struct {
 	Id           int       `db:"id" json:"id"`
 	Day          time.Time `db:"day" json:"day"`

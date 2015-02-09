@@ -36,6 +36,7 @@ func NewDb(connectionString string) *Db {
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_types").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
@@ -184,4 +185,49 @@ func (this *Db) DeleteProject(project *Project) error {
 	}
 
 	return nil
+}
+
+func (this *Db) GetActivityType(id int) (*ActivityType, error) {
+	obj, err := this.dbMap.Get(ActivityType{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*ActivityType), nil
+}
+
+func (this *Db) GetActivityTypes() ([]ActivityType, error) {
+	var activityTypes []ActivityType
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types order by title")
+	if err != nil {
+		return nil, err
+	}
+	return activityTypes, nil
+}
+
+func (this *Db) SaveActivityType(activityType *ActivityType) error {
+	var err error
+	if activityType.Id < 0 {
+		err = this.dbMap.Insert(activityType)
+	} else {
+		_, err = this.dbMap.Update(activityType)
+	}
+	return err
+}
+
+func (this *Db) DeleteActivityType(activityType *ActivityType) error {
+	_, err := this.dbMap.Delete(activityType)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
+	exists, err := this.dbMap.SelectInt("select exists(select id from activities where activity_type_id = ?)", id)
+	if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
 }
