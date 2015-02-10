@@ -182,17 +182,28 @@ func (this *Db) SaveProject(project *Project) error {
 		return err
 	}
 
+	if project.Id < 0 {
+		err = trans.Insert(project)
+	} else {
+		_, err = trans.Update(project)
+	}
+	if err != nil {
+		trans.Rollback()
+		return err
+	}
+
 	err = this.deleteProjectActivityTypes(trans, project)
 	if err != nil {
 		trans.Rollback()
 		return err
 	}
 
-	if project.Id < 0 {
-		err = trans.Insert(project)
-	} else {
-		_, err = trans.Update(project)
+	err = this.addProjectActivityTypes(trans, project)
+	if err != nil {
+		trans.Rollback()
+		return err
 	}
+
 	return trans.Commit()
 }
 
@@ -231,14 +242,47 @@ func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (this *Db) deleteProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+func (this *Db) getProjectActivityTypesRaw(trans *gorp.Transaction, projectId int) ([]ProjectActivityTypes, error) {
 	var projectActivityTypes []ProjectActivityTypes
-	_, err := trans.Select(&projectActivityTypes, "select * from projects_activity_types where project_id = ?", project.Id)
+	_, err := trans.Select(&projectActivityTypes, "select * from projects_activity_types where project_id = ?", projectId)
+	if err != nil {
+		return nil, err
+	}
+	return projectActivityTypes, nil
+}
+
+func (this *Db) addProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+	projectActivityTypes, err := this.getProjectActivityTypesRaw(trans, project.Id)
 	if err != nil {
 		return err
 	}
 
-	itemsToDelete := []ProjectActivityTypes{}
+	for _, activityType := range project.ActivityTypes {
+		addItem := true
+		for _, projectActivityType := range projectActivityTypes {
+			if projectActivityType.ActivityTypeId == activityType.Id {
+				addItem = false
+				break
+			}
+		}
+
+		if addItem {
+			err = trans.Insert(&ProjectActivityTypes{project.Id, activityType.Id})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (this *Db) deleteProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+	projectActivityTypes, err := this.getProjectActivityTypesRaw(trans, project.Id)
+	if err != nil {
+		return err
+	}
+
 	for _, projectActivityType := range projectActivityTypes {
 		deleteItem := true
 		for _, activityType := range project.ActivityTypes {
@@ -247,24 +291,17 @@ func (this *Db) deleteProjectActivityTypes(trans *gorp.Transaction, project *Pro
 				break
 			}
 		}
+
 		if deleteItem {
-			itemsToDelete = append(itemsToDelete, projectActivityType)
-		}
-	}
+			isReferenced, err := this.IsActivityTypeReferenced(projectActivityType.ActivityTypeId)
+			if err != nil {
+				return err
+			}
+			if isReferenced {
+				return ErrItemInUse
+			}
 
-	for _, itemToDelete := range itemsToDelete {
-		isReferenced, err := this.IsActivityTypeReferenced(itemToDelete.ActivityTypeId)
-		if err != nil {
-			return err
-		}
-		if isReferenced {
-			return ErrItemInUse
-		}
-	}
-
-	if len(itemsToDelete) > 0 {
-		for _, itemToDelete := range itemsToDelete {
-			_, err = trans.Delete(&itemToDelete)
+			_, err = trans.Delete(&projectActivityType)
 			if err != nil {
 				return err
 			}

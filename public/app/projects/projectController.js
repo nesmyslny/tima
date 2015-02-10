@@ -6,6 +6,9 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         activityTypes: []
     };
 
+    $scope.activityTypes = [];
+    $scope.selectedActivityType = {};
+
     $scope.fetch = function() {
         var id = parseInt($routeParams.id);
 
@@ -17,6 +20,27 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         }
     };
     $scope.fetch();
+
+    $scope.list = function() {
+        $http.get('/activityTypes')
+        .success(function(data, status, headers, config) {
+            $scope.activityTypes = data;
+        });
+    };
+    $scope.list();
+
+    $scope.addActivityType = function() {
+        var activityType = $scope.selectedActivityType.selected;
+        var alreadyInList = $scope.project.activityTypes.some(function(at) {
+            return at.id == activityType.id;
+        });
+
+        if (!alreadyInList) {
+            $scope.project.activityTypes.push(activityType);
+        }
+
+        $scope.selectedActivityType = {};
+    };
 
     $scope.deleteActivityType = function(activityType) {
         var index = $scope.project.activityTypes.indexOf(activityType);
