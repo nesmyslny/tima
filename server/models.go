@@ -27,13 +27,31 @@ type ProjectActivityTypes struct {
 	ActivityTypeId int `db:"activity_type_id"`
 }
 
+type ProjectActivityTypesView struct {
+	ProjectId         int    `db:"project_id" json:"projectId"`
+	ActivityTypeId    int    `db:"activity_type_id" json:"activityTypeId"`
+	ProjectTitle      string `db:"project_title" json:"projectTitle"`
+	ActivityTypeTitle string `db:"activity_type_title" json:"activityTypeTitle"`
+}
+
 type Activity struct {
-	Id           int       `db:"id" json:"id"`
-	Day          time.Time `db:"day" json:"day"`
-	UserId       int       `db:"user_id" json:"userId"`
-	ProjectId    int       `db:"project_id" json:"projectId"`
-	Duration     int       `db:"duration" json:"duration"`
-	ProjectTitle string    `db:"-" json:"projectTitle"`
+	Id             int       `db:"id" json:"id"`
+	Day            time.Time `db:"day" json:"day"`
+	UserId         int       `db:"user_id" json:"userId"`
+	ProjectId      int       `db:"project_id" json:"projectId"`
+	ActivityTypeId int       `db:"activity_type_id" json:"activityTypeId"`
+	Duration       int       `db:"duration" json:"duration"`
+}
+
+type ActivityView struct {
+	Id                int       `db:"id" json:"id"`
+	Day               time.Time `db:"day" json:"day"`
+	UserId            int       `db:"user_id" json:"userId"`
+	ProjectId         int       `db:"project_id" json:"projectId"`
+	ActivityTypeId    int       `db:"activity_type_id" json:"activityTypeId"`
+	Duration          int       `db:"duration" json:"duration"`
+	ProjectTitle      string    `db:"project_title" json:"projectTitle"`
+	ActivityTypeTitle string    `db:"activity_type_title" json:"activityTypeTitle"`
 }
 
 type UserCredentials struct {

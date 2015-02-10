@@ -31,6 +31,14 @@ func (this *ActivityTypesApi) GetListHandler(w http.ResponseWriter, r *http.Requ
 	return activityTypes, nil
 }
 
+func (this *ActivityTypesApi) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	list, err := this.getProjectActivityTypesView()
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't retrieve projects/activities", http.StatusInternalServerError}
+	}
+	return list, nil
+}
+
 func (this *ActivityTypesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activityType ActivityType
 	err := unmarshalJson(r.Body, &activityType)
@@ -102,4 +110,8 @@ func (this *ActivityTypesApi) delete(id int) error {
 	}
 
 	return nil
+}
+
+func (this *ActivityTypesApi) getProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
+	return this.db.GetProjectActivityTypesView()
 }

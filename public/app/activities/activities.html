@@ -26,11 +26,11 @@
 
             <div class="form-group" show-errors>
                 <label class="sr-only" for="project">Project</label>
-                <ui-select name="project" id="project" ng-model="formData.project.selected" ng-change="projectSelected()" class="form-control inline-act-text" required>
-                <ui-select-match placeholder="Project">{{$select.selected.title}}</ui-select-match>
-                <ui-select-choices repeat="project in projects | propsFilter: {title: $select.search}">
-                <div ng-bind-html="project.title | highlight: $select.search"></div>
-                </ui-select-choices>
+                <ui-select name="projectActivityList" id="projectActivityList" ng-model="formData.projectActivity.selected" class="form-control inline-act-text" required>
+                    <ui-select-match placeholder="Activity">{{$select.selected.text}}</ui-select-match>
+                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {text: $select.search}">
+                        <div ng-bind-html="projectActivity.text | highlight: $select.search"></div>
+                    </ui-select-choices>
                 </ui-select>
             </div>
 
@@ -57,7 +57,7 @@
 
             <div class="panel-heading clearfix">
                 <div class="row">
-                    <div class="col-md-9">{{a.projectTitle}}</div>
+                    <div class="col-md-9">{{a.projectTitle}}: {{a.activityTypeTitle}}</div>
                     <div class="col-md-3 pull-right text-right">
                         <ng-form name="formActivity" class="form-inline">
                         <div class="form-group no-margin" show-errors>
@@ -84,4 +84,3 @@
         </div>
     </div>
 </div>
-

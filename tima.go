@@ -41,6 +41,8 @@ func main() {
 	router.Handle("/activityTypes", server.NewAuthHandler(activityTypesApi.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/activityTypes/{id}", server.NewAuthHandler(activityTypesApi.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
+	router.Handle("/projectActivityTypes", server.NewAuthHandler(activityTypesApi.GetActivityViewListHandler, auth.AuthenticateRequest)).Methods("GET")
+
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)

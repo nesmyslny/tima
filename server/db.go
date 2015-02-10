@@ -88,11 +88,15 @@ func (this *Db) SaveUser(user *User) error {
 	return err
 }
 
-func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]Activity, error) {
-	var activities []Activity
-	_, err := this.dbMap.Select(&activities,
-		"select * from activities where user_id = ? and day = ? order by duration desc",
-		userId, day.Format(dateLayout))
+func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]ActivityView, error) {
+	sql := "select a.*, p.title project_title, at.title activity_type_title " +
+		"from activities a, projects p, activity_types at " +
+		"where a.project_id = p.id and a.activity_type_id = at.id " +
+		"and user_id = ? and day = ? " +
+		"order by duration desc"
+
+	var activities []ActivityView
+	_, err := this.dbMap.Select(&activities, sql, userId, day.Format(dateLayout))
 	if err != nil {
 		return nil, err
 	}
@@ -117,11 +121,11 @@ func (this *Db) SaveActivity(activity *Activity) error {
 	return err
 }
 
-func (this *Db) TryGetActivity(day time.Time, userId int, projectId int) (*Activity, error) {
+func (this *Db) TryGetActivity(day time.Time, userId int, projectId int, activityTypeId int) (*Activity, error) {
 	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
-		"select * from activities where user_id = ? and day = ? and project_id = ?",
-		userId, day.Format(dateLayout), projectId)
+		"select * from activities where user_id = ? and day = ? and project_id = ? and activity_type_id = ?",
+		userId, day.Format(dateLayout), projectId, activityTypeId)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -337,4 +341,18 @@ func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
 	}
 
 	return exists == 1, nil
+}
+
+func (this *Db) GetProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
+	sql := "select pat.*, p.title project_title, at.title activity_type_title " +
+		"from projects_activity_types pat, projects p, activity_types at " +
+		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
+		"order by p.title, at.title"
+
+	var list []ProjectActivityTypesView
+	_, err := this.dbMap.Select(&list, sql)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
