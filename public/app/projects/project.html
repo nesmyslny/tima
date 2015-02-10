@@ -7,9 +7,23 @@
 
 <form name="formProject" class="form-horizontal" role="form" ng-submit="save()" novalidate>
     <div class="row form-group" show-errors>
-        <label for="title" class="col-md-1 control-label">Title</label>
-        <div class="col-md-7">
+        <label for="title" class="col-md-2 control-label">Title</label>
+        <div class="col-md-6">
             <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" required />
+        </div>
+    </div>
+    <div class="row form-group">
+        <label for="" class="col-md-2 control-label">Activity types</label>
+        <div class="col-md-6">
+            <ul class="list-group">
+                <li class="list-group-item admin-list-item" ng-repeat="at in project.activityTypes" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
+                    <span>{{at.title}}</span>
+                    <div class="btn-group pull-right btn-admin-list-item" role="group">
+                        <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="deleteActivityType(at)"><i class="fa fa-times"></i></button>
+                    </div>
+                    <div class="clearfix"></div>
+                </li>
+            </ul>
         </div>
     </div>
     <div class="row">

@@ -37,6 +37,7 @@ func NewDb(connectionString string) *Db {
 	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_types").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ProjectActivityTypes{}, "projects_activity_types").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
@@ -156,7 +157,14 @@ func (this *Db) GetProject(id int) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	return obj.(*Project), nil
+
+	project := obj.(*Project)
+	project.ActivityTypes, err = this.getProjectActivityTypes(project.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
 }
 
 func (this *Db) GetProjects() ([]Project, error) {
@@ -169,13 +177,23 @@ func (this *Db) GetProjects() ([]Project, error) {
 }
 
 func (this *Db) SaveProject(project *Project) error {
-	var err error
-	if project.Id < 0 {
-		err = this.dbMap.Insert(project)
-	} else {
-		_, err = this.dbMap.Update(project)
+	trans, err := this.dbMap.Begin()
+	if err != nil {
+		return err
 	}
-	return err
+
+	err = this.deleteProjectActivityTypes(trans, project)
+	if err != nil {
+		trans.Rollback()
+		return err
+	}
+
+	if project.Id < 0 {
+		err = trans.Insert(project)
+	} else {
+		_, err = trans.Update(project)
+	}
+	return trans.Commit()
 }
 
 func (this *Db) DeleteProject(project *Project) error {
@@ -202,6 +220,58 @@ func (this *Db) GetActivityTypes() ([]ActivityType, error) {
 		return nil, err
 	}
 	return activityTypes, nil
+}
+
+func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
+	var activityTypes []ActivityType
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types where id in (select activity_type_id from projects_activity_types where project_id = ?)", projectId)
+	if err != nil {
+		return nil, err
+	}
+	return activityTypes, nil
+}
+
+func (this *Db) deleteProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+	var projectActivityTypes []ProjectActivityTypes
+	_, err := trans.Select(&projectActivityTypes, "select * from projects_activity_types where project_id = ?", project.Id)
+	if err != nil {
+		return err
+	}
+
+	itemsToDelete := []ProjectActivityTypes{}
+	for _, projectActivityType := range projectActivityTypes {
+		deleteItem := true
+		for _, activityType := range project.ActivityTypes {
+			if activityType.Id == projectActivityType.ActivityTypeId {
+				deleteItem = false
+				break
+			}
+		}
+		if deleteItem {
+			itemsToDelete = append(itemsToDelete, projectActivityType)
+		}
+	}
+
+	for _, itemToDelete := range itemsToDelete {
+		isReferenced, err := this.IsActivityTypeReferenced(itemToDelete.ActivityTypeId)
+		if err != nil {
+			return err
+		}
+		if isReferenced {
+			return ErrItemInUse
+		}
+	}
+
+	if len(itemsToDelete) > 0 {
+		for _, itemToDelete := range itemsToDelete {
+			_, err = trans.Delete(&itemToDelete)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (this *Db) SaveActivityType(activityType *ActivityType) error {

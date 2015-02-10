@@ -2,7 +2,8 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
 
     $scope.project = {
         id: -1,
-        title: ''
+        title: '',
+        activityTypes: []
     };
 
     $scope.fetch = function() {
@@ -16,6 +17,11 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         }
     };
     $scope.fetch();
+
+    $scope.deleteActivityType = function(activityType) {
+        var index = $scope.project.activityTypes.indexOf(activityType);
+        $scope.project.activityTypes.splice(index, 1);
+    };
 
     $scope.save = function() {
         $scope.$broadcast('show-errors-check-validity');

@@ -12,13 +12,19 @@ type User struct {
 }
 
 type Project struct {
-	Id    int    `db:"id" json:"id"`
-	Title string `db:"title" json:"title"`
+	Id            int            `db:"id" json:"id"`
+	Title         string         `db:"title" json:"title"`
+	ActivityTypes []ActivityType `db:"-" json:"activityTypes"`
 }
 
 type ActivityType struct {
 	Id    int    `db:"id" json:"id"`
 	Title string `db:"title" json:"title"`
+}
+
+type ProjectActivityTypes struct {
+	ProjectId      int `db:"project_id"`
+	ActivityTypeId int `db:"activity_type_id"`
 }
 
 type Activity struct {
