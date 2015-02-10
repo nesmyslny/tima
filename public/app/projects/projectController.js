@@ -30,6 +30,10 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
     $scope.list();
 
     $scope.addActivityType = function() {
+        if (typeof $scope.selectedActivityType.selected === "undefined") {
+            return;
+        }
+
         var activityType = $scope.selectedActivityType.selected;
         var alreadyInList = $scope.project.activityTypes.some(function(at) {
             return at.id == activityType.id;

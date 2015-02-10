@@ -33,7 +33,7 @@
             <ul class="list-group">
                 <li class="list-group-item admin-list-item" ng-repeat="at in project.activityTypes" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
                     <span>{{at.title}}</span>
-                    <div class="btn-group pull-right btn-admin-list-item" role="group">
+                    <div class="pull-right btn-admin-list-item" role="group">
                         <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="deleteActivityType(at)"><i class="fa fa-times"></i></button>
                     </div>
                     <div class="clearfix"></div>
