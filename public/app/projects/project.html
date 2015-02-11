@@ -16,7 +16,7 @@
         <label for="" class="col-md-2 control-label">Activity types</label>
         <div class="col-md-5">
             <ui-select name="activityType" id="activityType" ng-model="selectedActivityType.selected">
-                <ui-select-match placeholder="select an activity type">{{$select.selected.title}}</ui-select-match>
+                <ui-select-match placeholder="">{{$select.selected.title}}</ui-select-match>
                 <ui-select-choices repeat="at in activityTypes | propsFilter: {title: $select.search}">
                     <div ng-bind-html="at.title | highlight: $select.search"></div>
                 </ui-select-choices>

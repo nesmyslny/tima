@@ -12,7 +12,7 @@ angular.module('tima').controller('activityTypeListController', ['$scope', '$htt
     $scope.list();
 
     $scope.delete = function(id) {
-        popupService.show('Delete activity type', 'Do you really want to delete this activity type?', 'Delete', 'Cancel')
+        popupService.show('Delete Activity Type', 'Do you really want to delete this activity type?', 'Delete', 'Cancel')
         .result.then(function() {
             $http.delete('/activityTypes/' + id)
             .success(function() {
