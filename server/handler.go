@@ -11,39 +11,39 @@ type HandlerError struct {
 	Code    int
 }
 
-type anonHandler struct {
+type AnonHandler struct {
 	HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)
 }
 
-type authHandler struct {
+type AuthHandler struct {
 	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError)
 	AuthFunc    func(r *http.Request) (bool, *User)
 }
 
-func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)) anonHandler {
-	return anonHandler{handlerFunc}
+func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)) AnonHandler {
+	return AnonHandler{handlerFunc}
 }
 
 func NewAuthHandler(
 	handlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError),
-	authFunc func(r *http.Request) (bool, *User)) authHandler {
-	return authHandler{handlerFunc, authFunc}
+	authFunc func(r *http.Request) (bool, *User)) AuthHandler {
+	return AuthHandler{handlerFunc, authFunc}
 }
 
-func (this anonHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	response, hErr := this.HandlerFunc(w, r)
+func (anonHandler AnonHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	response, hErr := anonHandler.HandlerFunc(w, r)
 	serveHTTP(w, response, hErr)
 }
 
-func (this authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	authorized, user := this.AuthFunc(r)
+func (authHandler AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	authorized, user := authHandler.AuthFunc(r)
 
 	if !authorized {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	response, hErr := this.HandlerFunc(w, r, user)
+	response, hErr := authHandler.HandlerFunc(w, r, user)
 	serveHTTP(w, response, hErr)
 }
 

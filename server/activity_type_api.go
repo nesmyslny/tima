@@ -2,109 +2,108 @@ package server
 
 import "net/http"
 
-type ActivityTypeApi struct {
-	db *Db
+type ActivityTypeAPI struct {
+	db *DB
 }
 
-func NewActivityTypeApi(db *Db) *ActivityTypeApi {
-	return &ActivityTypeApi{db}
+func NewActivityTypeAPI(db *DB) *ActivityTypeAPI {
+	return &ActivityTypeAPI{db}
 }
 
-func (this *ActivityTypeApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	activityType, err := this.get(id)
+	activityType, err := activityTypeAPI.get(id)
 	if err != nil {
 		return nil, &HandlerError{err, "unknown id", http.StatusBadRequest}
 	}
 	return activityType, nil
 }
 
-func (this *ActivityTypeApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	activityTypes, err := this.getList()
+func (activityTypeAPI *ActivityTypeAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	activityTypes, err := activityTypeAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve activity types", http.StatusInternalServerError}
 	}
 	return activityTypes, nil
 }
 
-func (this *ActivityTypeApi) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	list, err := this.getProjectActivityTypeViewList()
+func (activityTypeAPI *ActivityTypeAPI) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	list, err := activityTypeAPI.getProjectActivityTypeViewList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects/activities", http.StatusInternalServerError}
 	}
 	return list, nil
 }
 
-func (this *ActivityTypeApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activityType ActivityType
-	err := unmarshalJson(r.Body, &activityType)
+	err := unmarshalJSON(r.Body, &activityType)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.save(&activityType)
+	err = activityTypeAPI.save(&activityType)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
-	return jsonResultInt(activityType.Id)
+	return jsonResultInt(activityType.ID)
 }
 
-func (this *ActivityTypeApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.delete(id)
+	err = activityTypeAPI.delete(id)
 	if err != nil {
-		if err == ErrItemInUse {
+		if err == errItemInUse {
 			return nil, &HandlerError{err, "Error: It is not possible to delete a activity type that is already in use.", http.StatusBadRequest}
-		} else {
-			return nil, &HandlerError{err, "Error: Activity type could not deleted.", http.StatusInternalServerError}
 		}
+		return nil, &HandlerError{err, "Error: Activity type could not deleted.", http.StatusInternalServerError}
 	}
 
 	return jsonResultBool(true)
 }
 
-func (this *ActivityTypeApi) get(id int) (*ActivityType, error) {
-	activityType, err := this.db.GetActivityType(id)
+func (activityTypeAPI *ActivityTypeAPI) get(id int) (*ActivityType, error) {
+	activityType, err := activityTypeAPI.db.GetActivityType(id)
 	if err != nil {
 		return nil, err
 	}
 	return activityType, nil
 }
 
-func (this *ActivityTypeApi) getList() ([]ActivityType, error) {
-	activityTypes, err := this.db.GetActivityTypes()
+func (activityTypeAPI *ActivityTypeAPI) getList() ([]ActivityType, error) {
+	activityTypes, err := activityTypeAPI.db.GetActivityTypes()
 	if err != nil {
 		return nil, err
 	}
 	return activityTypes, nil
 }
 
-func (this *ActivityTypeApi) save(activityType *ActivityType) error {
-	return this.db.SaveActivityType(activityType)
+func (activityTypeAPI *ActivityTypeAPI) save(activityType *ActivityType) error {
+	return activityTypeAPI.db.SaveActivityType(activityType)
 }
 
-func (this *ActivityTypeApi) delete(id int) error {
-	isReferenced, err := this.db.IsActivityTypeReferenced(id)
+func (activityTypeAPI *ActivityTypeAPI) delete(id int) error {
+	isReferenced, err := activityTypeAPI.db.IsActivityTypeReferenced(id)
 	if err != nil {
 		return err
 	} else if isReferenced {
-		return ErrItemInUse
+		return errItemInUse
 	}
 
-	activityType, err := this.db.GetActivityType(id)
+	activityType, err := activityTypeAPI.db.GetActivityType(id)
 	if err != nil {
 		return err
 	}
 
-	err = this.db.DeleteActivityType(activityType)
+	err = activityTypeAPI.db.DeleteActivityType(activityType)
 	if err != nil {
 		return err
 	}
@@ -112,6 +111,6 @@ func (this *ActivityTypeApi) delete(id int) error {
 	return nil
 }
 
-func (this *ActivityTypeApi) getProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
-	return this.db.GetProjectActivityTypeViewList()
+func (activityTypeAPI *ActivityTypeAPI) getProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
+	return activityTypeAPI.db.GetProjectActivityTypeViewList()
 }

@@ -35,13 +35,13 @@ func NewAuth() *Auth {
 	return &Auth{privKey, pubKey}
 }
 
-func (this *Auth) Authenticate(user *User, pwd string) (string, error) {
+func (auth *Auth) Authenticate(user *User, pwd string) (string, error) {
 	err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pwd))
 	if err != nil {
 		return "", errors.New("invalid password")
 	}
 
-	token, err := this.createToken(user)
+	token, err := auth.createToken(user)
 	if err != nil {
 		return "", errors.New("token could not created")
 	}
@@ -49,17 +49,17 @@ func (this *Auth) Authenticate(user *User, pwd string) (string, error) {
 	return token, nil
 }
 
-func (this *Auth) createToken(user *User) (string, error) {
+func (auth *Auth) createToken(user *User) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = user
 	// todo: exp -> config
 	token.Claims["exp"] = time.Now().Unix() + 3600
-	return token.SignedString(this.privateKey)
+	return token.SignedString(auth.privateKey)
 }
 
-func (this *Auth) getValidToken(r *http.Request) *jwt.Token {
+func (auth *Auth) getValidToken(r *http.Request) *jwt.Token {
 	token, err := jwt.ParseFromRequest(r, func(token *jwt.Token) (interface{}, error) {
-		return this.privateKey, nil
+		return auth.privateKey, nil
 	})
 	if err == nil && token.Valid {
 		return token
@@ -67,18 +67,18 @@ func (this *Auth) getValidToken(r *http.Request) *jwt.Token {
 	return nil
 }
 
-func (this *Auth) ValidateToken(r *http.Request) bool {
-	token := this.getValidToken(r)
+func (auth *Auth) ValidateToken(r *http.Request) bool {
+	token := auth.getValidToken(r)
 	if token == nil {
 		return false
 	}
 	return true
 }
 
-func (this *Auth) AuthenticateRequest(r *http.Request) (bool, *User) {
-	token := this.getValidToken(r)
+func (auth *Auth) AuthenticateRequest(r *http.Request) (bool, *User) {
+	token := auth.getValidToken(r)
 	if token != nil {
-		user, err := this.extractUser(token.Raw)
+		user, err := auth.extractUser(token.Raw)
 		if err != nil {
 			return false, nil
 		}
@@ -87,7 +87,7 @@ func (this *Auth) AuthenticateRequest(r *http.Request) (bool, *User) {
 	return false, nil
 }
 
-func (this *Auth) extractUser(token string) (*User, error) {
+func (auth *Auth) extractUser(token string) (*User, error) {
 	// todo: rethink: how to get user struct out of token?
 	// this seems lika a ridiculous solution:
 	// 1. get part of token, which contains claims (middle part):
@@ -127,7 +127,7 @@ func (this *Auth) extractUser(token string) (*User, error) {
 	return user, nil
 }
 
-func (this *Auth) GeneratePasswordHash(pwd string) ([]byte, error) {
+func (auth *Auth) GeneratePasswordHash(pwd string) ([]byte, error) {
 	const bcryptCost int = 13
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcryptCost)
 	if err != nil {

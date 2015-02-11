@@ -2,105 +2,103 @@ package server
 
 import "net/http"
 
-type ProjectApi struct {
-	db *Db
+type ProjectAPI struct {
+	db *DB
 }
 
-func NewProjectApi(db *Db) *ProjectApi {
-	return &ProjectApi{db}
+func NewProjectAPI(db *DB) *ProjectAPI {
+	return &ProjectAPI{db}
 }
 
-func (this *ProjectApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectAPI *ProjectAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	project, err := this.get(id)
+	project, err := projectAPI.get(id)
 	if err != nil {
 		return nil, &HandlerError{err, "unknown id", http.StatusBadRequest}
 	}
 	return project, nil
 }
 
-func (this *ProjectApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	projects, err := this.getList()
+func (projectAPI *ProjectAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	projects, err := projectAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
 	}
 	return projects, nil
 }
 
-func (this *ProjectApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectAPI *ProjectAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var project Project
-	err := unmarshalJson(r.Body, &project)
+	err := unmarshalJSON(r.Body, &project)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.save(&project)
+	err = projectAPI.save(&project)
 	if err != nil {
-		if err == ErrItemInUse {
+		if err == errItemInUse {
 			return nil, &HandlerError{err, "Error: It is not possible to delete activity types that are already in use.", http.StatusBadRequest}
-		} else {
-			return nil, &HandlerError{err, "Error: Project could not be saved.", http.StatusInternalServerError}
 		}
+		return nil, &HandlerError{err, "Error: Project could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(project.Id)
+	return jsonResultInt(project.ID)
 }
 
-func (this *ProjectApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectAPI *ProjectAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = this.delete(id)
+	err = projectAPI.delete(id)
 	if err != nil {
-		if err == ErrItemInUse {
+		if err == errItemInUse {
 			return nil, &HandlerError{err, "Error: It is not possible to delete a project that is already in use.", http.StatusBadRequest}
-		} else {
-			return nil, &HandlerError{err, "Error: Project could not deleted.", http.StatusInternalServerError}
 		}
+		return nil, &HandlerError{err, "Error: Project could not deleted.", http.StatusInternalServerError}
 	}
 
 	return jsonResultBool(true)
 }
 
-func (this *ProjectApi) get(id int) (*Project, error) {
-	project, err := this.db.GetProject(id)
+func (projectAPI *ProjectAPI) get(id int) (*Project, error) {
+	project, err := projectAPI.db.GetProject(id)
 	if err != nil {
 		return nil, err
 	}
 	return project, nil
 }
 
-func (this *ProjectApi) getList() ([]Project, error) {
-	projects, err := this.db.GetProjects()
+func (projectAPI *ProjectAPI) getList() ([]Project, error) {
+	projects, err := projectAPI.db.GetProjects()
 	if err != nil {
 		return nil, err
 	}
 	return projects, nil
 }
 
-func (this *ProjectApi) save(project *Project) error {
-	return this.db.SaveProject(project)
+func (projectAPI *ProjectAPI) save(project *Project) error {
+	return projectAPI.db.SaveProject(project)
 }
 
-func (this *ProjectApi) delete(id int) error {
-	isReferenced, err := this.db.IsProjectReferenced(id)
+func (projectAPI *ProjectAPI) delete(id int) error {
+	isReferenced, err := projectAPI.db.IsProjectReferenced(id)
 	if err != nil {
 		return err
 	} else if isReferenced {
-		return ErrItemInUse
+		return errItemInUse
 	}
 
-	project, err := this.db.GetProject(id)
+	project, err := projectAPI.db.GetProject(id)
 	if err != nil {
 		return err
 	}
 
-	err = this.db.DeleteProject(project)
+	err = projectAPI.db.DeleteProject(project)
 	if err != nil {
 		return err
 	}
