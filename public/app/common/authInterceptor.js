@@ -9,7 +9,7 @@ angular.module('tima').factory('authInterceptor', ['$q', '$injector', 'sessionSe
         },
         responseError: function (response) {
             if (response.status == 401) {
-                // manuelly getting authService because of circular dependency ($http).
+                // manually getting authService because of circular dependency ($http).
                 // todo: investigate / refactor authService?
                 authService = $injector.get('authService');
                 authService.signOut();
