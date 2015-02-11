@@ -162,7 +162,7 @@ func (db *DB) GetProject(id int) (*Project, error) {
 	}
 
 	project := obj.(*Project)
-	project.ActivityTypes, err = db.getProjectActivityTypes(project.ID)
+	project.ActivityTypes, err = db.getActivityTypes(project.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (db *DB) GetProjects() ([]Project, error) {
 	return projects, nil
 }
 
-func (db *DB) SaveProject(project *Project) error {
+func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
 		return err
@@ -195,16 +195,20 @@ func (db *DB) SaveProject(project *Project) error {
 		return err
 	}
 
-	err = db.deleteProjectActivityTypes(trans, project)
-	if err != nil {
-		trans.Rollback()
-		return err
+	for _, removedActivityType := range removedActivityTypes {
+		count, err := trans.Delete(&removedActivityType)
+		if err != nil || count != 1 {
+			trans.Rollback()
+			return err
+		}
 	}
 
-	err = db.addProjectActivityTypes(trans, project)
-	if err != nil {
-		trans.Rollback()
-		return err
+	for _, addedActivityType := range addedActivityTypes {
+		err = trans.Insert(&addedActivityType)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
 	}
 
 	return trans.Commit()
@@ -236,7 +240,7 @@ func (db *DB) GetActivityTypes() ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (db *DB) getProjectActivityTypes(projectID int) ([]ActivityType, error) {
+func (db *DB) getActivityTypes(projectID int) ([]ActivityType, error) {
 	var activityTypes []ActivityType
 	_, err := db.dbMap.Select(&activityTypes, "select * from activity_type where id in (select activity_type_id from project_activity_type where project_id = ?)", projectID)
 	if err != nil {
@@ -245,73 +249,13 @@ func (db *DB) getProjectActivityTypes(projectID int) ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (db *DB) getProjectActivityTypesRaw(trans *gorp.Transaction, projectID int) ([]ProjectActivityType, error) {
+func (db *DB) GetProjectActivityTypes(projectID int) ([]ProjectActivityType, error) {
 	var projectActivityTypes []ProjectActivityType
-	_, err := trans.Select(&projectActivityTypes, "select * from project_activity_type where project_id = ?", projectID)
+	_, err := db.dbMap.Select(&projectActivityTypes, "select * from project_activity_type where project_id = ?", projectID)
 	if err != nil {
 		return nil, err
 	}
 	return projectActivityTypes, nil
-}
-
-func (db *DB) addProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
-	projectActivityTypes, err := db.getProjectActivityTypesRaw(trans, project.ID)
-	if err != nil {
-		return err
-	}
-
-	for _, activityType := range project.ActivityTypes {
-		addItem := true
-		for _, projectActivityType := range projectActivityTypes {
-			if projectActivityType.ActivityTypeID == activityType.ID {
-				addItem = false
-				break
-			}
-		}
-
-		if addItem {
-			err = trans.Insert(&ProjectActivityType{project.ID, activityType.ID})
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (db *DB) deleteProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
-	projectActivityTypes, err := db.getProjectActivityTypesRaw(trans, project.ID)
-	if err != nil {
-		return err
-	}
-
-	for _, projectActivityType := range projectActivityTypes {
-		deleteItem := true
-		for _, activityType := range project.ActivityTypes {
-			if activityType.ID == projectActivityType.ActivityTypeID {
-				deleteItem = false
-				break
-			}
-		}
-
-		if deleteItem {
-			isReferenced, err := db.IsActivityTypeReferenced(projectActivityType.ActivityTypeID)
-			if err != nil {
-				return err
-			}
-			if isReferenced {
-				return errItemInUse
-			}
-
-			_, err = trans.Delete(&projectActivityType)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 func (db *DB) SaveActivityType(activityType *ActivityType) error {
@@ -333,8 +277,16 @@ func (db *DB) DeleteActivityType(activityType *ActivityType) error {
 	return nil
 }
 
-func (db *DB) IsActivityTypeReferenced(id int) (bool, error) {
-	exists, err := db.dbMap.SelectInt("select exists(select id from activity where activity_type_id = ?)", id)
+func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool, error) {
+	var exists int64
+	var err error
+
+	if projectID == nil {
+		exists, err = db.dbMap.SelectInt("select exists(select id from activity where activity_type_id = ?)", activityTypeID)
+	} else {
+		exists, err = db.dbMap.SelectInt("select exists(select id from activity where activity_type_id = ? and project_id = ?)", activityTypeID, projectID)
+	}
+
 	if err != nil {
 		return false, err
 	}

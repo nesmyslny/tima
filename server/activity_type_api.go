@@ -91,7 +91,7 @@ func (activityTypeAPI *ActivityTypeAPI) save(activityType *ActivityType) error {
 }
 
 func (activityTypeAPI *ActivityTypeAPI) delete(id int) error {
-	isReferenced, err := activityTypeAPI.db.IsActivityTypeReferenced(id)
+	isReferenced, err := activityTypeAPI.db.IsActivityTypeReferenced(id, nil)
 	if err != nil {
 		return err
 	} else if isReferenced {

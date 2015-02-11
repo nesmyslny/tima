@@ -82,7 +82,71 @@ func (projectAPI *ProjectAPI) getList() ([]Project, error) {
 }
 
 func (projectAPI *ProjectAPI) save(project *Project) error {
-	return projectAPI.db.SaveProject(project)
+	addedItems, err := projectAPI.getAddedActivityTypes(project)
+	if err != nil {
+		return err
+	}
+	deletedItems, err := projectAPI.getRemovedActivityTypes(project)
+	if err != nil {
+		return err
+	}
+	return projectAPI.db.SaveProject(project, addedItems, deletedItems)
+}
+
+func (projectAPI *ProjectAPI) getAddedActivityTypes(project *Project) ([]ProjectActivityType, error) {
+	projectActivityTypes, err := projectAPI.db.GetProjectActivityTypes(project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var addedItems []ProjectActivityType
+	for _, activityType := range project.ActivityTypes {
+		added := true
+		for _, projectActivityType := range projectActivityTypes {
+			if projectActivityType.ActivityTypeID == activityType.ID {
+				added = false
+				break
+			}
+		}
+
+		if added {
+			addedItems = append(addedItems, ProjectActivityType{project.ID, activityType.ID})
+		}
+	}
+
+	return addedItems, nil
+}
+
+func (projectAPI *ProjectAPI) getRemovedActivityTypes(project *Project) ([]ProjectActivityType, error) {
+	projectActivityTypes, err := projectAPI.db.GetProjectActivityTypes(project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var deleteditems []ProjectActivityType
+	for _, projectActivityType := range projectActivityTypes {
+		deleted := true
+		for _, activityType := range project.ActivityTypes {
+			if activityType.ID == projectActivityType.ActivityTypeID {
+				deleted = false
+				break
+			}
+		}
+
+		if deleted {
+			isReferenced, err := projectAPI.db.IsActivityTypeReferenced(projectActivityType.ActivityTypeID, &project.ID)
+			if err != nil {
+				return nil, err
+			}
+			if isReferenced {
+				return nil, errItemInUse
+			}
+
+			deleteditems = append(deleteditems, projectActivityType)
+		}
+	}
+
+	return deleteditems, nil
 }
 
 func (projectAPI *ProjectAPI) delete(id int) error {
