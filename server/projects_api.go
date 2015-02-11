@@ -40,7 +40,11 @@ func (this *ProjectsApi) SaveHandler(w http.ResponseWriter, r *http.Request, use
 
 	err = this.save(&project)
 	if err != nil {
-		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+		if err == ErrItemInUse {
+			return nil, &HandlerError{err, "Error: It is not possible to delete activity types that are already in use.", http.StatusBadRequest}
+		} else {
+			return nil, &HandlerError{err, "Error: Project could not be saved.", http.StatusInternalServerError}
+		}
 	}
 	return jsonResultInt(project.Id)
 }

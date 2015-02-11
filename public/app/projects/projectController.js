@@ -1,4 +1,4 @@
-angular.module('tima').controller('projectController', ['$scope', '$http', '$routeParams', '$location', function ($scope, $http, $routeParams, $location) {
+angular.module('tima').controller('projectController', ['$scope', '$http', '$routeParams', '$location', 'messageService', function ($scope, $http, $routeParams, $location, messageService) {
 
     $scope.project = {
         id: -1,
@@ -60,6 +60,9 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         $http.post('/projects', $scope.project)
         .success(function(data, status, headers, config) {
             $location.path('/projects');
+        })
+        .error(function(data, status) {
+            messageService.add('danger', data);
         });
     };
 
