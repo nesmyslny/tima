@@ -2,28 +2,28 @@ package server
 
 import "net/http"
 
-type UserApi struct {
-	db   *Db
+type UserAPI struct {
+	db   *DB
 	auth *Auth
 }
 
-func NewUserApi(db *Db, auth *Auth) *UserApi {
-	return &UserApi{db, auth}
+func NewUserAPI(db *DB, auth *Auth) *UserAPI {
+	return &UserAPI{db, auth}
 }
 
-func (this *UserApi) SigninHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
+func (userAPI *UserAPI) SigninHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
 	var credentials UserCredentials
-	err := unmarshalJson(r.Body, &credentials)
+	err := unmarshalJSON(r.Body, &credentials)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	user := this.db.GetUserByName(credentials.Username)
+	user := userAPI.db.GetUserByName(credentials.Username)
 	if user == nil {
 		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
 
-	token, err := this.auth.Authenticate(user, credentials.Password)
+	token, err := userAPI.auth.Authenticate(user, credentials.Password)
 	if err != nil {
 		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
@@ -31,19 +31,19 @@ func (this *UserApi) SigninHandler(w http.ResponseWriter, r *http.Request) (inte
 	return jsonResultString(token)
 }
 
-func (this *UserApi) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
-	signedIn := this.auth.ValidateToken(r)
+func (userAPI *UserAPI) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
+	signedIn := userAPI.auth.ValidateToken(r)
 	return jsonResultBool(signedIn)
 }
 
-func (this *UserApi) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
-	pwdHash, err := this.auth.GeneratePasswordHash(pwd)
+func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
+	pwdHash, err := userAPI.auth.GeneratePasswordHash(pwd)
 	if err != nil {
 		return nil, err
 	}
 
 	user := &User{
-		Id:           -1,
+		ID:           -1,
 		Username:     username,
 		PasswordHash: pwdHash,
 		FirstName:    firstName,
@@ -51,7 +51,7 @@ func (this *UserApi) AddUser(username string, pwd string, firstName string, last
 		Email:        email,
 	}
 
-	err = this.db.SaveUser(user)
+	err = userAPI.db.SaveUser(user)
 	if err != nil {
 		return nil, err
 	}

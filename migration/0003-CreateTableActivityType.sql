@@ -1,9 +1,9 @@
 -- +migrate Up
-create table projects (
+create table activity_type (
     id              integer         not null    auto_increment,
     title           varchar(100)    not null,
     primary key (id)
 );
 
 -- +migrate Down
-drop table projects;
+drop table activity_type;

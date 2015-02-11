@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var ErrItemInUse = errors.New("Item is already in use")
+var errItemInUse = errors.New("Item is already in use")
 
 func jsonResult(boolResult bool, stringResult string, intResult int) (interface{}, *HandlerError) {
 	return JsonResult{boolResult, stringResult, intResult}, nil
@@ -30,7 +30,7 @@ func jsonResultInt(intResult int) (interface{}, *HandlerError) {
 	return JsonResult{IntResult: intResult}, nil
 }
 
-func unmarshalJson(body io.Reader, model interface{}) error {
+func unmarshalJSON(body io.Reader, model interface{}) error {
 	data, err := ioutil.ReadAll(body)
 	if err != nil {
 		return errors.New("invalid request")

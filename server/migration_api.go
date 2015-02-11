@@ -4,17 +4,17 @@ import (
 	"net/http"
 )
 
-type MigrationApi struct {
-	db      *Db
-	userApi *UserApi
+type MigrationAPI struct {
+	db      *DB
+	userAPI *UserAPI
 }
 
-func NewMigrationApi(db *Db, userApi *UserApi) *MigrationApi {
-	return &MigrationApi{db, userApi}
+func NewMigrationAPI(db *DB, userAPI *UserAPI) *MigrationAPI {
+	return &MigrationAPI{db, userAPI}
 }
 
-func (this *MigrationApi) UpgradeHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
-	err := this.migrate()
+func (migrationAPI *MigrationAPI) UpgradeHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
+	err := migrationAPI.migrate()
 	if err != nil {
 		// todo: logging
 		// in this case, the internal error is directly exposed to the user.
@@ -25,13 +25,13 @@ func (this *MigrationApi) UpgradeHandler(w http.ResponseWriter, r *http.Request)
 	return jsonResultBool(true)
 }
 
-func (this *MigrationApi) migrate() error {
-	err := this.db.Upgrade()
+func (migrationAPI *MigrationAPI) migrate() error {
+	err := migrationAPI.db.Upgrade()
 	if err != nil {
 		return err
 	}
 
-	err = this.postMigration()
+	err = migrationAPI.postMigration()
 	if err != nil {
 		return err
 	}
@@ -39,14 +39,14 @@ func (this *MigrationApi) migrate() error {
 	return nil
 }
 
-func (this *MigrationApi) postMigration() error {
-	countUsers, err := this.db.GetNumberOfUsers()
+func (migrationAPI *MigrationAPI) postMigration() error {
+	countUsers, err := migrationAPI.db.GetNumberOfUsers()
 	if err != nil {
 		return err
 	}
 
 	if countUsers == 0 {
-		_, err = this.userApi.AddUser("admin", "pwd", "", "", "")
+		_, err = migrationAPI.userAPI.AddUser("admin", "pwd", "", "", "")
 	}
 
 	return err
