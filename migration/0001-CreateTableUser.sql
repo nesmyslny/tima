@@ -1,5 +1,5 @@
 -- +migrate Up
-create table users (
+create table user (
     id              integer         not null    auto_increment,
     username        varchar(50)     not null,
     password_hash   binary(60)      not null,
@@ -11,4 +11,4 @@ create table users (
 );
 
 -- +migrate Down
-drop table users;
+drop table user;

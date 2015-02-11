@@ -23,8 +23,8 @@ func NewDb(connectionString string) *Db {
 	dbAccess := &Db{
 		connectionString: connectionString,
 		dialect:          "mysql",
-		migrationDir:     "migrations",
-		migrationTable:   "migrations",
+		migrationDir:     "migration",
+		migrationTable:   "migration",
 	}
 
 	db, err := sql.Open(dbAccess.dialect, dbAccess.connectionString)
@@ -34,11 +34,11 @@ func NewDb(connectionString string) *Db {
 	}
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
-	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
-	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
-	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_types").SetKeys(true, "Id")
-	dbAccess.dbMap.AddTableWithName(ProjectActivityTypes{}, "projects_activity_types").SetKeys(false, "project_id", "activity_type_id")
-	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ProjectActivityTypes{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
+	dbAccess.dbMap.AddTableWithName(Activity{}, "activity").SetKeys(true, "Id")
 
 	return dbAccess
 }
@@ -49,11 +49,11 @@ func (this *Db) Close() error {
 
 func (this *Db) Upgrade() error {
 	migrate.SetTable(this.migrationTable)
-	migrations := &migrate.FileMigrationSource{
+	migrationSource := &migrate.FileMigrationSource{
 		Dir: this.migrationDir,
 	}
 
-	_, err := migrate.Exec(this.dbMap.Db, this.dialect, migrations, migrate.Up)
+	_, err := migrate.Exec(this.dbMap.Db, this.dialect, migrationSource, migrate.Up)
 	if err != nil {
 		// todo: logging
 		// if(!) any migration were applied, try to roll back:
@@ -65,13 +65,13 @@ func (this *Db) Upgrade() error {
 }
 
 func (this *Db) GetNumberOfUsers() (int, error) {
-	count, err := this.dbMap.SelectInt("select count(*) from users")
+	count, err := this.dbMap.SelectInt("select count(*) from user")
 	return int(count), err
 }
 
 func (this *Db) GetUserByName(username string) *User {
 	var user *User
-	err := this.dbMap.SelectOne(&user, "select * from users where username = ?", username)
+	err := this.dbMap.SelectOne(&user, "select * from user where username = ?", username)
 	if err != nil {
 		return nil
 	}
@@ -90,7 +90,7 @@ func (this *Db) SaveUser(user *User) error {
 
 func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]ActivityView, error) {
 	sql := "select a.*, p.title project_title, at.title activity_type_title " +
-		"from activities a, projects p, activity_types at " +
+		"from activity a, project p, activity_type at " +
 		"where a.project_id = p.id and a.activity_type_id = at.id " +
 		"and user_id = ? and day = ? " +
 		"order by duration desc"
@@ -124,7 +124,7 @@ func (this *Db) SaveActivity(activity *Activity) error {
 func (this *Db) TryGetActivity(day time.Time, userId int, projectId int, activityTypeId int) (*Activity, error) {
 	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
-		"select * from activities where user_id = ? and day = ? and project_id = ? and activity_type_id = ?",
+		"select * from activity where user_id = ? and day = ? and project_id = ? and activity_type_id = ?",
 		userId, day.Format(dateLayout), projectId, activityTypeId)
 
 	if err != nil {
@@ -139,7 +139,7 @@ func (this *Db) TryGetActivity(day time.Time, userId int, projectId int, activit
 }
 
 func (this *Db) IsProjectReferenced(id int) (bool, error) {
-	exists, err := this.dbMap.SelectInt("select exists(select id from activities where project_id = ?)", id)
+	exists, err := this.dbMap.SelectInt("select exists(select id from activity where project_id = ?)", id)
 	if err != nil {
 		return false, err
 	}
@@ -173,7 +173,7 @@ func (this *Db) GetProject(id int) (*Project, error) {
 
 func (this *Db) GetProjects() ([]Project, error) {
 	var projects []Project
-	_, err := this.dbMap.Select(&projects, "select * from projects order by title")
+	_, err := this.dbMap.Select(&projects, "select * from project order by title")
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (this *Db) GetActivityType(id int) (*ActivityType, error) {
 
 func (this *Db) GetActivityTypes() ([]ActivityType, error) {
 	var activityTypes []ActivityType
-	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types order by title")
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_type order by title")
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (this *Db) GetActivityTypes() ([]ActivityType, error) {
 
 func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
 	var activityTypes []ActivityType
-	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types where id in (select activity_type_id from projects_activity_types where project_id = ?)", projectId)
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_type where id in (select activity_type_id from project_activity_type where project_id = ?)", projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
 
 func (this *Db) getProjectActivityTypesRaw(trans *gorp.Transaction, projectId int) ([]ProjectActivityTypes, error) {
 	var projectActivityTypes []ProjectActivityTypes
-	_, err := trans.Select(&projectActivityTypes, "select * from projects_activity_types where project_id = ?", projectId)
+	_, err := trans.Select(&projectActivityTypes, "select * from project_activity_type where project_id = ?", projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -335,7 +335,7 @@ func (this *Db) DeleteActivityType(activityType *ActivityType) error {
 }
 
 func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
-	exists, err := this.dbMap.SelectInt("select exists(select id from activities where activity_type_id = ?)", id)
+	exists, err := this.dbMap.SelectInt("select exists(select id from activity where activity_type_id = ?)", id)
 	if err != nil {
 		return false, err
 	}
@@ -345,7 +345,7 @@ func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
 
 func (this *Db) GetProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
 	sql := "select pat.*, p.title project_title, at.title activity_type_title " +
-		"from projects_activity_types pat, projects p, activity_types at " +
+		"from project_activity_type pat, project p, activity_type at " +
 		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
 		"order by p.title, at.title"
 
