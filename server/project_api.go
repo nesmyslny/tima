@@ -2,15 +2,15 @@ package server
 
 import "net/http"
 
-type ProjectsApi struct {
+type ProjectApi struct {
 	db *Db
 }
 
-func NewProjectsApi(db *Db) *ProjectsApi {
-	return &ProjectsApi{db}
+func NewProjectApi(db *Db) *ProjectApi {
+	return &ProjectApi{db}
 }
 
-func (this *ProjectsApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ProjectApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -23,7 +23,7 @@ func (this *ProjectsApi) GetHandler(w http.ResponseWriter, r *http.Request, user
 	return project, nil
 }
 
-func (this *ProjectsApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ProjectApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	projects, err := this.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
@@ -31,7 +31,7 @@ func (this *ProjectsApi) GetListHandler(w http.ResponseWriter, r *http.Request, 
 	return projects, nil
 }
 
-func (this *ProjectsApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ProjectApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var project Project
 	err := unmarshalJson(r.Body, &project)
 	if err != nil {
@@ -49,7 +49,7 @@ func (this *ProjectsApi) SaveHandler(w http.ResponseWriter, r *http.Request, use
 	return jsonResultInt(project.Id)
 }
 
-func (this *ProjectsApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ProjectApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -67,7 +67,7 @@ func (this *ProjectsApi) DeleteHandler(w http.ResponseWriter, r *http.Request, u
 	return jsonResultBool(true)
 }
 
-func (this *ProjectsApi) get(id int) (*Project, error) {
+func (this *ProjectApi) get(id int) (*Project, error) {
 	project, err := this.db.GetProject(id)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (this *ProjectsApi) get(id int) (*Project, error) {
 	return project, nil
 }
 
-func (this *ProjectsApi) getList() ([]Project, error) {
+func (this *ProjectApi) getList() ([]Project, error) {
 	projects, err := this.db.GetProjects()
 	if err != nil {
 		return nil, err
@@ -83,11 +83,11 @@ func (this *ProjectsApi) getList() ([]Project, error) {
 	return projects, nil
 }
 
-func (this *ProjectsApi) save(project *Project) error {
+func (this *ProjectApi) save(project *Project) error {
 	return this.db.SaveProject(project)
 }
 
-func (this *ProjectsApi) delete(id int) error {
+func (this *ProjectApi) delete(id int) error {
 	isReferenced, err := this.db.IsProjectReferenced(id)
 	if err != nil {
 		return err

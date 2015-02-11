@@ -22,12 +22,12 @@ type ActivityType struct {
 	Title string `db:"title" json:"title"`
 }
 
-type ProjectActivityTypes struct {
+type ProjectActivityType struct {
 	ProjectId      int `db:"project_id"`
 	ActivityTypeId int `db:"activity_type_id"`
 }
 
-type ProjectActivityTypesView struct {
+type ProjectActivityTypeView struct {
 	ProjectId         int    `db:"project_id" json:"projectId"`
 	ActivityTypeId    int    `db:"activity_type_id" json:"activityTypeId"`
 	ProjectTitle      string `db:"project_title" json:"projectTitle"`

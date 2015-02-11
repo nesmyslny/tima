@@ -2,15 +2,15 @@ package server
 
 import "net/http"
 
-type ActivityTypesApi struct {
+type ActivityTypeApi struct {
 	db *Db
 }
 
-func NewActivityTypesApi(db *Db) *ActivityTypesApi {
-	return &ActivityTypesApi{db}
+func NewActivityTypeApi(db *Db) *ActivityTypeApi {
+	return &ActivityTypeApi{db}
 }
 
-func (this *ActivityTypesApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityTypeApi) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -23,7 +23,7 @@ func (this *ActivityTypesApi) GetHandler(w http.ResponseWriter, r *http.Request,
 	return activityType, nil
 }
 
-func (this *ActivityTypesApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityTypeApi) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	activityTypes, err := this.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve activity types", http.StatusInternalServerError}
@@ -31,15 +31,15 @@ func (this *ActivityTypesApi) GetListHandler(w http.ResponseWriter, r *http.Requ
 	return activityTypes, nil
 }
 
-func (this *ActivityTypesApi) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	list, err := this.getProjectActivityTypesView()
+func (this *ActivityTypeApi) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	list, err := this.getProjectActivityTypeViewList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects/activities", http.StatusInternalServerError}
 	}
 	return list, nil
 }
 
-func (this *ActivityTypesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityTypeApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activityType ActivityType
 	err := unmarshalJson(r.Body, &activityType)
 	if err != nil {
@@ -53,7 +53,7 @@ func (this *ActivityTypesApi) SaveHandler(w http.ResponseWriter, r *http.Request
 	return jsonResultInt(activityType.Id)
 }
 
-func (this *ActivityTypesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityTypeApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -71,7 +71,7 @@ func (this *ActivityTypesApi) DeleteHandler(w http.ResponseWriter, r *http.Reque
 	return jsonResultBool(true)
 }
 
-func (this *ActivityTypesApi) get(id int) (*ActivityType, error) {
+func (this *ActivityTypeApi) get(id int) (*ActivityType, error) {
 	activityType, err := this.db.GetActivityType(id)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (this *ActivityTypesApi) get(id int) (*ActivityType, error) {
 	return activityType, nil
 }
 
-func (this *ActivityTypesApi) getList() ([]ActivityType, error) {
+func (this *ActivityTypeApi) getList() ([]ActivityType, error) {
 	activityTypes, err := this.db.GetActivityTypes()
 	if err != nil {
 		return nil, err
@@ -87,11 +87,11 @@ func (this *ActivityTypesApi) getList() ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (this *ActivityTypesApi) save(activityType *ActivityType) error {
+func (this *ActivityTypeApi) save(activityType *ActivityType) error {
 	return this.db.SaveActivityType(activityType)
 }
 
-func (this *ActivityTypesApi) delete(id int) error {
+func (this *ActivityTypeApi) delete(id int) error {
 	isReferenced, err := this.db.IsActivityTypeReferenced(id)
 	if err != nil {
 		return err
@@ -112,6 +112,6 @@ func (this *ActivityTypesApi) delete(id int) error {
 	return nil
 }
 
-func (this *ActivityTypesApi) getProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
-	return this.db.GetProjectActivityTypesView()
+func (this *ActivityTypeApi) getProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
+	return this.db.GetProjectActivityTypeViewList()
 }

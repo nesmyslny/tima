@@ -37,7 +37,7 @@ func NewDb(connectionString string) *Db {
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "Id")
-	dbAccess.dbMap.AddTableWithName(ProjectActivityTypes{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
+	dbAccess.dbMap.AddTableWithName(ProjectActivityType{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activity").SetKeys(true, "Id")
 
 	return dbAccess
@@ -246,8 +246,8 @@ func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (this *Db) getProjectActivityTypesRaw(trans *gorp.Transaction, projectId int) ([]ProjectActivityTypes, error) {
-	var projectActivityTypes []ProjectActivityTypes
+func (this *Db) getProjectActivityTypesRaw(trans *gorp.Transaction, projectId int) ([]ProjectActivityType, error) {
+	var projectActivityTypes []ProjectActivityType
 	_, err := trans.Select(&projectActivityTypes, "select * from project_activity_type where project_id = ?", projectId)
 	if err != nil {
 		return nil, err
@@ -271,7 +271,7 @@ func (this *Db) addProjectActivityTypes(trans *gorp.Transaction, project *Projec
 		}
 
 		if addItem {
-			err = trans.Insert(&ProjectActivityTypes{project.Id, activityType.Id})
+			err = trans.Insert(&ProjectActivityType{project.Id, activityType.Id})
 			if err != nil {
 				return err
 			}
@@ -343,13 +343,13 @@ func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
 	return exists == 1, nil
 }
 
-func (this *Db) GetProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
+func (this *Db) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
 	sql := "select pat.*, p.title project_title, at.title activity_type_title " +
 		"from project_activity_type pat, project p, activity_type at " +
 		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
 		"order by p.title, at.title"
 
-	var list []ProjectActivityTypesView
+	var list []ProjectActivityTypeView
 	_, err := this.dbMap.Select(&list, sql)
 	if err != nil {
 		return nil, err

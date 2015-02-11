@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-type ActivitiesApi struct {
+type ActivityApi struct {
 	db *Db
 }
 
-func NewActivitiesApi(db *Db) *ActivitiesApi {
-	return &ActivitiesApi{db}
+func NewActivityApi(db *Db) *ActivityApi {
+	return &ActivityApi{db}
 }
 
-func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityApi) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	day, err := getRouteVarTime(r, "day", "2006-01-02")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -26,7 +26,7 @@ func (this *ActivitiesApi) GetByDayHandler(w http.ResponseWriter, r *http.Reques
 	return activities, nil
 }
 
-func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityApi) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	var activity Activity
 	err := unmarshalJson(r.Body, &activity)
 	if err != nil {
@@ -40,7 +40,7 @@ func (this *ActivitiesApi) SaveHandler(w http.ResponseWriter, r *http.Request, u
 	return jsonResultBool(true)
 }
 
-func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (this *ActivityApi) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	id, err := getRouteVarInt(r, "id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
@@ -54,7 +54,7 @@ func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request,
 	return jsonResultBool(true)
 }
 
-func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]ActivityView, error) {
+func (this *ActivityApi) getByDay(userId int, day time.Time) ([]ActivityView, error) {
 	activities, err := this.db.GetActivitiesByDay(userId, day)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]ActivityView, 
 	return activities, nil
 }
 
-func (this *ActivitiesApi) save(activity *Activity) error {
+func (this *ActivityApi) save(activity *Activity) error {
 	var err error
 	var existingActivity *Activity
 
@@ -81,7 +81,7 @@ func (this *ActivitiesApi) save(activity *Activity) error {
 	return this.db.SaveActivity(activity)
 }
 
-func (this *ActivitiesApi) delete(id int) error {
+func (this *ActivityApi) delete(id int) error {
 	activity, err := this.db.GetActivity(id)
 	if err != nil {
 		return err
