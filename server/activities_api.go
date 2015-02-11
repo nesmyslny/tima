@@ -54,28 +54,12 @@ func (this *ActivitiesApi) DeleteHandler(w http.ResponseWriter, r *http.Request,
 	return jsonResultBool(true)
 }
 
-func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]Activity, error) {
+func (this *ActivitiesApi) getByDay(userId int, day time.Time) ([]ActivityView, error) {
 	activities, err := this.db.GetActivitiesByDay(userId, day)
 	if err != nil {
 		return nil, err
 	}
-	err = this.setProjectTitle(activities)
-	if err != nil {
-		return nil, err
-	}
 	return activities, nil
-}
-
-func (this *ActivitiesApi) setProjectTitle(activities []Activity) error {
-	for i := 0; i < len(activities); i++ {
-		projectId := activities[i].ProjectId
-		project, err := this.db.GetProject(projectId)
-		if err != nil {
-			return err
-		}
-		activities[i].ProjectTitle = project.Title
-	}
-	return nil
 }
 
 func (this *ActivitiesApi) save(activity *Activity) error {
@@ -83,7 +67,7 @@ func (this *ActivitiesApi) save(activity *Activity) error {
 	var existingActivity *Activity
 
 	if activity.Id == -1 {
-		existingActivity, err = this.db.TryGetActivity(activity.Day, activity.UserId, activity.ProjectId)
+		existingActivity, err = this.db.TryGetActivity(activity.Day, activity.UserId, activity.ProjectId, activity.ActivityTypeId)
 		if err != nil {
 			return err
 		}

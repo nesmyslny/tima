@@ -36,6 +36,8 @@ func NewDb(connectionString string) *Db {
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "users").SetKeys(true, "Id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "projects").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_types").SetKeys(true, "Id")
+	dbAccess.dbMap.AddTableWithName(ProjectActivityTypes{}, "projects_activity_types").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activities").SetKeys(true, "Id")
 
 	return dbAccess
@@ -86,11 +88,15 @@ func (this *Db) SaveUser(user *User) error {
 	return err
 }
 
-func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]Activity, error) {
-	var activities []Activity
-	_, err := this.dbMap.Select(&activities,
-		"select * from activities where user_id = ? and day = ? order by duration desc",
-		userId, day.Format(dateLayout))
+func (this *Db) GetActivitiesByDay(userId int, day time.Time) ([]ActivityView, error) {
+	sql := "select a.*, p.title project_title, at.title activity_type_title " +
+		"from activities a, projects p, activity_types at " +
+		"where a.project_id = p.id and a.activity_type_id = at.id " +
+		"and user_id = ? and day = ? " +
+		"order by duration desc"
+
+	var activities []ActivityView
+	_, err := this.dbMap.Select(&activities, sql, userId, day.Format(dateLayout))
 	if err != nil {
 		return nil, err
 	}
@@ -115,11 +121,11 @@ func (this *Db) SaveActivity(activity *Activity) error {
 	return err
 }
 
-func (this *Db) TryGetActivity(day time.Time, userId int, projectId int) (*Activity, error) {
+func (this *Db) TryGetActivity(day time.Time, userId int, projectId int, activityTypeId int) (*Activity, error) {
 	var activity *Activity
 	err := this.dbMap.SelectOne(&activity,
-		"select * from activities where user_id = ? and day = ? and project_id = ?",
-		userId, day.Format(dateLayout), projectId)
+		"select * from activities where user_id = ? and day = ? and project_id = ? and activity_type_id = ?",
+		userId, day.Format(dateLayout), projectId, activityTypeId)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -155,7 +161,14 @@ func (this *Db) GetProject(id int) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	return obj.(*Project), nil
+
+	project := obj.(*Project)
+	project.ActivityTypes, err = this.getProjectActivityTypes(project.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
 }
 
 func (this *Db) GetProjects() ([]Project, error) {
@@ -168,13 +181,34 @@ func (this *Db) GetProjects() ([]Project, error) {
 }
 
 func (this *Db) SaveProject(project *Project) error {
-	var err error
-	if project.Id < 0 {
-		err = this.dbMap.Insert(project)
-	} else {
-		_, err = this.dbMap.Update(project)
+	trans, err := this.dbMap.Begin()
+	if err != nil {
+		return err
 	}
-	return err
+
+	if project.Id < 0 {
+		err = trans.Insert(project)
+	} else {
+		_, err = trans.Update(project)
+	}
+	if err != nil {
+		trans.Rollback()
+		return err
+	}
+
+	err = this.deleteProjectActivityTypes(trans, project)
+	if err != nil {
+		trans.Rollback()
+		return err
+	}
+
+	err = this.addProjectActivityTypes(trans, project)
+	if err != nil {
+		trans.Rollback()
+		return err
+	}
+
+	return trans.Commit()
 }
 
 func (this *Db) DeleteProject(project *Project) error {
@@ -184,4 +218,141 @@ func (this *Db) DeleteProject(project *Project) error {
 	}
 
 	return nil
+}
+
+func (this *Db) GetActivityType(id int) (*ActivityType, error) {
+	obj, err := this.dbMap.Get(ActivityType{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*ActivityType), nil
+}
+
+func (this *Db) GetActivityTypes() ([]ActivityType, error) {
+	var activityTypes []ActivityType
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types order by title")
+	if err != nil {
+		return nil, err
+	}
+	return activityTypes, nil
+}
+
+func (this *Db) getProjectActivityTypes(projectId int) ([]ActivityType, error) {
+	var activityTypes []ActivityType
+	_, err := this.dbMap.Select(&activityTypes, "select * from activity_types where id in (select activity_type_id from projects_activity_types where project_id = ?)", projectId)
+	if err != nil {
+		return nil, err
+	}
+	return activityTypes, nil
+}
+
+func (this *Db) getProjectActivityTypesRaw(trans *gorp.Transaction, projectId int) ([]ProjectActivityTypes, error) {
+	var projectActivityTypes []ProjectActivityTypes
+	_, err := trans.Select(&projectActivityTypes, "select * from projects_activity_types where project_id = ?", projectId)
+	if err != nil {
+		return nil, err
+	}
+	return projectActivityTypes, nil
+}
+
+func (this *Db) addProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+	projectActivityTypes, err := this.getProjectActivityTypesRaw(trans, project.Id)
+	if err != nil {
+		return err
+	}
+
+	for _, activityType := range project.ActivityTypes {
+		addItem := true
+		for _, projectActivityType := range projectActivityTypes {
+			if projectActivityType.ActivityTypeId == activityType.Id {
+				addItem = false
+				break
+			}
+		}
+
+		if addItem {
+			err = trans.Insert(&ProjectActivityTypes{project.Id, activityType.Id})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (this *Db) deleteProjectActivityTypes(trans *gorp.Transaction, project *Project) error {
+	projectActivityTypes, err := this.getProjectActivityTypesRaw(trans, project.Id)
+	if err != nil {
+		return err
+	}
+
+	for _, projectActivityType := range projectActivityTypes {
+		deleteItem := true
+		for _, activityType := range project.ActivityTypes {
+			if activityType.Id == projectActivityType.ActivityTypeId {
+				deleteItem = false
+				break
+			}
+		}
+
+		if deleteItem {
+			isReferenced, err := this.IsActivityTypeReferenced(projectActivityType.ActivityTypeId)
+			if err != nil {
+				return err
+			}
+			if isReferenced {
+				return ErrItemInUse
+			}
+
+			_, err = trans.Delete(&projectActivityType)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (this *Db) SaveActivityType(activityType *ActivityType) error {
+	var err error
+	if activityType.Id < 0 {
+		err = this.dbMap.Insert(activityType)
+	} else {
+		_, err = this.dbMap.Update(activityType)
+	}
+	return err
+}
+
+func (this *Db) DeleteActivityType(activityType *ActivityType) error {
+	_, err := this.dbMap.Delete(activityType)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this *Db) IsActivityTypeReferenced(id int) (bool, error) {
+	exists, err := this.dbMap.SelectInt("select exists(select id from activities where activity_type_id = ?)", id)
+	if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
+}
+
+func (this *Db) GetProjectActivityTypesView() ([]ProjectActivityTypesView, error) {
+	sql := "select pat.*, p.title project_title, at.title activity_type_title " +
+		"from projects_activity_types pat, projects p, activity_types at " +
+		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
+		"order by p.title, at.title"
+
+	var list []ProjectActivityTypesView
+	_, err := this.dbMap.Select(&list, sql)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }

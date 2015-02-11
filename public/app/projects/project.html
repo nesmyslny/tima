@@ -7,10 +7,40 @@
 
 <form name="formProject" class="form-horizontal" role="form" ng-submit="save()" novalidate>
     <div class="row form-group" show-errors>
-        <label for="title" class="col-md-1 control-label">Title</label>
-        <div class="col-md-7">
+        <label for="title" class="col-md-2 control-label">Title</label>
+        <div class="col-md-6">
             <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" required />
         </div>
+    </div>
+
+    <div class="row form-group">
+        <label for="" class="col-md-2 control-label">Activity types</label>
+        <div class="col-md-5">
+            <ui-select name="activityType" id="activityType" ng-model="selectedActivityType.selected">
+                <ui-select-match placeholder="select an activity type">{{$select.selected.title}}</ui-select-match>
+                <ui-select-choices repeat="at in activityTypes | propsFilter: {title: $select.search}">
+                    <div ng-bind-html="at.title | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-default" ng-click="addActivityType()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-6">
+            <ul class="list-group">
+                <li class="list-group-item admin-list-item" ng-repeat="at in project.activityTypes" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
+                    <span>{{at.title}}</span>
+                    <div class="pull-right btn-admin-list-item" role="group">
+                        <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="deleteActivityType(at)"><i class="fa fa-times"></i></button>
+                    </div>
+                    <div class="clearfix"></div>
+                </li>
+            </ul>
+        </div>
+
     </div>
     <div class="row">
         <div class="col-md-8">

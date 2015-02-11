@@ -76,10 +76,10 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        getProjects: function() {
+        getProjectActivityList: function() {
             var deferred = $q.defer();
 
-            $http.get('/projects')
+            $http.get('/projectActivityTypes')
             .success(function(data) {
                 deferred.resolve(data);
             })
@@ -121,12 +121,13 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
             return deferred.promise;
         },
 
-        createNew: function(day, userId, projectId, hours, minutes) {
+        createNew: function(day, userId, projectId, activityTypeId, hours, minutes) {
             return {
                 id: -1,
                 day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
                 userId: userId,
                 projectId: projectId,
+                activityTypeId: activityTypeId,
                 duration: service.calculateDuration(hours, minutes)
             };
         },
