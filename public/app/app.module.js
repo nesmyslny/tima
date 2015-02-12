@@ -11,39 +11,39 @@ angular
     $routeProvider
     .when('/signin', {
         templateUrl: 'app/signin/signin.html',
-        controller: 'signinController'
+        controller: 'SigninController'
     })
     .when('/activities/:day', {
-        templateUrl: 'app/activities/activities.html',
-        controller: 'activitiesController',
+        templateUrl: 'app/activity/activityDay.html',
+        controller: 'ActivityController',
         resolve: {
             signedIn: checkSignedIn
         }
     })
     .when('/projects', {
-        templateUrl: 'app/projects/projectList.html',
-        controller: 'projectListController',
+        templateUrl: 'app/project/projectList.html',
+        controller: 'ProjectListController',
         resolve: {
             signedIn: checkSignedIn
         }
     })
     .when('/projects/:id', {
-        templateUrl: 'app/projects/project.html',
-        controller: 'projectController',
+        templateUrl: 'app/project/project.html',
+        controller: 'ProjectController',
         resolve: {
             signedIn: checkSignedIn
         }
     })
     .when('/activityTypes', {
-        templateUrl: 'app/activityTypes/activityTypeList.html',
-        controller: 'activityTypeListController',
+        templateUrl: 'app/activityType/activityTypeList.html',
+        controller: 'ActivityTypeListController',
         resolve: {
             signedIn: checkSignedIn
         }
     })
     .when('/activityTypes/:id', {
-        templateUrl: 'app/activityTypes/activityType.html',
-        controller: 'activityTypeController',
+        templateUrl: 'app/activityType/activityType.html',
+        controller: 'ActivityTypeController',
         resolve: {
             signedIn: checkSignedIn
         }

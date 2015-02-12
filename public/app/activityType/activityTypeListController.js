@@ -1,4 +1,6 @@
-angular.module('tima').controller('activityTypeListController', ['$scope','ActivityType', 'messageService', 'popupService', function ($scope, ActivityType, messageService, popupService) {
+angular.module('tima').controller('ActivityTypeListController',
+['$scope','ActivityType', 'messageService', 'popupService',
+function ($scope, ActivityType, messageService, popupService) {
 
     $scope.activityTypes = [];
 

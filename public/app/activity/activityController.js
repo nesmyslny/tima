@@ -1,4 +1,6 @@
-angular.module('tima').controller('activitiesController', ['activitiesService', '$scope', '$routeParams', '$location', 'authService', function (activitiesService, $scope, $routeParams, $location, authService) {
+angular.module('tima').controller('ActivityController',
+['activityService', '$scope', '$routeParams', '$location', 'authService',
+function (activityService, $scope, $routeParams, $location, authService) {
 
     $scope.day = $routeParams.day;
     $scope.dayHeader = moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
@@ -19,7 +21,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.list = function() {
-        var promise = activitiesService.refresh($scope.day, $scope.activities);
+        var promise = activityService.refresh($scope.day, $scope.activities);
         promise.then(function(data) {
             $scope.totalDuration = data.minutes;
             $scope.durationHeader = data.formatted;
@@ -28,7 +30,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     $scope.list();
 
     $scope.fetchProjectActivityList = function() {
-        activitiesService.getProjectActivityList().then(function(data) {
+        activityService.getProjectActivityList().then(function(data) {
             $scope.projectActivityList = data;
             $scope.projectActivityList.forEach(function(item) {
                 item.text = item.projectTitle + ": " + item.activityTypeTitle;
@@ -43,7 +45,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             return;
         }
 
-        var activity = activitiesService.createNew(
+        var activity = activityService.createNew(
             $scope.day,
             authService.getUser().id,
             $scope.formData.projectActivity.selected.projectId,
@@ -52,7 +54,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             $scope.formData.minutes
         );
 
-        activitiesService.save(activity).then(function() {
+        activityService.save(activity).then(function() {
             $scope.list();
         });
 
@@ -65,14 +67,14 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.delete = function(id) {
-        activitiesService.delete(id).then(function() {
+        activityService.delete(id).then(function() {
             $scope.list();
         });
     };
 
     $scope.changeDuration = function(activity) {
-        activity.duration = activitiesService.calculateDuration(activity.durationHours, activity.durationMinutes);
-        activitiesService.save(activity).then(function() {
+        activity.duration = activityService.calculateDuration(activity.durationHours, activity.durationMinutes);
+        activityService.save(activity).then(function() {
             $scope.list();
         });
     };

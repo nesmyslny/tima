@@ -1,4 +1,6 @@
-angular.module('tima').controller('activityTypeController', ['$scope', '$routeParams', '$location', 'ActivityType', function ($scope, $routeParams, $location, ActivityType) {
+angular.module('tima').controller('ActivityTypeController',
+['$scope', '$routeParams', '$location', 'ActivityType',
+function ($scope, $routeParams, $location, ActivityType) {
 
     $scope.activityType = {
         id: -1,

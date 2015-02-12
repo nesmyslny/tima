@@ -1,4 +1,6 @@
-angular.module('tima').controller('projectListController', ['$scope', 'Project', 'popupService', function ($scope, Project, popupService) {
+angular.module('tima').controller('ProjectListController',
+['$scope', 'Project', 'popupService',
+function ($scope, Project, popupService) {
 
     $scope.projects = [];
 

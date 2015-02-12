@@ -1,4 +1,6 @@
-angular.module('tima').factory('activitiesService', ['$filter', 'Activity', 'ProjectActivityType', function($filter, Activity, ProjectActivityType) {
+angular.module('tima').factory('activityService',
+['$filter', 'Activity', 'ProjectActivityType',
+function($filter, Activity, ProjectActivityType) {
 
     function removeDeletedActivities(source, dest) {
         dest.forEach(function(activity) {

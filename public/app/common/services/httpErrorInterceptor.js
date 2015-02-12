@@ -1,4 +1,6 @@
-angular.module('tima').factory('httpErrorInterceptor', ['$q', '$injector', 'messageService', function ($q, $injector, messageService) {
+angular.module('tima').factory('httpErrorInterceptor',
+['$q', '$injector', 'messageService',
+function ($q, $injector, messageService) {
     return {
         responseError: function (response) {
             if (response.status == 401) {

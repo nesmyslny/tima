@@ -1,4 +1,6 @@
-angular.module('tima').factory('httpAuthInterceptor', ['$q', '$injector', 'sessionService', function ($q, $injector, sessionService) {
+angular.module('tima').factory('httpAuthInterceptor',
+['sessionService',
+function (sessionService) {
     return {
         request: function (config) {
             config.headers = config.headers || {};

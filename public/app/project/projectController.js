@@ -1,4 +1,6 @@
-angular.module('tima').controller('projectController', ['$scope', '$routeParams', '$location', 'Project', 'ActivityType', function ($scope, $routeParams, $location, Project, ActivityType) {
+angular.module('tima').controller('ProjectController',
+['$scope', '$routeParams', '$location', 'Project', 'ActivityType',
+function ($scope, $routeParams, $location, Project, ActivityType) {
 
     $scope.project = {
         id: -1,

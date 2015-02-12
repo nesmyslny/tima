@@ -1,59 +1,62 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="tima">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>tima</title>
+    <title>tima</title>
 
-        <link href="lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-        <link href="lib/bootstrap/dist/css/bootstrap-theme.css" rel="stylesheet">
-        <link href="lib/font-awesome/css/font-awesome.css" rel="stylesheet">
-        <link href="lib/angular-ui-select/dist/select.css" rel="stylesheet">
-        <link href="assets/css/tima.css" rel="stylesheet">
+    <link href="lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="lib/bootstrap/dist/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="lib/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="lib/angular-ui-select/dist/select.css" rel="stylesheet">
+    <link href="assets/css/tima.css" rel="stylesheet">
 
-        <script src="lib/jquery/dist/jquery.js"></script>
-        <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="lib/angular/angular.js"></script>
-        <script src="lib/angular-route/angular-route.js"></script>
-        <script src="lib/angular-sanitize/angular-sanitize.js"></script>
-        <script src="lib/angular-resource/angular-resource.js"></script>
-        <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-        <script src="lib/angular-bootstrap-show-errors/src/showErrors.js"></script>
-        <script src="lib/jwt-decode/build/jwt-decode.js"></script>
-        <script src="lib/moment/moment.js"></script>
-        <script src="lib/angular-ui-select/dist/select.js"></script>
+</head>
+<body>
+    <div ng-include="'app/navbar/navbar.html'"></div>
+    <div class="container">
+        <div global-messages class="global-messages-container"></div>
+        <div ng-view></div>
+    </div>
+    <hr />
 
-        <script src="app/app.module.js"></script>
-        <script src="app/signin/signinController.js"></script>
-        <script src="app/navbar/navbarController.js"></script>
-        <script src="app/activities/activity.js"></script>
-        <script src="app/activities/projectActivityType.js"></script>
-        <script src="app/activities/activitiesController.js"></script>
-        <script src="app/activities/activitiesService.js"></script>
-        <script src="app/projects/project.js"></script>
-        <script src="app/projects/projectListController.js"></script>
-        <script src="app/projects/projectController.js"></script>
-        <script src="app/activityTypes/activityType.js"></script>
-        <script src="app/activityTypes/activityTypeListController.js"></script>
-        <script src="app/activityTypes/activityTypeController.js"></script>
-        <script src="app/common/httpAuthInterceptor.js"></script>
-        <script src="app/common/httpErrorInterceptor.js"></script>
-        <script src="app/common/authService.js"></script>
-        <script src="app/common/sessionService.js"></script>
-        <script src="app/common/messageService.js"></script>
-        <script src="app/common/filters.js"></script>
-        <script src="app/common/timaMessageDirective.js"></script>
-        <script src="app/common/popupController.js"></script>
-        <script src="app/common/popupService.js"></script>
-    </head>
-    <body>
-        <div ng-include="'app/navbar/navbar.html'"></div>
-        <div class="container">
-            <div tima-messages class="tima-messages-container"></div>
-            <div ng-view></div>
-        </div>
-        <hr />
-    </body>
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular-route/angular-route.js"></script>
+    <script src="lib/angular-sanitize/angular-sanitize.js"></script>
+    <script src="lib/angular-resource/angular-resource.js"></script>
+    <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="lib/angular-bootstrap-show-errors/src/showErrors.js"></script>
+    <script src="lib/jwt-decode/build/jwt-decode.js"></script>
+    <script src="lib/moment/moment.js"></script>
+    <script src="lib/angular-ui-select/dist/select.js"></script>
+
+    <script src="app/app.module.js"></script>
+    <script src="app/common/services/httpAuthInterceptor.js"></script>
+    <script src="app/common/services/httpErrorInterceptor.js"></script>
+    <script src="app/common/services/authService.js"></script>
+    <script src="app/common/services/sessionService.js"></script>
+    <script src="app/common/services/messageService.js"></script>
+    <script src="app/common/filters/propsFilter.js"></script>
+    <script src="app/common/filters/startFromFilter.js"></script>
+    <script src="app/common/directives/globalMessageDirective.js"></script>
+    <script src="app/popup/popupController.js"></script>
+    <script src="app/popup/popupService.js"></script>
+    <script src="app/signin/signinController.js"></script>
+    <script src="app/navbar/navbarController.js"></script>
+    <script src="app/activity/activity.js"></script>
+    <script src="app/activity/projectActivityType.js"></script>
+    <script src="app/activity/activityController.js"></script>
+    <script src="app/activity/activityService.js"></script>
+    <script src="app/project/project.js"></script>
+    <script src="app/project/projectListController.js"></script>
+    <script src="app/project/projectController.js"></script>
+    <script src="app/activityType/activityType.js"></script>
+    <script src="app/activityType/activityTypeListController.js"></script>
+    <script src="app/activityType/activityTypeController.js"></script>
+
+</body>
 </html>

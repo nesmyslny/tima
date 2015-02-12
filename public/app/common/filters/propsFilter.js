@@ -1,4 +1,5 @@
-angular.module('tima').filter('propsFilter', function() {
+angular.module('tima').filter('propsFilter',
+function() {
     return function(items, props) {
         var out = [];
 
@@ -26,15 +27,5 @@ angular.module('tima').filter('propsFilter', function() {
         }
 
         return out;
-    };
-});
-
-angular.module('tima').filter('startFrom', function() {
-    return function(input, start) {
-        if (input) {
-            start = +start;	// parse to int
-            return input.slice(start);
-        }
-        return [];
     };
 });

@@ -1,4 +1,6 @@
-angular.module('tima').controller('signinController', ['$scope', 'authService', function ($scope, authService) {
+angular.module('tima').controller('SigninController',
+['$scope', 'authService',
+function ($scope, authService) {
     $scope.formData = {
         username: '',
         password: '',

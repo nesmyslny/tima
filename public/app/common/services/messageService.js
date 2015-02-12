@@ -1,4 +1,6 @@
-angular.module('tima').factory('messageService', ['$timeout', function($timeout) {
+angular.module('tima').factory('messageService',
+['$timeout',
+function($timeout) {
     var service = {
         messages: [],
 
