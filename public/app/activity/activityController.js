@@ -72,8 +72,7 @@ function (activityService, $scope, $routeParams, $location, authService) {
         });
     };
 
-    $scope.changeDuration = function(activity) {
-        activity.duration = activityService.calculateDuration(activity.durationHours, activity.durationMinutes);
+    $scope.save = function(activity) {
         activityService.save(activity).then(function() {
             $scope.list();
         });

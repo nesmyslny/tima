@@ -66,7 +66,7 @@
                                     <input type="number" class="form-control input-sm inline-act-time-sm" name="actMinutes" placeholder="Minutes" min="0" max="59" ng-model="a.durationMinutes" ng-required="!a.durationHours" />
                                 </div>
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default btn-sm" ng-click="changeDuration(a)" ng-disabled="formActivity.actHours.$invalid || formActivity.actMinutes.$invalid"><i class="fa fa-check fa-md"></i></button>
+                                    <button class="btn btn-default btn-sm" ng-click="save(a)" ng-disabled="formActivity.actHours.$invalid || formActivity.actMinutes.$invalid"><i class="fa fa-check fa-md"></i></button>
                                     <button class="btn btn-default btn-sm" ng-click="delete(a.id)"><i class="fa fa-remove fa-md"></i></button>
                                 </span>
                             </div>

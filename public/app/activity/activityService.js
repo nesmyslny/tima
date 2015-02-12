@@ -55,6 +55,10 @@ function($filter, Activity, ProjectActivityType) {
         return durationFormatted;
     }
 
+    function calculateDuration(hours, minutes) {
+        return hours * 60 + minutes;
+    }
+
     var service = {
         refresh: function(day, activities) {
             return Activity.query({day:day})
@@ -71,6 +75,7 @@ function($filter, Activity, ProjectActivityType) {
         },
 
         save: function(activity) {
+            activity.duration = calculateDuration(activity.durationHours, activity.durationMinutes);
             return Activity.save(activity).$promise;
         },
 
@@ -85,12 +90,9 @@ function($filter, Activity, ProjectActivityType) {
                 userId: userId,
                 projectId: projectId,
                 activityTypeId: activityTypeId,
-                duration: service.calculateDuration(hours, minutes)
+                durationHours: hours,
+                durationMinutes: minutes
             };
-        },
-
-        calculateDuration: function(hours, minutes) {
-            return hours * 60 + minutes;
         }
     };
 
