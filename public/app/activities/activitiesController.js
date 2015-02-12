@@ -21,15 +21,14 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     $scope.list = function() {
         var promise = activitiesService.refresh($scope.day, $scope.activities);
         promise.then(function(data) {
-            $scope.totalDuration = data.totalDuration.minutes;
-            $scope.durationHeader = data.totalDuration.formatted;
+            $scope.totalDuration = data.minutes;
+            $scope.durationHeader = data.formatted;
         });
     };
     $scope.list();
 
     $scope.fetchProjectActivityList = function() {
-        activitiesService.getProjectActivityList()
-        .then(function(data) {
+        activitiesService.getProjectActivityList().then(function(data) {
             $scope.projectActivityList = data;
             $scope.projectActivityList.forEach(function(item) {
                 item.text = item.projectTitle + ": " + item.activityTypeTitle;
@@ -53,8 +52,7 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
             $scope.formData.minutes
         );
 
-        activitiesService.save(activity)
-        .then(function() {
+        activitiesService.save(activity).then(function() {
             $scope.list();
         });
 
@@ -67,16 +65,14 @@ angular.module('tima').controller('activitiesController', ['activitiesService', 
     };
 
     $scope.delete = function(id) {
-        activitiesService.delete(id)
-        .then(function() {
+        activitiesService.delete(id).then(function() {
             $scope.list();
         });
     };
 
     $scope.changeDuration = function(activity) {
         activity.duration = activitiesService.calculateDuration(activity.durationHours, activity.durationMinutes);
-        activitiesService.save(activity)
-        .then(function() {
+        activitiesService.save(activity).then(function() {
             $scope.list();
         });
     };

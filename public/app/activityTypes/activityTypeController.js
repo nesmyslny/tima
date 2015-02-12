@@ -1,4 +1,4 @@
-angular.module('tima').controller('activityTypeController', ['$scope', '$http', '$routeParams', '$location', function ($scope, $http, $routeParams, $location) {
+angular.module('tima').controller('activityTypeController', ['$scope', '$routeParams', '$location', 'ActivityType', function ($scope, $routeParams, $location, ActivityType) {
 
     $scope.activityType = {
         id: -1,
@@ -9,10 +9,7 @@ angular.module('tima').controller('activityTypeController', ['$scope', '$http', 
         var id = parseInt($routeParams.id);
 
         if (id > -1) {
-            $http.get('/activityTypes/' + id)
-            .success(function(data, status, headers, config) {
-                $scope.activityType = data;
-            });
+            $scope.activityType = ActivityType.get({id:id});
         }
     };
     $scope.fetch();
@@ -23,8 +20,7 @@ angular.module('tima').controller('activityTypeController', ['$scope', '$http', 
             return;
         }
 
-        $http.post('/activityTypes', $scope.activityType)
-        .success(function(data, status, headers, config) {
+        ActivityType.save($scope.activityType, function() {
             $location.path('/activityTypes');
         });
     };

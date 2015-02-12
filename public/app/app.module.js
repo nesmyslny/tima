@@ -1,5 +1,5 @@
 angular
-.module('tima', ['ngRoute', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ngSanitize', 'ui.select'])
+.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ui.select'])
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', function($routeProvider, $httpProvider, uiSelectConfig) {
 
     uiSelectConfig.theme = 'bootstrap';
@@ -55,6 +55,7 @@ angular
         redirectTo: '/signin'
     });
 
-    $httpProvider.interceptors.push('authInterceptor');
+    $httpProvider.interceptors.push('httpAuthInterceptor');
+    $httpProvider.interceptors.push('httpErrorInterceptor');
 
 }]);
