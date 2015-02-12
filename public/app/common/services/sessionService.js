@@ -1,4 +1,6 @@
-angular.module('tima').factory('sessionService', ['$window', function($window) {
+angular.module('tima').factory('sessionService',
+['$window',
+function($window) {
     function getUserOrNull() {
         if ($window.sessionStorage.user) {
             return JSON.parse($window.sessionStorage.user);

@@ -1,4 +1,6 @@
-angular.module('tima').controller('projectController', ['$scope', '$http', '$routeParams', '$location', 'messageService', function ($scope, $http, $routeParams, $location, messageService) {
+angular.module('tima').controller('ProjectController',
+['$scope', '$routeParams', '$location', 'Project', 'ActivityType',
+function ($scope, $routeParams, $location, Project, ActivityType) {
 
     $scope.project = {
         id: -1,
@@ -13,19 +15,13 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
         var id = parseInt($routeParams.id);
 
         if (id > -1) {
-            $http.get('/projects/' + id)
-            .success(function(data, status, headers, config) {
-                $scope.project = data;
-            });
+            $scope.project = Project.get({id:id});
         }
     };
     $scope.fetch();
 
     $scope.list = function() {
-        $http.get('/activityTypes')
-        .success(function(data, status, headers, config) {
-            $scope.activityTypes = data;
-        });
+        $scope.activityTypes = ActivityType.query();
     };
     $scope.list();
 
@@ -57,12 +53,8 @@ angular.module('tima').controller('projectController', ['$scope', '$http', '$rou
             return;
         }
 
-        $http.post('/projects', $scope.project)
-        .success(function(data, status, headers, config) {
+        Project.save($scope.project, function() {
             $location.path('/projects');
-        })
-        .error(function(data, status) {
-            messageService.add('danger', data);
         });
     };
 

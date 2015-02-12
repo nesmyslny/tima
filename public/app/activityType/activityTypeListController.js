@@ -1,11 +1,11 @@
-angular.module('tima').controller('activityTypeListController', ['$scope', '$http', 'messageService', 'popupService', function ($scope, $http, messageService, popupService) {
+angular.module('tima').controller('ActivityTypeListController',
+['$scope','ActivityType', 'messageService', 'popupService',
+function ($scope, ActivityType, messageService, popupService) {
 
     $scope.activityTypes = [];
 
     $scope.list = function() {
-        $http.get('/activityTypes')
-        .success(function(data, status, headers, config) {
-            $scope.activityTypes = data;
+        $scope.activityTypes = ActivityType.query(function(data) {
             $scope.initializePagination();
         });
     };
@@ -14,12 +14,8 @@ angular.module('tima').controller('activityTypeListController', ['$scope', '$htt
     $scope.delete = function(id) {
         popupService.show('Delete Activity Type', 'Do you really want to delete this activity type?', 'Delete', 'Cancel')
         .result.then(function() {
-            $http.delete('/activityTypes/' + id)
-            .success(function() {
+            ActivityType.delete({id:id}, function() {
                 $scope.list();
-            })
-            .error(function(data, status) {
-                messageService.add('danger', data);
             });
         });
     };

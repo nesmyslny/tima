@@ -1,4 +1,6 @@
-angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', function($http, $q, $filter) {
+angular.module('tima').factory('activityService',
+['$filter', 'Activity', 'ProjectActivityType',
+function($filter, Activity, ProjectActivityType) {
 
     function removeDeletedActivities(source, dest) {
         dest.forEach(function(activity) {
@@ -55,70 +57,25 @@ angular.module('tima').factory('activitiesService', ['$http', '$q', '$filter', f
 
     var service = {
         refresh: function(day, activities) {
-            var deferred = $q.defer();
-
-            $http.get('/activities/' + day)
-            .success(function(data, status, headers, config) {
+            return Activity.query({day:day})
+            .$promise.then(function(data) {
                 removeDeletedActivities(data, activities);
                 mergeActivities(data, activities);
                 refreshActivitiesViewValues(activities);
-                var totalDuration = getTotalDuration(activities);
-
-                deferred.resolve({
-                    totalDuration: totalDuration
-                });
-            })
-            .error(function(data, status, header, config) {
-                // todo: error handling
-                deferred.reject(data, status);
+                return getTotalDuration(activities);
             });
-
-            return deferred.promise;
         },
 
         getProjectActivityList: function() {
-            var deferred = $q.defer();
-
-            $http.get('/projectActivityTypes')
-            .success(function(data) {
-                deferred.resolve(data);
-            })
-            .error(function(data, status) {
-                // todo: error handling
-                deferred.reject(data, status);
-            });
-
-            return deferred.promise;
+            return ProjectActivityType.query().$promise;
         },
 
         save: function(activity) {
-            var deferred = $q.defer();
-
-            $http.post('/activities', activity)
-            .success(function(data, status, headers, config) {
-                deferred.resolve();
-            })
-            .error(function(data, status, header, config) {
-                // todo: error handling
-                deferred.reject(data, status);
-            });
-
-            return deferred.promise;
+            return Activity.save(activity).$promise;
         },
 
         delete: function(id) {
-            var deferred = $q.defer();
-
-            $http.delete('/activities/' + id)
-            .success(function() {
-                deferred.resolve();
-            })
-            .error(function(data, status) {
-                // todo: error handling
-                deferred.reject(data, status);
-            });
-
-            return deferred.promise;
+            return Activity.delete({id:id}).$promise;
         },
 
         createNew: function(day, userId, projectId, activityTypeId, hours, minutes) {

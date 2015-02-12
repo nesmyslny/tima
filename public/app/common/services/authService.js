@@ -1,4 +1,6 @@
-angular.module('tima').factory('authService', ['$http', '$location', 'sessionService', function($http, $location, sessionService) {
+angular.module('tima').factory('authService',
+['$http', '$location', 'sessionService',
+function($http, $location, sessionService) {
     var service = {
         getUser: function() {
             return sessionService.user;
