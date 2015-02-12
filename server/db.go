@@ -204,6 +204,11 @@ func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivity
 	}
 
 	for _, addedActivityType := range addedActivityTypes {
+		// project id must be set, if it's a new project
+		if addedActivityType.ProjectID < 0 {
+			addedActivityType.ProjectID = project.ID
+		}
+
 		err = trans.Insert(&addedActivityType)
 		if err != nil {
 			trans.Rollback()
