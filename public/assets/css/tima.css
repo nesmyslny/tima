@@ -45,7 +45,7 @@
     width: 100px;
 }
 
-.form-inline > .input-group > .inline-act-time-sm {
+.form-inline .input-group .inline-act-time-sm {
     width: 55px;
 }
 
