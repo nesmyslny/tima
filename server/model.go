@@ -17,6 +17,13 @@ type Project struct {
 	ActivityTypes []ActivityType `db:"-" json:"activityTypes"`
 }
 
+type ProjectCategory struct {
+	ID                int               `db:"id" json:"id"`
+	ParentID          *int              `db:"parent_id" json:"parentId"`
+	Title             string            `db:"title" json:"title"`
+	ProjectCategories []ProjectCategory `db:"-" json:"projectCategories"`
+}
+
 type ActivityType struct {
 	ID    int    `db:"id" json:"id"`
 	Title string `db:"title" json:"title"`

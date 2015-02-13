@@ -34,6 +34,13 @@ angular
             signedIn: checkSignedIn
         }
     })
+    .when('/projectCategories', {
+        templateUrl: 'app/projectCategory/projectCategoryList.html',
+        controller: 'ProjectCategoryListController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
     .when('/activityTypes', {
         templateUrl: 'app/activityType/activityTypeList.html',
         controller: 'ActivityTypeListController',

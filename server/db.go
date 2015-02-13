@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/coopernurse/gorp"
@@ -311,4 +312,30 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 		return nil, err
 	}
 	return list, nil
+}
+
+func (db *DB) GetProjectCategories(parentID *int) ([]ProjectCategory, error) {
+	var projectCategories []ProjectCategory
+	const sqlTemplate string = "select * from project_category where parent_id %s order by title"
+	var err error
+
+	if parentID == nil {
+		sql := fmt.Sprintf(sqlTemplate, "is null")
+		_, err = db.dbMap.Select(&projectCategories, sql)
+	} else {
+		sql := fmt.Sprintf(sqlTemplate, "= ?")
+		_, err = db.dbMap.Select(&projectCategories, sql, *parentID)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	for i, cat := range projectCategories {
+		projectCategories[i].ProjectCategories, err = db.GetProjectCategories(&cat.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return projectCategories, nil
 }

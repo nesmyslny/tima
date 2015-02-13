@@ -1,0 +1,18 @@
+<div class="row margin-bottom-20">
+    <div class="col-md-12">
+        <h1>Project Categories</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <ul class="list-group">
+            <li class="list-group-item recursive-admin-list-item"
+                ng-repeat="pc in projectCategories"
+                ng-include="'app/projectCategory/projectCategoryListTemplate.html'"
+                ng-class="{'recursive-admin-list-item-hover': hasFocus(pc.id)}"
+                ng-mouseenter="focus(pc.id)" ng-mouseleave="focus(null)">
+            </li>
+        </ul>
+    </div>
+</div>

@@ -15,6 +15,7 @@ func main() {
 	auth := server.NewAuth()
 	userAPI := server.NewUserAPI(db, auth)
 	projectAPI := server.NewProjectAPI(db)
+	projectCategoryAPI := server.NewProjectCategoryAPI(db)
 	activityTypeAPI := server.NewActivityTypeAPI(db)
 	activityAPI := server.NewActivityAPI(db)
 	migrationAPI := server.NewMigrationAPI(db, userAPI)
@@ -35,6 +36,11 @@ func main() {
 	router.Handle("/projects/{id}", server.NewAuthHandler(projectAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/projects", server.NewAuthHandler(projectAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/projects/{id}", server.NewAuthHandler(projectAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+
+	router.Handle("/projectCategories", server.NewAuthHandler(projectCategoryAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projectCategories/{id}", server.NewAuthHandler(projectCategoryAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projectCategories", server.NewAuthHandler(projectCategoryAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
+	router.Handle("/projectCategories/{id}", server.NewAuthHandler(projectCategoryAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
 	router.Handle("/activityTypes", server.NewAuthHandler(activityTypeAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/activityTypes/{id}", server.NewAuthHandler(activityTypeAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
