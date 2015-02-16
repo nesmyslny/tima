@@ -37,6 +37,7 @@ func NewDB(connectionString string) *DB {
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id")
+	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(ProjectActivityType{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activity").SetKeys(true, "id")
@@ -338,4 +339,14 @@ func (db *DB) GetProjectCategories(parentID *int) ([]ProjectCategory, error) {
 	}
 
 	return projectCategories, nil
+}
+
+func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
+	var err error
+	if projectCategory.ID < 0 {
+		err = db.dbMap.Insert(projectCategory)
+	} else {
+		_, err = db.dbMap.Update(projectCategory)
+	}
+	return err
 }

@@ -30,14 +30,24 @@ func (projectCategoryAPI *ProjectCategoryAPI) GetActivityViewListHandler(w http.
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemted", http.StatusNotImplemented}
+	var projectCategory ProjectCategory
+	err := unmarshalJSON(r.Body, &projectCategory)
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	err = projectCategoryAPI.save(&projectCategory)
+	if err != nil {
+		return nil, &HandlerError{err, "Error: Project category could not be saved.", http.StatusInternalServerError}
+	}
+	return jsonResultInt(projectCategory.ID)
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	return nil, &HandlerError{errors.New("not implemented"), "not implemted", http.StatusNotImplemented}
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) get(id int) (*ActivityType, error) {
+func (projectCategoryAPI *ProjectCategoryAPI) get(id int) (*ProjectCategory, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -49,8 +59,8 @@ func (projectCategoryAPI *ProjectCategoryAPI) getList() ([]ProjectCategory, erro
 	return projectCategories, nil
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) save(activityType *ActivityType) error {
-	return errors.New("not implemented")
+func (projectCategoryAPI *ProjectCategoryAPI) save(projectCategory *ProjectCategory) error {
+	return projectCategoryAPI.db.SaveProjectCategory(projectCategory)
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) delete(id int) error {

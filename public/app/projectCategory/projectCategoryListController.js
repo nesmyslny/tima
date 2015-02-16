@@ -22,4 +22,53 @@ function ($scope, ProjectCategory, popupService) {
         projectCategory.isVisible = !projectCategory.isVisible;
     };
 
+    $scope.add = function(parent) {
+        var parentId = null;
+        var categories = $scope.projectCategories;
+        if (parent) {
+            parentId = parent.id;
+            categories = parent.projectCategories;
+        }
+
+        data = {
+            title: ""
+        };
+
+        popupService.showForm("Add Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Add", "Cancel")
+        .result.then(function() {
+            var category = {
+                id: -1,
+                parentId: parentId,
+                title: data.title,
+                projectCategories: []
+            };
+
+            ProjectCategory.save(category, function(response) {
+                category.id = response.intResult;
+                categories.push(category);
+
+                if (parent) {
+                    parent.isVisible = true;
+                }
+
+            });
+        });
+    };
+
+    $scope.edit = function(category) {
+        var data = {
+            id: category.id,
+            parentId: category.parentId,
+            title: category.title
+        };
+
+        popupService.showForm("Edit Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Save", "Cancel")
+        .result.then(function() {
+            ProjectCategory.save(data, function() {
+                // category.id = data.id;
+                category.title = data.title;
+            });
+        });
+    };
+
 }]);
