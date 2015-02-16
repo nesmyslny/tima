@@ -19,7 +19,7 @@ function ($scope, ProjectCategory, popupService) {
     };
 
     $scope.show = function(projectCategory) {
-        projectCategory.isVisible = !projectCategory.isVisible;
+        projectCategory.showChildren = !projectCategory.showChildren;
     };
 
     $scope.add = function(parent) {
@@ -48,7 +48,7 @@ function ($scope, ProjectCategory, popupService) {
                 categories.push(category);
 
                 if (parent) {
-                    parent.isVisible = true;
+                    parent.showChildren = true;
                 }
 
             });
@@ -65,7 +65,6 @@ function ($scope, ProjectCategory, popupService) {
         popupService.showForm("Edit Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Save", "Cancel")
         .result.then(function() {
             ProjectCategory.save(data, function() {
-                // category.id = data.id;
                 category.title = data.title;
             });
         });

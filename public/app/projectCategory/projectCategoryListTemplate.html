@@ -2,7 +2,7 @@
     <button class="btn btn-default btn-sm"
         ng-disabled="!pc.projectCategories.length"
         ng-click="show(pc)">
-        <i class="fa" ng-class="{'fa-chevron-right': !pc.isVisible, 'fa-chevron-down': pc.isVisible}"></i>
+        <i class="fa" ng-class="{'fa-chevron-right': !pc.showChildren, 'fa-chevron-down': pc.showChildren}"></i>
     </button>
 </div>
 
@@ -27,7 +27,7 @@
 </div>
 <div class="clearfix"></div>
 
-<ul class="list-group" ng-class="{'recursive-admin-list-hidden': !pc.isVisible}">
+<ul class="list-group" ng-class="{'recursive-admin-list-hidden': !pc.showChildren}">
     <li class="list-group-item recursive-admin-list-item"
         ng-repeat="pc in pc.projectCategories"
         ng-include="'app/projectCategory/projectCategoryListTemplate.html'"
