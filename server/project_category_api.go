@@ -1,9 +1,6 @@
 package server
 
-import (
-	"errors"
-	"net/http"
-)
+import "net/http"
 
 type ProjectCategoryAPI struct {
 	db *DB
@@ -13,20 +10,12 @@ func NewProjectCategoryAPI(db *DB) *ProjectCategoryAPI {
 	return &ProjectCategoryAPI{db}
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemted", http.StatusNotImplemented}
-}
-
 func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	projectCategories, err := projectCategoryAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
 	}
 	return projectCategories, nil
-}
-
-func (projectCategoryAPI *ProjectCategoryAPI) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemted", http.StatusNotImplemented}
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
@@ -44,11 +33,20 @@ func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(w http.ResponseWriter,
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemted", http.StatusNotImplemented}
-}
+	id, err := getRouteVarInt(r, "id")
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
 
-func (projectCategoryAPI *ProjectCategoryAPI) get(id int) (*ProjectCategory, error) {
-	return nil, errors.New("not implemented")
+	err = projectCategoryAPI.delete(id)
+	if err != nil {
+		if err == errItemInUse {
+			return nil, &HandlerError{err, "Error: This project category, or one of its descendants, is in use.", http.StatusBadRequest}
+		}
+		return nil, &HandlerError{err, "Error: Project category could not deleted.", http.StatusInternalServerError}
+	}
+
+	return jsonResultBool(true)
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) getList() ([]ProjectCategory, error) {
@@ -64,5 +62,22 @@ func (projectCategoryAPI *ProjectCategoryAPI) save(projectCategory *ProjectCateg
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) delete(id int) error {
-	return errors.New("not implemented")
+	isReferenced, err := projectCategoryAPI.db.IsProjectCategoryReferenced(id)
+	if err != nil {
+		return err
+	} else if isReferenced {
+		return errItemInUse
+	}
+
+	projectCatetory, err := projectCategoryAPI.db.GetProjectCategory(id)
+	if err != nil {
+		return err
+	}
+
+	err = projectCategoryAPI.db.DeleteProjectCategory(projectCatetory)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

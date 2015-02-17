@@ -341,6 +341,14 @@ func (db *DB) GetProjectCategories(parentID *int) ([]ProjectCategory, error) {
 	return projectCategories, nil
 }
 
+func (db *DB) GetProjectCategory(id int) (*ProjectCategory, error) {
+	obj, err := db.dbMap.Get(ProjectCategory{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*ProjectCategory), nil
+}
+
 func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 	var err error
 	if projectCategory.ID < 0 {
@@ -349,4 +357,18 @@ func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 		_, err = db.dbMap.Update(projectCategory)
 	}
 	return err
+}
+
+func (db *DB) DeleteProjectCategory(projectCategory *ProjectCategory) error {
+	_, err := db.dbMap.Delete(projectCategory)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) IsProjectCategoryReferenced(id int) (bool, error) {
+	// todo: check if this category, or any child (recursive) is in use.
+	return false, nil
 }

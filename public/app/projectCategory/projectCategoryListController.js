@@ -18,7 +18,7 @@ function ($scope, ProjectCategory, popupService) {
         return focusedCategoryId === id;
     };
 
-    $scope.show = function(projectCategory) {
+    $scope.showToggle = function(projectCategory) {
         projectCategory.showChildren = !projectCategory.showChildren;
     };
 
@@ -69,5 +69,42 @@ function ($scope, ProjectCategory, popupService) {
             });
         });
     };
+
+    $scope.delete = function(category) {
+        var categories = $scope.projectCategories;
+        var parent = findCategory(category.parentId, $scope.projectCategories);
+        if (parent) {
+            categories = parent.projectCategories;
+        }
+
+        popupService.show('Delete Project Category', 'Do you really want to delete this project category?', 'Delete', 'Cancel')
+        .result.then(function() {
+            ProjectCategory.delete({id:category.id}, function() {
+                var index = categories.indexOf(category);
+                categories.splice(index, 1);
+
+                if (parent && categories.length === 0) {
+                    parent.showChildren = false;
+                }
+            });
+        });
+    };
+
+    function findCategory(id, categories) {
+        if (id === null) {
+            return null;
+        }
+
+        for (var i = 0; i < categories.length; i++) {
+            if (categories[i].id == id) {
+                return categories[i];
+            }
+            var category = findCategory(id, categories[i].projectCategories);
+            if (category) {
+                return category;
+            }
+        }
+        return null;
+    }
 
 }]);

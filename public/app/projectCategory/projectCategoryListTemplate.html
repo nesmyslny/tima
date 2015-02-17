@@ -1,7 +1,7 @@
 <div class="btn-group btn-admin-list-item" role="group">
     <button class="btn btn-default btn-sm"
         ng-disabled="!pc.projectCategories.length"
-        ng-click="show(pc)">
+        ng-click="showToggle(pc)">
         <i class="fa" ng-class="{'fa-chevron-right': !pc.showChildren, 'fa-chevron-down': pc.showChildren}"></i>
     </button>
 </div>
@@ -21,7 +21,7 @@
     </button>
     <button class="btn btn-sm"
         ng-class="{'btn-danger': hasFocus(pc.id), 'btn-default': !hasFocus(pc.id)}"
-        ng-click="">
+        ng-click="delete(pc)">
         <i class="fa fa-times"></i>
     </button>
 </div>
