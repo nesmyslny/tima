@@ -1,9 +1,9 @@
 angular.module('tima').controller('ActivityController',
-['activityService', '$scope', '$routeParams', '$location', 'authService',
-function (activityService, $scope, $routeParams, $location, authService) {
+['activityService', '$scope', '$routeParams', '$location', '$moment', 'authService',
+function (activityService, $scope, $routeParams, $location, $moment, authService) {
 
     $scope.day = $routeParams.day;
-    $scope.dayHeader = moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
+    $scope.dayHeader = $moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
     $scope.durationHeader = '';
     $scope.totalDuration = 0;
     $scope.activities = [];
@@ -85,18 +85,18 @@ function (activityService, $scope, $routeParams, $location, authService) {
     };
 
     $scope.today = function() {
-        $scope.day = moment().format('YYYY-MM-DD');
+        $scope.day = $moment().format('YYYY-MM-DD');
     };
 
     $scope.navigateDay = function(forward) {
         var i = forward ? 1 : -1;
-        $scope.day = moment($scope.day).add(i, 'days').format('YYYY-MM-DD');
+        $scope.day = $moment($scope.day).add(i, 'days').format('YYYY-MM-DD');
     };
 
     $scope.$watch("day", dayWatchCallback, true);
     function dayWatchCallback(newVal, oldVal) {
         if (newVal != oldVal) {
-            var date = moment($scope.day).format('YYYY-MM-DD');
+            var date = $moment($scope.day).format('YYYY-MM-DD');
             $location.path('/activities/' + date);
         }
     }

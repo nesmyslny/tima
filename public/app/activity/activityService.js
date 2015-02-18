@@ -1,6 +1,6 @@
 angular.module('tima').factory('activityService',
-['$filter', 'Activity', 'ProjectActivityType',
-function($filter, Activity, ProjectActivityType) {
+['$filter', '$moment', 'Activity', 'ProjectActivityType',
+function($filter, $moment, Activity, ProjectActivityType) {
 
     function removeDeletedActivities(source, dest) {
         dest.forEach(function(activity) {
@@ -25,7 +25,7 @@ function($filter, Activity, ProjectActivityType) {
 
     function refreshActivitiesViewValues(activities) {
         activities.forEach(function(activity) {
-            var m = moment.duration(activity.duration, 'minutes');
+            var m = $moment.duration(activity.duration, 'minutes');
             activity.durationHours = m.hours();
             activity.durationMinutes = m.minutes();
             activity.durationFormatted = getTimeFormatted(activity.durationHours, activity.durationMinutes);
@@ -45,7 +45,7 @@ function($filter, Activity, ProjectActivityType) {
     }
 
     function getDurationFormatted(duration) {
-        var m = moment.duration(duration, 'minutes');
+        var m = $moment.duration(duration, 'minutes');
         return getTimeFormatted(m.hours(), m.minutes());
     }
 
@@ -86,7 +86,7 @@ function($filter, Activity, ProjectActivityType) {
         createNew: function(day, userId, projectId, activityTypeId, hours, minutes) {
             return {
                 id: -1,
-                day: moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
+                day: $moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
                 userId: userId,
                 projectId: projectId,
                 activityTypeId: activityTypeId,

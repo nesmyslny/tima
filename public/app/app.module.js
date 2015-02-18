@@ -1,5 +1,5 @@
 angular
-.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ui.select', 'jwt-decode'])
+.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ui.select', 'jwt-decode', 'angular-momentjs'])
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', function($routeProvider, $httpProvider, uiSelectConfig) {
 
     uiSelectConfig.theme = 'bootstrap';
