@@ -1,6 +1,6 @@
 angular.module('tima').factory('authService',
-['$http', '$location', 'sessionService',
-function($http, $location, sessionService) {
+['$http', '$location', 'JwtDecode', 'sessionService',
+function($http, $location, JwtDecode, sessionService) {
     var service = {
         getUser: function() {
             return sessionService.user;
@@ -9,7 +9,7 @@ function($http, $location, sessionService) {
         signIn: function(credentials, redirectPath) {
             $http.post('/signin', credentials)
             .success(function(data, status, headers, config) {
-                var tokenData = jwt_decode(data.stringResult);
+                var tokenData = JwtDecode.decode(data.stringResult);
                 sessionService.init(data.stringResult, tokenData.user);
                 $location.path(redirectPath);
                 credentials.clear();
