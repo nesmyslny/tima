@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', 'Project', 'ProjectCategory', 'ActivityType',
-function ($scope, $routeParams, $location, $q, Project, ProjectCategory, ActivityType) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType) {
 
     $scope.project = {
         id: -1,
@@ -13,18 +13,6 @@ function ($scope, $routeParams, $location, $q, Project, ProjectCategory, Activit
 
     $scope.projectCategories = [];
     $scope.selectedProjectCategory = {};
-
-    // todo: replace with utility lib (lodash?)
-    function findProjectCategory(id) {
-        var category;
-        $scope.projectCategories.some(function(cat) {
-            if (cat.id === id) {
-                category = cat;
-                return true;
-            }
-        });
-        return category;
-    }
 
     $scope.fetch = function() {
         var id = parseInt($routeParams.id);
@@ -40,7 +28,7 @@ function ($scope, $routeParams, $location, $q, Project, ProjectCategory, Activit
             $scope.project.$promise,
             $scope.projectCategories.$promise
         ]).then(function() {
-            $scope.selectedProjectCategory.selected = findProjectCategory($scope.project.projectCategoryId);
+            $scope.selectedProjectCategory.selected = _.find($scope.projectCategories, { 'id': $scope.project.projectCategoryId });
         });
     };
     $scope.fetch();

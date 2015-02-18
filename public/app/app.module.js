@@ -1,5 +1,6 @@
 angular
 .module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ui.select', 'jwt-decode', 'angular-momentjs'])
+.constant('_', window._) // use lodash via DI in controllers, etc.
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', function($routeProvider, $httpProvider, uiSelectConfig) {
 
     uiSelectConfig.theme = 'bootstrap';
@@ -65,4 +66,8 @@ angular
     $httpProvider.interceptors.push('httpAuthInterceptor');
     $httpProvider.interceptors.push('httpErrorInterceptor');
 
-}]);
+}])
+.run(function($rootScope) {
+    // use lodash in views
+    $rootScope._ = window._;
+});
