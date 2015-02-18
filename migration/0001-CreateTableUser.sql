@@ -7,7 +7,7 @@ create table user (
     last_name       varchar(50)         null,
     email           varchar(254)    not null,
     primary key (id),
-    unique index (username)
+    unique index idx_user_username (username)
 );
 
 -- +migrate Down
