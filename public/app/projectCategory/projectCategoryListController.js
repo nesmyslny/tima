@@ -2,13 +2,8 @@ angular.module('tima').controller('ProjectCategoryListController',
 ['$scope', 'ProjectCategory', 'popupService',
 function ($scope, ProjectCategory, popupService) {
 
-    $scope.projectCategories = [];
+    $scope.projectCategories = ProjectCategory.queryTree();
     var focusedCategoryId = null;
-
-    $scope.list = function() {
-        $scope.projectCategories = ProjectCategory.queryTree();
-    };
-    $scope.list();
 
     $scope.focus = function(id) {
         focusedCategoryId = id;
