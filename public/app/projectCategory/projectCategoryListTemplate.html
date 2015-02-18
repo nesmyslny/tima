@@ -1,0 +1,37 @@
+<div class="btn-group btn-admin-list-item" role="group">
+    <button class="btn btn-default btn-sm"
+        ng-disabled="!pc.projectCategories.length"
+        ng-click="showToggle(pc)">
+        <i class="fa" ng-class="{'fa-chevron-right': !pc.showChildren, 'fa-chevron-down': pc.showChildren}"></i>
+    </button>
+</div>
+
+<span>{{pc.title}}</span>
+
+<div class="btn-group pull-right btn-admin-list-item" role="group">
+    <button class="btn btn-sm"
+        ng-class="{'btn-primary': hasFocus(pc.id), 'btn-default': !hasFocus(pc.id)}"
+        ng-click="add(pc)">
+        <i class="fa fa-plus"></i> New
+    </button>
+    <button class="btn btn-sm"
+        ng-class="{'btn-primary': hasFocus(pc.id), 'btn-default': !hasFocus(pc.id)}"
+        ng-click="edit(pc)">
+        <i class="fa fa-pencil"></i> Edit
+    </button>
+    <button class="btn btn-sm"
+        ng-class="{'btn-danger': hasFocus(pc.id), 'btn-default': !hasFocus(pc.id)}"
+        ng-click="delete(pc)">
+        <i class="fa fa-times"></i>
+    </button>
+</div>
+<div class="clearfix"></div>
+
+<ul class="list-group" ng-class="{'recursive-admin-list-hidden': !pc.showChildren}">
+    <li class="list-group-item recursive-admin-list-item"
+        ng-repeat="pc in pc.projectCategories"
+        ng-include="'app/projectCategory/projectCategoryListTemplate.html'"
+        ng-class="{'recursive-admin-list-item-hover': hasFocus(pc.id)}"
+        ng-mouseenter="focus(pc.id)" ng-mouseleave="focus(pc.parentId)">
+    </li>
+</ul>

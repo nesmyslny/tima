@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/coopernurse/gorp"
@@ -36,6 +37,7 @@ func NewDB(connectionString string) *DB {
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id")
+	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(ProjectActivityType{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activity").SetKeys(true, "id")
@@ -311,4 +313,103 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 		return nil, err
 	}
 	return list, nil
+}
+
+func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
+	var projectCategories []ProjectCategory
+	const sqlTemplate string = "select * from project_category where parent_id %s order by title"
+	var err error
+
+	if parent == nil {
+		sql := fmt.Sprintf(sqlTemplate, "is null")
+		_, err = db.dbMap.Select(&projectCategories, sql)
+	} else {
+		sql := fmt.Sprintf(sqlTemplate, "= ?")
+		_, err = db.dbMap.Select(&projectCategories, sql, parent.ID)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return projectCategories, nil
+}
+
+func (db *DB) setProjectCategoryPath(projectCategory *ProjectCategory, parentCategory *ProjectCategory) {
+	parentPath := ""
+	if parentCategory != nil {
+		parentPath = parentCategory.Path + " \u203A "
+	}
+	projectCategory.Path = parentPath + projectCategory.Title
+}
+
+func (db *DB) GetProjectCategoryTree(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := db.getProjectCategories(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range projectCategories {
+		db.setProjectCategoryPath(&projectCategories[i], parent)
+		projectCategories[i].ProjectCategories, err = db.GetProjectCategoryTree(&projectCategories[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return projectCategories, nil
+}
+
+func (db *DB) GetProjectCategoryList(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := db.getProjectCategories(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(projectCategories); i++ {
+		db.setProjectCategoryPath(&projectCategories[i], parent)
+
+		children, err := db.GetProjectCategoryList(&projectCategories[i])
+		if err != nil {
+			return nil, err
+		}
+
+		// inserting children into slice after parent
+		slicingIndex := i + 1
+		projectCategories = append(projectCategories[:slicingIndex], append(children, projectCategories[slicingIndex:]...)...)
+		i += len(children)
+	}
+
+	return projectCategories, nil
+}
+
+func (db *DB) GetProjectCategory(id int) (*ProjectCategory, error) {
+	obj, err := db.dbMap.Get(ProjectCategory{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*ProjectCategory), nil
+}
+
+func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
+	var err error
+	if projectCategory.ID < 0 {
+		err = db.dbMap.Insert(projectCategory)
+	} else {
+		_, err = db.dbMap.Update(projectCategory)
+	}
+	return err
+}
+
+func (db *DB) DeleteProjectCategory(projectCategory *ProjectCategory) error {
+	_, err := db.dbMap.Delete(projectCategory)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) IsProjectCategoryReferenced(id int) (bool, error) {
+	// todo: check if this category, or any child (recursive) is in use.
+	return false, nil
 }

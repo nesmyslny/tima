@@ -1,0 +1,12 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{ title }}</h3>
+</div>
+<form name="form" class="form-horizontal" role="form" novalidate>
+    <div class="modal-body">
+        <ng-include src="template"></ng-include>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="accept()">{{ acceptButton || "Ok" }}</button>
+        <button class="btn btn-default" ng-click="cancel()">{{ cancelButton || "Cancel" }}</button>
+    </div>
+</form>
