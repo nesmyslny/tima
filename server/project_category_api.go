@@ -78,16 +78,16 @@ func (projectCategoryAPI *ProjectCategoryAPI) save(projectCategory *ProjectCateg
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) delete(id int) error {
-	isReferenced, err := projectCategoryAPI.db.IsProjectCategoryReferenced(id)
+	projectCatetory, err := projectCategoryAPI.db.GetProjectCategory(id)
+	if err != nil {
+		return err
+	}
+
+	isReferenced, err := projectCategoryAPI.db.IsProjectCategoryReferenced(projectCatetory)
 	if err != nil {
 		return err
 	} else if isReferenced {
 		return errItemInUse
-	}
-
-	projectCatetory, err := projectCategoryAPI.db.GetProjectCategory(id)
-	if err != nil {
-		return err
 	}
 
 	err = projectCategoryAPI.db.DeleteProjectCategory(projectCatetory)

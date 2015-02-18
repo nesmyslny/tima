@@ -409,7 +409,25 @@ func (db *DB) DeleteProjectCategory(projectCategory *ProjectCategory) error {
 	return nil
 }
 
-func (db *DB) IsProjectCategoryReferenced(id int) (bool, error) {
-	// todo: check if this category, or any child (recursive) is in use.
+func (db *DB) IsProjectCategoryReferenced(projectCategory *ProjectCategory) (bool, error) {
+	exists, err := db.dbMap.SelectInt("select exists(select id from project where project_category_id = ?)", projectCategory.ID)
+	if err != nil {
+		return false, err
+	}
+
+	if exists == 1 {
+		return true, nil
+	}
+
+	children, err := db.getProjectCategories(projectCategory)
+	for _, child := range children {
+		isReferenced, err := db.IsProjectCategoryReferenced(&child)
+		if err != nil {
+			return false, err
+		} else if isReferenced {
+			return true, nil
+		}
+	}
+
 	return false, nil
 }
