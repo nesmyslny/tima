@@ -71,7 +71,7 @@ function($filter, $moment, Activity, ProjectActivityType) {
         },
 
         getProjectActivityList: function() {
-            return ProjectActivityType.query().$promise;
+            return ProjectActivityType.query();
         },
 
         save: function(activity) {

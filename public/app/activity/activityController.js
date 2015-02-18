@@ -7,7 +7,7 @@ function (activityService, $scope, $routeParams, $location, $moment, authService
     $scope.durationHeader = '';
     $scope.totalDuration = 0;
     $scope.activities = [];
-    $scope.projectActivityList = [];
+    $scope.projectActivityList = activityService.getProjectActivityList();
 
     $scope.formData = {
         projectActivity: null,
@@ -28,16 +28,6 @@ function (activityService, $scope, $routeParams, $location, $moment, authService
         });
     };
     $scope.list();
-
-    $scope.fetchProjectActivityList = function() {
-        activityService.getProjectActivityList().then(function(data) {
-            $scope.projectActivityList = data;
-            $scope.projectActivityList.forEach(function(item) {
-                item.text = item.projectTitle + ": " + item.activityTypeTitle;
-            });
-        });
-    };
-    $scope.fetchProjectActivityList();
 
     $scope.add = function() {
         $scope.$broadcast('show-errors-check-validity');

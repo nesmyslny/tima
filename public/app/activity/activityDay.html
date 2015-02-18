@@ -26,9 +26,13 @@
             <div class="form-group" show-errors>
                 <label class="sr-only" for="project">Project</label>
                 <ui-select name="projectActivityList" id="projectActivityList" ng-model="formData.projectActivity.selected" class="form-control form-control-ui-select activity-select" required>
-                    <ui-select-match placeholder="Activity">{{$select.selected.text}}</ui-select-match>
-                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {text: $select.search}">
-                        <div ng-bind-html="projectActivity.text | highlight: $select.search"></div>
+                    <ui-select-match placeholder="Activity">
+                        <span ng-bind="$select.selected.projectTitle"></span>
+                        <small ng-bind="$select.selected.activityTypeTitle"></small>
+                    </ui-select-match>
+                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {projectTitle: $select.search, activityTypeTitle: $select.search}">
+                        <span ng-bind-html="projectActivity.projectTitle | highlight: $select.search"></span>
+                        <small ng-bind-html="projectActivity.activityTypeTitle | highlight: $select.search"></small>
                     </ui-select-choices>
                 </ui-select>
             </div>
@@ -56,7 +60,10 @@
 
             <div class="panel-heading clearfix">
                 <div class="row">
-                    <div class="col-md-9">{{a.projectTitle}}: {{a.activityTypeTitle}}</div>
+                    <div class="col-md-9">
+                        <span ng-bind="a.projectTitle"></span>
+                        <small ng-bind="a.activityTypeTitle"></small>
+                    </div>
                     <div class="col-md-3 pull-right text-right">
                         <ng-form name="formActivity" class="form-inline">
                         <div class="form-group no-margin" show-errors>
