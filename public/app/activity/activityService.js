@@ -1,11 +1,11 @@
 angular.module('tima').factory('activityService',
-['$filter', '$moment', 'Activity', 'ProjectActivityType',
-function($filter, $moment, Activity, ProjectActivityType) {
+['_', '$moment', 'Activity', 'ProjectActivityType',
+function(_, $moment, Activity, ProjectActivityType) {
 
     function removeDeletedActivities(source, dest) {
         dest.forEach(function(activity) {
-            var actFound = $filter('filter')(source, {id: activity.id}, true);
-            if (!actFound.length) {
+            var found = _.any(source, { 'id': activity.id });
+            if (!found) {
                 var index = dest.indexOf(activity);
                 dest.splice(index, 1);
             }
@@ -14,9 +14,9 @@ function($filter, $moment, Activity, ProjectActivityType) {
 
     function mergeActivities(source, dest) {
         source.forEach(function(activity) {
-            var actFound = $filter('filter')(dest, {id: activity.id}, true);
-            if (actFound.length) {
-                actFound[0].duration = activity.duration;
+            var found = _.find(dest, { 'id': activity.id });
+            if (found) {
+                found.duration = activity.duration;
             } else {
                 dest.push(activity);
             }

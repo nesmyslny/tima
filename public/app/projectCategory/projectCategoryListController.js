@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectCategoryListController',
-['$scope', 'ProjectCategory', 'popupService',
-function ($scope, ProjectCategory, popupService) {
+['$scope', '_', 'ProjectCategory', 'popupService',
+function ($scope, _, ProjectCategory, popupService) {
 
     $scope.projectCategories = ProjectCategory.queryTree();
     var focusedCategoryId = null;
@@ -90,16 +90,21 @@ function ($scope, ProjectCategory, popupService) {
             return null;
         }
 
-        for (var i = 0; i < categories.length; i++) {
-            if (categories[i].id == id) {
-                return categories[i];
+        var category = null;
+
+        _.forEach(categories, function(x) {
+            if (x.id == id) {
+                category = x;
+                return false;
             }
-            var category = findCategory(id, categories[i].projectCategories);
+
+            category = findCategory(id, x.projectCategories);
             if (category) {
-                return category;
+                return false;
             }
-        }
-        return null;
+        });
+
+        return category;
     }
 
 }]);
