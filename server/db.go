@@ -315,27 +315,68 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 	return list, nil
 }
 
-func (db *DB) GetProjectCategories(parentID *int) ([]ProjectCategory, error) {
+func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
 	var projectCategories []ProjectCategory
 	const sqlTemplate string = "select * from project_category where parent_id %s order by title"
 	var err error
 
-	if parentID == nil {
+	if parent == nil {
 		sql := fmt.Sprintf(sqlTemplate, "is null")
 		_, err = db.dbMap.Select(&projectCategories, sql)
 	} else {
 		sql := fmt.Sprintf(sqlTemplate, "= ?")
-		_, err = db.dbMap.Select(&projectCategories, sql, *parentID)
+		_, err = db.dbMap.Select(&projectCategories, sql, parent.ID)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	for i, cat := range projectCategories {
-		projectCategories[i].ProjectCategories, err = db.GetProjectCategories(&cat.ID)
+	return projectCategories, nil
+}
+
+func (db *DB) setProjectCategoryPath(projectCategory *ProjectCategory, parentCategory *ProjectCategory) {
+	parentPath := ""
+	if parentCategory != nil {
+		parentPath = parentCategory.Path + " \u203A "
+	}
+	projectCategory.Path = parentPath + projectCategory.Title
+}
+
+func (db *DB) GetProjectCategoryTree(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := db.getProjectCategories(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range projectCategories {
+		db.setProjectCategoryPath(&projectCategories[i], parent)
+		projectCategories[i].ProjectCategories, err = db.GetProjectCategoryTree(&projectCategories[i])
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	return projectCategories, nil
+}
+
+func (db *DB) GetProjectCategoryList(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := db.getProjectCategories(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(projectCategories); i++ {
+		db.setProjectCategoryPath(&projectCategories[i], parent)
+
+		children, err := db.GetProjectCategoryList(&projectCategories[i])
+		if err != nil {
+			return nil, err
+		}
+
+		// inserting children into slice after parent
+		slicingIndex := i + 1
+		projectCategories = append(projectCategories[:slicingIndex], append(children, projectCategories[slicingIndex:]...)...)
+		i += len(children)
 	}
 
 	return projectCategories, nil

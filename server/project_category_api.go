@@ -10,6 +10,14 @@ func NewProjectCategoryAPI(db *DB) *ProjectCategoryAPI {
 	return &ProjectCategoryAPI{db}
 }
 
+func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	projectCategories, err := projectCategoryAPI.getTree()
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
+	}
+	return projectCategories, nil
+}
+
 func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
 	projectCategories, err := projectCategoryAPI.getList()
 	if err != nil {
@@ -49,8 +57,16 @@ func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(w http.ResponseWrite
 	return jsonResultBool(true)
 }
 
+func (projectCategoryAPI *ProjectCategoryAPI) getTree() ([]ProjectCategory, error) {
+	projectCategories, err := projectCategoryAPI.db.GetProjectCategoryTree(nil)
+	if err != nil {
+		return nil, err
+	}
+	return projectCategories, nil
+}
+
 func (projectCategoryAPI *ProjectCategoryAPI) getList() ([]ProjectCategory, error) {
-	projectCategories, err := projectCategoryAPI.db.GetProjectCategories(nil)
+	projectCategories, err := projectCategoryAPI.db.GetProjectCategoryList(nil)
 	if err != nil {
 		return nil, err
 	}

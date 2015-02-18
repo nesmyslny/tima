@@ -30,22 +30,26 @@
     margin-bottom: 20px;
 }
 
-.form-inline > .form-group > .inline-act-text {
+.activity-select {
     min-width: 300px;
+}
+
+.form-control-ui-select {
+    width: 100%;
     padding: 0;
     border: 0;
 }
 
-.form-inline > .form-group > .inline-act-text > .ui-select-match,
-.form-inline > .form-group > .inline-act-text > .ui-select-search {
+.form-control-ui-select > .ui-select-match,
+.form-control-ui-select > .ui-select-search {
     width: 100%;
 }
 
-.form-inline > .form-group > .inline-act-time {
+.form-inline .form-group .activity-time {
     width: 100px;
 }
 
-.form-inline .input-group .inline-act-time-sm {
+.form-inline .input-group .activity-time-small {
     width: 55px;
 }
 

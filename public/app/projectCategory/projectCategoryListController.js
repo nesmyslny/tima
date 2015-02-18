@@ -6,7 +6,7 @@ function ($scope, ProjectCategory, popupService) {
     var focusedCategoryId = null;
 
     $scope.list = function() {
-        $scope.projectCategories = ProjectCategory.query();
+        $scope.projectCategories = ProjectCategory.queryTree();
     };
     $scope.list();
 

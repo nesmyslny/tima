@@ -37,7 +37,8 @@ func main() {
 	router.Handle("/projects", server.NewAuthHandler(projectAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/projects/{id}", server.NewAuthHandler(projectAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
-	router.Handle("/projectCategories", server.NewAuthHandler(projectCategoryAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projectCategories/tree", server.NewAuthHandler(projectCategoryAPI.GetTreeHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/projectCategories/list", server.NewAuthHandler(projectCategoryAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
 	router.Handle("/projectCategories", server.NewAuthHandler(projectCategoryAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/projectCategories/{id}", server.NewAuthHandler(projectCategoryAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
