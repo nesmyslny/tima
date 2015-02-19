@@ -26,7 +26,7 @@ func (migrationAPI *MigrationAPI) UpgradeHandler(w http.ResponseWriter, r *http.
 }
 
 func (migrationAPI *MigrationAPI) migrate() error {
-	err := migrationAPI.db.Upgrade()
+	err := migrationAPI.db.Upgrade(0)
 	if err != nil {
 		return err
 	}

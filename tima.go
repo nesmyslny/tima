@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -8,8 +10,11 @@ import (
 )
 
 func main() {
-	// todo: configuration
-	db := server.NewDB("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
+	if execFlags() {
+		return
+	}
+
+	db := initDB()
 	defer db.Close()
 
 	auth := server.NewAuth()
@@ -52,4 +57,51 @@ func main() {
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
+}
+
+func initDB() *server.DB {
+	// todo: configuration
+	db := server.NewDB("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
+	return db
+}
+
+func execFlags() bool {
+	dbUp := flag.Int("dbUp", -1, "Applies the given number of database migrations (if 0 is specified, all pending migrations will be applied)")
+	dbDown := flag.Int("dbDown", -1, "Undos the given number of database migration (if 0 is specified, all migration will be undone)")
+	dbGenerateData := flag.Bool("dbGenerateData", false, "Generate test data")
+	flag.Parse()
+
+	if *dbUp > -1 && *dbDown > -1 {
+		fmt.Println("dbUp and dbDown can't be used at once")
+		return true
+	}
+
+	db := initDB()
+	defer db.Close()
+
+	if *dbUp > -1 {
+		err := db.Upgrade(*dbUp)
+		printCliActionResult(err)
+		return true
+	}
+
+	if *dbDown > -1 {
+		err := db.Downgrade(*dbDown)
+		printCliActionResult(err)
+		return true
+	}
+
+	if *dbGenerateData {
+		return true
+	}
+
+	return false
+}
+
+func printCliActionResult(err error) {
+	if err == nil {
+		fmt.Println("done!")
+	} else {
+		fmt.Println(err.Error())
+	}
 }

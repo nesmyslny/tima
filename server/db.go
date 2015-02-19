@@ -49,13 +49,17 @@ func (db *DB) Close() error {
 	return db.dbMap.Db.Close()
 }
 
-func (db *DB) Upgrade() error {
+func (db *DB) initMigrate() migrate.MigrationSource {
 	migrate.SetTable(db.migrationTable)
 	migrationSource := &migrate.FileMigrationSource{
 		Dir: db.migrationDir,
 	}
+	return migrationSource
+}
 
-	_, err := migrate.Exec(db.dbMap.Db, db.dialect, migrationSource, migrate.Up)
+func (db *DB) Upgrade(max int) error {
+	migrationSource := db.initMigrate()
+	_, err := migrate.ExecMax(db.dbMap.Db, db.dialect, migrationSource, migrate.Up, max)
 	if err != nil {
 		// todo: logging
 		// if(!) any migration were applied, try to roll back:
@@ -64,6 +68,12 @@ func (db *DB) Upgrade() error {
 	}
 
 	return nil
+}
+
+func (db *DB) Downgrade(max int) error {
+	migrationSource := db.initMigrate()
+	_, err := migrate.ExecMax(db.dbMap.Db, db.dialect, migrationSource, migrate.Down, max)
+	return err
 }
 
 func (db *DB) GetNumberOfUsers() (int, error) {
