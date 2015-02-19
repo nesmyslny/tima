@@ -66,8 +66,8 @@ func initDB() *server.DB {
 }
 
 func execFlags() bool {
-	dbUp := flag.Int("dbUp", -1, "Applies the given number of database migrations (if 0 is specified, all pending migrations will be applied)")
-	dbDown := flag.Int("dbDown", -1, "Undos the given number of database migration (if 0 is specified, all migration will be undone)")
+	dbUp := flag.Int("dbUp", -1, "Apply the given number of database migrations (if 0 is specified, all pending migrations will be applied)")
+	dbDown := flag.Int("dbDown", -1, "Undo the given number of database migration (if 0 is specified, all migration will be undone)")
 	dbGenerateData := flag.Bool("dbGenerateData", false, "Generate test data")
 	flag.Parse()
 
@@ -92,6 +92,14 @@ func execFlags() bool {
 	}
 
 	if *dbGenerateData {
+		auth := server.NewAuth()
+		testPwdHash, err := auth.GeneratePasswordHash("pwd")
+		if err != nil {
+			printCliActionResult(err)
+			return true
+		}
+		err = db.GenerateTestData(testPwdHash)
+		printCliActionResult(err)
 		return true
 	}
 
