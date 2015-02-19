@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coopernurse/gorp"
 	_ "github.com/go-sql-driver/mysql" // this package is only imported because of gorp. it's not directly used here.
 	"github.com/rubenv/sql-migrate"
+	"gopkg.in/gorp.v1"
 )
 
 type DB struct {
