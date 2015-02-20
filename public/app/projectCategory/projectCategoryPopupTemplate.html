@@ -5,6 +5,7 @@
             <span class="input-group-addon" id="ref-id-pre" ng-bind="data.refIdPrefix || '#'"></span>
             <input type="text" class="form-control" id="ref-id" name="ref-id" ng-model="data.refId" maxlength="5" placeholder="Reference ID" aria-describedby="ref-id-pre" required />
         </div>
+        <small ng-show="data.id > -1"><strong>Warning:</strong> Changing the reference ID will also change the IDs of all descendants and all project in this, or a descendant, category.</small>
     </div>
 </div>
 <div class="row form-group" show-errors>
