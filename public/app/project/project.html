@@ -26,9 +26,13 @@
         <label for="projectCategory" class="col-md-2 control-label">Project category</label>
         <div class="col-md-6">
             <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" required>
-                <ui-select-match placeholder="">{{$select.selected.path}}</ui-select-match>
-                <ui-select-choices repeat="cat in projectCategories | propsFilter: {path: $select.search}">
-                    <div ng-bind-html="cat.path | highlight: $select.search"></div>
+                <ui-select-match placeholder="">
+                    <small ng-bind="$select.selected.refIdComplete"></small>
+                    <span ng-bind="$select.selected.path"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="cat in projectCategories | propsFilter: {refIdComplete: $select.search, path: $select.search}">
+                    <small ng-bind-html="cat.refIdComplete | highlight: $select.search"></small>
+                    <span ng-bind-html="cat.path | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
         </div>

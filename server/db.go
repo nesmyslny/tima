@@ -355,7 +355,7 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 
 func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
 	var projectCategories []ProjectCategory
-	const sqlTemplate string = "select * from project_category where parent_id %s order by title"
+	const sqlTemplate string = "select * from project_category where parent_id %s order by ref_id_complete"
 	var err error
 
 	if parent == nil {
