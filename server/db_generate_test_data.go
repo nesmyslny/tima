@@ -20,23 +20,23 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	}
 
 	projectCategories := []interface{}{
-		&ProjectCategory{0, nil, "Category 1", "", nil},
-		&ProjectCategory{1, nil, "Category 1>1", "", nil},
-		&ProjectCategory{2, nil, "Category 1>2", "", nil},
-		&ProjectCategory{3, nil, "Category 1>2>1", "", nil},
-		&ProjectCategory{4, nil, "Category 1>3", "", nil},
-		&ProjectCategory{5, nil, "Category 2", "", nil},
-		&ProjectCategory{6, nil, "Category 2>1", "", nil},
-		&ProjectCategory{7, nil, "Category 2>2", "", nil}}
+		&ProjectCategory{0, nil, "AA", "AA", "Category 1", "", nil},
+		&ProjectCategory{1, nil, "01", "AA01", "Category 1>1", "", nil},
+		&ProjectCategory{2, nil, "02", "AA02", "Category 1>2", "", nil},
+		&ProjectCategory{3, nil, "001", "AA02001", "Category 1>2>1", "", nil},
+		&ProjectCategory{4, nil, "03", "AA03", "Category 1>3", "", nil},
+		&ProjectCategory{5, nil, "BB", "BB", "Category 2", "", nil},
+		&ProjectCategory{6, nil, "01", "BB01", "Category 2>1", "", nil},
+		&ProjectCategory{7, nil, "02", "BB02", "Category 2>2", "", nil}}
 	if err = db.insertTestData(trans, projectCategories); err != nil {
 		return err
 	}
 
 	projects := []interface{}{
-		&Project{0, projectCategories[1].(*ProjectCategory).ID, "Project 1", nil},
-		&Project{1, projectCategories[3].(*ProjectCategory).ID, "Project 2", nil},
-		&Project{2, projectCategories[6].(*ProjectCategory).ID, "Project 3", nil},
-		&Project{3, projectCategories[7].(*ProjectCategory).ID, "Project 4", nil}}
+		&Project{0, projectCategories[1].(*ProjectCategory).ID, "01", "AA/01", "Project 1", nil},
+		&Project{1, projectCategories[3].(*ProjectCategory).ID, "01", "AA02001/01", "Project 2", nil},
+		&Project{2, projectCategories[6].(*ProjectCategory).ID, "01", "BB01/01", "Project 3", nil},
+		&Project{3, projectCategories[7].(*ProjectCategory).ID, "02", "BB02/02", "Project 4", nil}}
 	if err = db.insertTestData(trans, projects); err != nil {
 		return err
 	}

@@ -8,7 +8,7 @@
     <div class="col-md-8">
         <form name="formProjectList" class="form-inline pull-right" role="form" novalidate>
             <div class="form-group">
-                <input type="text" class="form-control" ng-model="searchItem.title" placeholder="Filter..." />
+                <input type="text" class="form-control" ng-model="search" placeholder="Filter..." />
             </div>
             <div class="form-group">
                 <a href="#/projects/-1" class="btn btn-primary"><i class="fa fa-plus"></i> New Project</a>
@@ -21,9 +21,10 @@
     <div class="col-md-8">
         <ul class="list-group">
             <li class="list-group-item admin-list-item"
-            ng-repeat="p in filteredProjects = (projects | filter:searchItem) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
+            ng-repeat="p in filteredProjects = (projects | propsFilter: {refIdComplete:search, title:search}) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
             ng-mouseenter="hover = true" ng-mouseleave="hover = false">
-                <span>{{p.title}}</span>
+                <small ng-bind-html="p.refIdComplete | highlight: search"></small>
+                <span ng-bind-html="p.title | highlight: search"></span>
                 <div class="btn-group pull-right btn-admin-list-item" role="group">
                     <a href="#/projects/{{p.id}}" class="btn btn-sm" ng-class="{'btn-primary': hover, 'btn-default': !hover}" role="button"><i class="fa fa-pencil"></i> Edit</a>
                     <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="delete(p.id)"><i class="fa fa-times"></i></button>

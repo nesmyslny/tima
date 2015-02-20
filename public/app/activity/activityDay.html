@@ -30,9 +30,12 @@
                         <span ng-bind="$select.selected.projectTitle"></span>
                         <small ng-bind="$select.selected.activityTypeTitle"></small>
                     </ui-select-match>
-                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {projectTitle: $select.search, activityTypeTitle: $select.search}">
-                        <span ng-bind-html="projectActivity.projectTitle | highlight: $select.search"></span>
-                        <small ng-bind-html="projectActivity.activityTypeTitle | highlight: $select.search"></small>
+                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {projectRefIdComplete: $select.search, projectTitle: $select.search, activityTypeTitle: $select.search}">
+                        <div>
+                            <small ng-bind-html="projectActivity.projectRefIdComplete | highlight: $select.search"></small>
+                            <small ng-bind-html="projectActivity.projectTitle | highlight: $select.search"></small>
+                        </div>
+                        <span ng-bind-html="projectActivity.activityTypeTitle | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>

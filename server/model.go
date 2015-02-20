@@ -14,6 +14,8 @@ type User struct {
 type Project struct {
 	ID                int            `db:"id" json:"id"`
 	ProjectCategoryID int            `db:"project_category_id" json:"projectCategoryId"`
+	RefID             string         `db:"ref_id" json:"refId"`
+	RefIDComplete     string         `db:"ref_id_complete" json:"refIdComplete"`
 	Title             string         `db:"title" json:"title"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
 }
@@ -21,6 +23,8 @@ type Project struct {
 type ProjectCategory struct {
 	ID                int               `db:"id" json:"id"`
 	ParentID          *int              `db:"parent_id" json:"parentId"`
+	RefID             string            `db:"ref_id" json:"refId"`
+	RefIDComplete     string            `db:"ref_id_complete" json:"refIdComplete"`
 	Title             string            `db:"title" json:"title"`
 	Path              string            `db:"-" json:"path"`
 	ProjectCategories []ProjectCategory `db:"-" json:"projectCategories"`
@@ -37,10 +41,11 @@ type ProjectActivityType struct {
 }
 
 type ProjectActivityTypeView struct {
-	ProjectID         int    `db:"project_id" json:"projectId"`
-	ActivityTypeID    int    `db:"activity_type_id" json:"activityTypeId"`
-	ProjectTitle      string `db:"project_title" json:"projectTitle"`
-	ActivityTypeTitle string `db:"activity_type_title" json:"activityTypeTitle"`
+	ProjectID            int    `db:"project_id" json:"projectId"`
+	ActivityTypeID       int    `db:"activity_type_id" json:"activityTypeId"`
+	ProjectRefIDComplete string `db:"project_ref_id_complete" json:"projectRefIdComplete"`
+	ProjectTitle         string `db:"project_title" json:"projectTitle"`
+	ActivityTypeTitle    string `db:"activity_type_title" json:"activityTypeTitle"`
 }
 
 type Activity struct {

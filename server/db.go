@@ -184,15 +184,43 @@ func (db *DB) GetProject(id int) (*Project, error) {
 
 func (db *DB) GetProjects() ([]Project, error) {
 	var projects []Project
-	_, err := db.dbMap.Select(&projects, "select * from project order by title")
+	_, err := db.dbMap.Select(&projects, "select * from project order by ref_id_complete")
 	if err != nil {
 		return nil, err
 	}
 	return projects, nil
 }
 
+func (db *DB) getProjectsByProjectCategory(trans *gorp.Transaction, projectCategoryId int) ([]Project, error) {
+	var projects []Project
+	_, err := trans.Select(&projects, "select * from project where project_category_id = ? order by ref_id_complete", projectCategoryId)
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func (db *DB) getProjectRefIDComplete(trans *gorp.Transaction, project *Project) (string, error) {
+	category, err := db.getProjectCategory(trans, project.ProjectCategoryID)
+	if err != nil {
+		return "", err
+	}
+
+	refIDCategory, err := db.getProjectCategoryRefIDComplete(trans, category)
+	if err != nil {
+		return "", err
+	}
+
+	return refIDCategory + "/" + project.RefID, nil
+}
+
 func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType) error {
 	trans, err := db.dbMap.Begin()
+	if err != nil {
+		return err
+	}
+
+	project.RefIDComplete, err = db.getProjectRefIDComplete(trans, project)
 	if err != nil {
 		return err
 	}
@@ -312,7 +340,7 @@ func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool
 }
 
 func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
-	sql := "select pat.*, p.title project_title, at.title activity_type_title " +
+	sql := "select pat.*, p.ref_id_complete project_ref_id_complete, p.title project_title, at.title activity_type_title " +
 		"from project_activity_type pat, project p, activity_type at " +
 		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
 		"order by p.title, at.title"
@@ -327,7 +355,7 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 
 func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
 	var projectCategories []ProjectCategory
-	const sqlTemplate string = "select * from project_category where parent_id %s order by title"
+	const sqlTemplate string = "select * from project_category where parent_id %s order by ref_id_complete"
 	var err error
 
 	if parent == nil {
@@ -339,6 +367,10 @@ func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, 
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	for i := range projectCategories {
+		db.setProjectCategoryPath(&projectCategories[i], parent)
 	}
 
 	return projectCategories, nil
@@ -359,7 +391,6 @@ func (db *DB) GetProjectCategoryTree(parent *ProjectCategory) ([]ProjectCategory
 	}
 
 	for i := range projectCategories {
-		db.setProjectCategoryPath(&projectCategories[i], parent)
 		projectCategories[i].ProjectCategories, err = db.GetProjectCategoryTree(&projectCategories[i])
 		if err != nil {
 			return nil, err
@@ -376,8 +407,6 @@ func (db *DB) GetProjectCategoryList(parent *ProjectCategory) ([]ProjectCategory
 	}
 
 	for i := 0; i < len(projectCategories); i++ {
-		db.setProjectCategoryPath(&projectCategories[i], parent)
-
 		children, err := db.GetProjectCategoryList(&projectCategories[i])
 		if err != nil {
 			return nil, err
@@ -392,22 +421,125 @@ func (db *DB) GetProjectCategoryList(parent *ProjectCategory) ([]ProjectCategory
 	return projectCategories, nil
 }
 
-func (db *DB) GetProjectCategory(id int) (*ProjectCategory, error) {
-	obj, err := db.dbMap.Get(ProjectCategory{}, id)
+func (db *DB) getProjectCategory(trans *gorp.Transaction, id int) (*ProjectCategory, error) {
+	var obj interface{}
+	var err error
+
+	if trans == nil {
+		obj, err = db.dbMap.Get(ProjectCategory{}, id)
+	} else {
+		obj, err = trans.Get(ProjectCategory{}, id)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	return obj.(*ProjectCategory), nil
 }
 
-func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
-	var err error
-	if projectCategory.ID < 0 {
-		err = db.dbMap.Insert(projectCategory)
-	} else {
-		_, err = db.dbMap.Update(projectCategory)
+func (db *DB) GetProjectCategory(id int) (*ProjectCategory, error) {
+	return db.getProjectCategory(nil, id)
+}
+
+func (db *DB) getProjectCategoryRefIDComplete(trans *gorp.Transaction, projectCategory *ProjectCategory) (string, error) {
+	refID := projectCategory.RefID
+
+	if projectCategory.ParentID != nil {
+		parent, err := db.getProjectCategory(trans, *projectCategory.ParentID)
+		if err != nil {
+			return "", err
+		}
+		parentRefIDComplete, err := db.getProjectCategoryRefIDComplete(trans, parent)
+		if err != nil {
+			return "", err
+		}
+		refID = parentRefIDComplete + refID
 	}
-	return err
+
+	return refID, nil
+}
+
+func (db *DB) updateProjectCategoryRefIDComplete(trans *gorp.Transaction, projectCategory *ProjectCategory) error {
+	categories, err := db.GetProjectCategoryList(projectCategory)
+	if err != nil {
+		return err
+	}
+
+	for i := range categories {
+		categories[i].RefIDComplete, err = db.getProjectCategoryRefIDComplete(trans, &categories[i])
+		if err != nil {
+			return err
+		}
+		if _, err = trans.Update(&categories[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (db *DB) updateProjectRefIDComplete(trans *gorp.Transaction, projectCategory *ProjectCategory) error {
+	projects, err := db.getProjectsByProjectCategory(trans, projectCategory.ID)
+	if err != nil {
+		return err
+	}
+
+	for i := range projects {
+		projects[i].RefIDComplete, err = db.getProjectRefIDComplete(trans, &projects[i])
+		if err != nil {
+			return err
+		}
+		_, err = trans.Update(&projects[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	for i := range projectCategory.ProjectCategories {
+		db.updateProjectRefIDComplete(trans, &projectCategory.ProjectCategories[i])
+	}
+
+	return nil
+}
+
+func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
+	trans, err := db.dbMap.Begin()
+	if err != nil {
+		return err
+	}
+
+	projectCategory.RefIDComplete, err = db.getProjectCategoryRefIDComplete(trans, projectCategory)
+	if err != nil {
+		return err
+	}
+
+	if projectCategory.ID < 0 {
+		err = trans.Insert(projectCategory)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+	} else {
+		_, err = trans.Update(projectCategory)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+
+		err = db.updateProjectCategoryRefIDComplete(trans, projectCategory)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+
+		err = db.updateProjectRefIDComplete(trans, projectCategory)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+	}
+
+	return trans.Commit()
 }
 
 func (db *DB) DeleteProjectCategory(projectCategory *ProjectCategory) error {

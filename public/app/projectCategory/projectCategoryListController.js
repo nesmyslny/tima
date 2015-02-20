@@ -19,27 +19,29 @@ function ($scope, _, ProjectCategory, popupService) {
 
     $scope.add = function(parent) {
         var parentId = null;
+        var refIdPrefix = "";
         var categories = $scope.projectCategories;
         if (parent) {
             parentId = parent.id;
+            refIdPrefix = parent.refIdComplete;
             categories = parent.projectCategories;
         }
 
-        data = {
-            title: ""
+        var category = {
+            id: -1,
+            parentId: parentId,
+            refId: "",
+            title: "",
+            refIdPrefix: refIdPrefix,
+            projectCategories: []
         };
 
-        popupService.showForm("Add Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Add", "Cancel")
+        popupService.showForm("Add Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", category, "Add", "Cancel")
         .result.then(function() {
-            var category = {
-                id: -1,
-                parentId: parentId,
-                title: data.title,
-                projectCategories: []
-            };
 
             ProjectCategory.save(category, function(response) {
                 category.id = response.intResult;
+                category.refIdComplete = category.refIdPrefix + category.refId
                 categories.push(category);
 
                 if (parent) {
@@ -51,16 +53,17 @@ function ($scope, _, ProjectCategory, popupService) {
     };
 
     $scope.edit = function(category) {
-        var data = {
-            id: category.id,
-            parentId: category.parentId,
-            title: category.title
-        };
+        var data = _.clone(category);
+        parent = findCategory(category.parentId, $scope.projectCategories);
+        if (parent) {
+            data.refIdPrefix = parent.refIdComplete;
+        }
 
         popupService.showForm("Edit Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Save", "Cancel")
         .result.then(function() {
             ProjectCategory.save(data, function() {
                 category.title = data.title;
+                _.assign(category, data);
             });
         });
     };
