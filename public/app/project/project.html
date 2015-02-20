@@ -1,6 +1,6 @@
 <div class="row margin-bottom-20">
     <div class="col-md-12">
-        <h1>Project <small>{{project.title}}</small></h1>
+        <h1>Project <small ng-bind="project.title"></small></h1>
     </div>
 </div>
 
@@ -57,7 +57,7 @@
         <div class="col-md-offset-2 col-md-6">
             <ul class="list-group">
                 <li class="list-group-item admin-list-item" ng-repeat="at in project.activityTypes" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
-                    <span>{{at.title}}</span>
+                    <span ng-bind="at.title"></span>
                     <div class="pull-right btn-admin-list-item" role="group">
                         <button type="button" class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="deleteActivityType(at)"><i class="fa fa-times"></i></button>
                     </div>
