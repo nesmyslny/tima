@@ -8,7 +8,7 @@
     <div class="col-md-8">
         <form name="forActivityTypeList" class="form-inline pull-right" role="form" novalidate>
             <div class="form-group">
-                <input type="text" class="form-control" ng-model="searchItem.title" placeholder="Filter..." />
+                <input type="text" class="form-control" ng-model="search" placeholder="Filter..." />
             </div>
             <div class="form-group">
                 <a href="#/activityTypes/-1" class="btn btn-primary"><i class="fa fa-plus"></i> New Activity Type</a>
@@ -21,9 +21,9 @@
     <div class="col-md-8">
         <ul class="list-group">
             <li class="list-group-item admin-list-item"
-            ng-repeat="at in filteredActivityTypes = (activityTypes | filter:searchItem) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
+            ng-repeat="at in filteredActivityTypes = (activityTypes | filter:search) | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
             ng-mouseenter="hover = true" ng-mouseleave="hover = false">
-                <span>{{at.title}}</span>
+                <span ng-bind-html="at.title | highlight: search"></span>
                 <div class="btn-group pull-right btn-admin-list-item" role="group">
                     <a href="#/activityTypes/{{at.id}}" class="btn btn-sm" ng-class="{'btn-primary': hover, 'btn-default': !hover}" role="button"><i class="fa fa-pencil"></i> Edit</a>
                     <button class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="delete(at.id)"><i class="fa fa-times"></i></button>
