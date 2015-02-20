@@ -14,7 +14,7 @@
     <div class="col-md-8">
         <ul class="list-group">
             <li class="list-group-item recursive-admin-list-item"
-                ng-repeat="pc in projectCategories"
+                ng-repeat="pc in projectCategories | orderObjectBy:'refIdComplete'"
                 ng-include="'app/projectCategory/projectCategoryListTemplate.html'"
                 ng-class="{'recursive-admin-list-item-hover': hasFocus(pc.id)}"
                 ng-mouseenter="focus(pc.id)" ng-mouseleave="focus(null)">

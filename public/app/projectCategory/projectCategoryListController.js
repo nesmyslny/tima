@@ -62,7 +62,6 @@ function ($scope, _, ProjectCategory, popupService) {
         popupService.showForm("Edit Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Save", "Cancel")
         .result.then(function() {
             ProjectCategory.save(data, function() {
-                category.title = data.title;
                 _.assign(category, data);
             });
         });

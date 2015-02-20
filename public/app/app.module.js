@@ -49,13 +49,6 @@ angular
             signedIn: checkSignedIn
         }
     })
-    .when('/activityTypes/:id', {
-        templateUrl: 'app/activityType/activityType.html',
-        controller: 'ActivityTypeController',
-        resolve: {
-            signedIn: checkSignedIn
-        }
-    })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')
     })
