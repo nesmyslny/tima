@@ -12,7 +12,7 @@ function ($scope, ActivityType, messageService, popupService) {
     $scope.list();
 
     $scope.delete = function(id) {
-        popupService.show('Delete Activity Type', 'Do you really want to delete this activity type?', 'Delete', 'Cancel')
+        popupService.showSimple('Delete Activity Type', 'Do you really want to delete this activity type?', 'Delete', 'Cancel')
         .result.then(function() {
             ActivityType.delete({id:id}, function() {
                 $scope.list();

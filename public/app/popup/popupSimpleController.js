@@ -1,4 +1,4 @@
-angular.module('tima').controller('PopupController',
+angular.module('tima').controller('PopupSimpleController',
 ['$scope', '$modalInstance', 'title', 'body', 'acceptButton', 'cancelButton',
 function ($scope, $modalInstance, title, body, acceptButton, cancelButton) {
 

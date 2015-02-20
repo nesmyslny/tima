@@ -13,7 +13,7 @@ function ($scope, Project, popupService) {
     $scope.list();
 
     $scope.delete = function(id) {
-        popupService.show('Delete Project', 'Do you really want to delete this project?', 'Delete', 'Cancel')
+        popupService.showSimple('Delete Project', 'Do you really want to delete this project?', 'Delete', 'Cancel')
         .result.then(function() {
             Project.delete({id:id}, function() {
                 $scope.list();

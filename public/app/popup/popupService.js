@@ -3,10 +3,10 @@ angular.module('tima').factory('popupService',
 function($modal) {
 
     var service = {
-        show: function(title, body, acceptButton, cancelButton) {
+        showSimple: function(title, body, acceptButton, cancelButton) {
             return $modal.open({
-                templateUrl: 'app/popup/popupTemplate.html',
-                controller: 'PopupController',
+                templateUrl: 'app/popup/popupSimpleTemplate.html',
+                controller: 'PopupSimpleController',
                 resolve: {
                     title: function() { return title; },
                     body: function() { return body; },

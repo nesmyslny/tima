@@ -74,7 +74,7 @@ function ($scope, _, ProjectCategory, popupService) {
             categories = parent.projectCategories;
         }
 
-        popupService.show('Delete Project Category', 'Do you really want to delete this project category?', 'Delete', 'Cancel')
+        popupService.showSimple('Delete Project Category', 'Do you really want to delete this project category?', 'Delete', 'Cancel')
         .result.then(function() {
             ProjectCategory.delete({id:category.id}, function() {
                 var index = categories.indexOf(category);
