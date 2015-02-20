@@ -3,6 +3,7 @@ angular.module('tima').controller('ProjectListController',
 function ($scope, Project, popupService) {
 
     $scope.projects = [];
+    $scope.search = "";
 
     $scope.list = function() {
         $scope.projects = Project.query(function() {
