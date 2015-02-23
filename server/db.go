@@ -573,3 +573,12 @@ func (db *DB) IsProjectCategoryReferenced(projectCategory *ProjectCategory) (boo
 
 	return false, nil
 }
+
+func (db *DB) GetUsers() ([]User, error) {
+	var users []User
+	_, err := db.dbMap.Select(&users, "select * from user order by username")
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

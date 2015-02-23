@@ -1,6 +1,9 @@
 package server
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 type UserAPI struct {
 	db   *DB
@@ -36,6 +39,22 @@ func (userAPI *UserAPI) IsSignedInHandler(w http.ResponseWriter, r *http.Request
 	return jsonResultBool(signedIn)
 }
 
+func (userAPI *UserAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	return nil, &HandlerError{errors.New("not implemented"), "not implemented", http.StatusNotImplemented}
+}
+
+func (userAPI *UserAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	users, err := userAPI.getList()
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't retrieve users", http.StatusInternalServerError}
+	}
+	return users, nil
+}
+
+func (userAPI *UserAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+	return nil, &HandlerError{errors.New("not implemented"), "not implemented", http.StatusNotImplemented}
+}
+
 func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
 	pwdHash, err := userAPI.auth.GeneratePasswordHash(pwd)
 	if err != nil {
@@ -57,4 +76,12 @@ func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, l
 	}
 
 	return user, nil
+}
+
+func (userAPI *UserAPI) getList() ([]User, error) {
+	users, err := userAPI.db.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

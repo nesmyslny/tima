@@ -52,6 +52,10 @@ func main() {
 	router.Handle("/activityTypes", server.NewAuthHandler(activityTypeAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
 	router.Handle("/activityTypes/{id}", server.NewAuthHandler(activityTypeAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
 
+	router.Handle("/users", server.NewAuthHandler(userAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/users/{id}", server.NewAuthHandler(userAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
+	router.Handle("/users", server.NewAuthHandler(userAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
+
 	router.Handle("/projectActivityTypes", server.NewAuthHandler(activityTypeAPI.GetActivityViewListHandler, auth.AuthenticateRequest)).Methods("GET")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))

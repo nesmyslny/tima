@@ -49,6 +49,13 @@ angular
             signedIn: checkSignedIn
         }
     })
+    .when('/users', {
+        templateUrl: 'app/user/userList.html',
+        controller: 'UserListController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')
     })
