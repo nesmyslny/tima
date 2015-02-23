@@ -40,7 +40,16 @@ func (userAPI *UserAPI) IsSignedInHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (userAPI *UserAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemented", http.StatusNotImplemented}
+	id, err := getRouteVarInt(r, "id")
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	requestedUser, err := userAPI.get(id)
+	if err != nil {
+		return nil, &HandlerError{err, "unknown id", http.StatusBadRequest}
+	}
+	return requestedUser, nil
 }
 
 func (userAPI *UserAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
@@ -52,7 +61,20 @@ func (userAPI *UserAPI) GetListHandler(w http.ResponseWriter, r *http.Request, u
 }
 
 func (userAPI *UserAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	return nil, &HandlerError{errors.New("not implemented"), "not implemented", http.StatusNotImplemented}
+	var userRequest User
+	err := unmarshalJSON(r.Body, &userRequest)
+	if err != nil {
+		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
+	}
+
+	err = userAPI.save(&userRequest)
+	if err != nil {
+		if err == errUsernameUnavailable {
+			return nil, &HandlerError{err, "Error: Specified Username is not available.", http.StatusBadRequest}
+		}
+		return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
+	}
+	return jsonResultInt(userRequest.ID)
 }
 
 func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
@@ -78,10 +100,45 @@ func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, l
 	return user, nil
 }
 
+func (userAPI *UserAPI) get(id int) (*User, error) {
+	user, err := userAPI.db.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (userAPI *UserAPI) getList() ([]User, error) {
 	users, err := userAPI.db.GetUsers()
 	if err != nil {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (userAPI *UserAPI) save(user *User) error {
+	var err error
+
+	if user.ID < 0 {
+		available, err := userAPI.db.IsUsernameAvailable(user.Username)
+		if err != nil {
+			return err
+		}
+		if !available {
+			return errUsernameUnavailable
+		}
+	}
+
+	if user.NewPassword != "" {
+		if user.NewPassword == user.NewPasswordConfirm {
+			user.PasswordHash, err = userAPI.auth.GeneratePasswordHash(user.NewPassword)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("Passwords do not match")
+		}
+	}
+
+	return userAPI.db.SaveUser(user)
 }

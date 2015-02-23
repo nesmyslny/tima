@@ -3,12 +3,14 @@ package server
 import "time"
 
 type User struct {
-	ID           int    `db:"id" json:"id"`
-	Username     string `db:"username" json:"username"`
-	PasswordHash []byte `db:"password_hash" json:"-"`
-	FirstName    string `db:"first_name" json:"firstName"`
-	LastName     string `db:"last_name" json:"lastName"`
-	Email        string `db:"email" json:"email"`
+	ID                 int    `db:"id" json:"id"`
+	Username           string `db:"username" json:"username"`
+	PasswordHash       []byte `db:"password_hash" json:"-"`
+	FirstName          string `db:"first_name" json:"firstName"`
+	LastName           string `db:"last_name" json:"lastName"`
+	Email              string `db:"email" json:"email"`
+	NewPassword        string `db:"-" json:"newPassword"`
+	NewPasswordConfirm string `db:"-" json:"newPasswordConfirm"`
 }
 
 type Project struct {
