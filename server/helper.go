@@ -13,6 +13,7 @@ import (
 )
 
 var errItemInUse = errors.New("Item is already in use")
+var errUsernameUnavailable = errors.New("Username unavailable")
 
 func jsonResult(boolResult bool, stringResult string, intResult int) (interface{}, *HandlerError) {
 	return JsonResult{boolResult, stringResult, intResult}, nil

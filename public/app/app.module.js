@@ -1,5 +1,5 @@
 angular
-.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'ui.select', 'jwt-decode', 'angular-momentjs'])
+.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'validation.match', 'ui.select', 'jwt-decode', 'angular-momentjs'])
 .constant('_', window._) // use lodash via DI in controllers, etc.
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', function($routeProvider, $httpProvider, uiSelectConfig) {
 
@@ -45,6 +45,27 @@ angular
     .when('/activityTypes', {
         templateUrl: 'app/activityType/activityTypeList.html',
         controller: 'ActivityTypeListController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
+    .when('/users', {
+        templateUrl: 'app/user/userList.html',
+        controller: 'UserListController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
+    .when('/users/:id', {
+        templateUrl: 'app/user/userAdministration.html',
+        controller: 'UserController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
+    .when('/userSettings', {
+        templateUrl: 'app/user/userSettings.html',
+        controller: 'UserController',
         resolve: {
             signedIn: checkSignedIn
         }

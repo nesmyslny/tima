@@ -1,0 +1,19 @@
+<div class="row margin-bottom-20">
+    <div class="col-md-12">
+        <h1>User <small ng-bind="user.username"></small></h1>
+    </div>
+</div>
+
+<form name="formUser" class="form-horizontal" role="form" ng-submit="save()" novalidate>
+    <div ng-include="'app/user/userPartial.html'"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="pull-right">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

@@ -95,7 +95,17 @@ func (db *DB) SaveUser(user *User) error {
 	if user.ID < 0 {
 		err = db.dbMap.Insert(user)
 	} else {
-		_, err = db.dbMap.Update(user)
+		// password hash is only provided, if password needs to be changed. to prevent empty password hashes, this
+		// statement is explicitly specified.
+		sql := "update user set username = ?, first_name = ?, last_name = ?, email = ?%s where id = ?"
+
+		if len(user.PasswordHash) == 0 {
+			sql := fmt.Sprintf(sql, "")
+			_, err = db.dbMap.Exec(sql, user.Username, user.FirstName, user.LastName, user.Email, user.ID)
+		} else {
+			sql := fmt.Sprintf(sql, ", password_hash = ?")
+			_, err = db.dbMap.Exec(sql, user.Username, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.ID)
+		}
 	}
 	return err
 }
@@ -572,4 +582,31 @@ func (db *DB) IsProjectCategoryReferenced(projectCategory *ProjectCategory) (boo
 	}
 
 	return false, nil
+}
+
+func (db *DB) GetUsers() ([]User, error) {
+	var users []User
+	_, err := db.dbMap.Select(&users, "select * from user order by username")
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (db *DB) GetUser(id int) (*User, error) {
+	obj, err := db.dbMap.Get(User{}, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return obj.(*User), nil
+}
+
+func (db *DB) IsUsernameAvailable(username string) (bool, error) {
+	exists, err := db.dbMap.SelectInt("select exists(select id from user where username = ?)", username)
+	if err != nil {
+		return false, err
+	}
+
+	return exists == 0, nil
 }

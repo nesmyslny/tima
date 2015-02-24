@@ -1,0 +1,42 @@
+<div class="row form-group" show-errors>
+    <label for="username" class="col-md-2 control-label">Username</label>
+    <div class="col-md-6">
+        <input type="text" class="form-control" id="username" name="username" ng-model="user.username" maxlength="50" placeholder="Username" ng-disabled="user.id !== -1" required />
+    </div>
+</div>
+
+<div class="row form-group" show-errors>
+    <label for="firstName" class="col-md-2 control-label">First Name</label>
+    <div class="col-md-6">
+        <input type="text" class="form-control" id="firtName" name="firstName" ng-model="user.firstName" maxlength="50" placeholder="First Name" />
+    </div>
+</div>
+
+<div class="row form-group" show-errors>
+    <label for="lastName" class="col-md-2 control-label">Last Name</label>
+    <div class="col-md-6">
+        <input type="text" class="form-control" id="lastName" name="lastName" ng-model="user.lastName" maxlength="50" placeholder="Last Name" />
+    </div>
+</div>
+
+<div class="row form-group" show-errors>
+    <label for="email" class="col-md-2 control-label">Email</label>
+    <div class="col-md-6">
+        <input type="email" class="form-control" id="email" name="email" ng-model="user.email" maxlength="254" placeholder="Email" required />
+    </div>
+</div>
+
+<div class="row form-group" show-errors>
+    <label for="passwordNew" class="col-md-2 control-label">Password</label>
+    <div class="col-md-6">
+        <input type="password" class="form-control" id="passwordNew" name="passwordNew" ng-model="user.newPassword" maxlength="50" placeholder="Password" ng-required="user.id === -1" />
+    </div>
+</div>
+
+<div class="row form-group" show-errors>
+    <label for="passwordConfirm" class="col-md-2 control-label sr-only">Password</label>
+    <div class="col-md-6">
+        <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" ng-model="user.newPasswordConfirm" maxlength="50" placeholder="Confirm Password" ng-required="user.id === -1" match="user.newPassword" />
+        <small class="help-block" ng-show="formUser.passwordConfirm.$error.match">Passwords do not match</small>
+    </div>
+</div>
