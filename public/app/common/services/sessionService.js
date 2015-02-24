@@ -1,6 +1,6 @@
 angular.module('tima').factory('sessionService',
-['$window',
-function($window) {
+['$window', '_',
+function($window, _) {
     function getUserOrNull() {
         if ($window.sessionStorage.user) {
             return JSON.parse($window.sessionStorage.user);
@@ -17,6 +17,14 @@ function($window) {
             $window.sessionStorage.token = service.token = token;
             $window.sessionStorage.user = JSON.stringify(user);
             service.user = user;
+        },
+
+        updateUser: function (user) {
+            // todo: is there a lodash-function for this? (copying only properties, which are in source.)
+            _.forOwn(service.user, function(value, key, object) {
+                object[key] = user[key];
+            });
+            $window.sessionStorage.user = JSON.stringify(service.user);
         },
 
         delete: function() {

@@ -76,11 +76,15 @@
     <ul class="nav navbar-nav navbar-right">
         <li class="dropdown" dropdown>
             <a href="#" class="dropdown-toggle" dropdown-toggle role="button">
-                <span ng-bind="username"></span>
+                <span ng-bind="user.username" ng-show="!user.firstName || !user.lastName"></span>
+                <span ng-show="user.firstName && user.lastName">
+                    <span ng-bind="user.firstName"></span>
+                    <span ng-bind="user.lastName"></span>
+                </span>
                 <i class="fa fa-caret-down fa-fw"></i>
             </a>
             <ul class="dropdown-menu">
-                <li><a href="#"><i class="fa fa-cog fa-fw"></i> Settings</a></li>
+                <li><a ng-href="#/userSettings"><i class="fa fa-cog fa-fw"></i> Settings</a></li>
                 <li class="divider"></li>
                 <li><a href="" ng-click="signout()"><i class="fa fa-sign-out fa-fw"></i> Sign out</a></li>
             </ul>

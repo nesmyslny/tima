@@ -57,7 +57,14 @@ angular
         }
     })
     .when('/users/:id', {
-        templateUrl: 'app/user/user.html',
+        templateUrl: 'app/user/userAdministration.html',
+        controller: 'UserController',
+        resolve: {
+            signedIn: checkSignedIn
+        }
+    })
+    .when('/userSettings', {
+        templateUrl: 'app/user/userSettings.html',
         controller: 'UserController',
         resolve: {
             signedIn: checkSignedIn

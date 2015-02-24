@@ -1,13 +1,13 @@
 angular.module('tima').controller('NavbarController',
 ['$scope', '$moment', 'authService',
 function ($scope, $moment, authService) {
-    $scope.username = '';
+    $scope.user = {};
     $scope.isSignedIn = false;
-    $scope.$watch(authService.getUser, usernameWatchCallback, true);
+    $scope.$watch(authService.getUser, userWatchCallback, true);
     $scope.activitiesPathToday = 'activities/' + $moment().format('YYYY-MM-DD');
 
-    function usernameWatchCallback(newVal) {
-        $scope.username = newVal ? newVal.username : '';
+    function userWatchCallback(newVal) {
+        $scope.user = newVal ? newVal : {};
         $scope.isSignedIn = Boolean(newVal);
     }
 
