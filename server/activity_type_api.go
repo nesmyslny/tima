@@ -10,8 +10,8 @@ func NewActivityTypeAPI(db *DB) *ActivityTypeAPI {
 	return &ActivityTypeAPI{db}
 }
 
-func (activityTypeAPI *ActivityTypeAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (activityTypeAPI *ActivityTypeAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -23,7 +23,7 @@ func (activityTypeAPI *ActivityTypeAPI) GetHandler(w http.ResponseWriter, r *htt
 	return activityType, nil
 }
 
-func (activityTypeAPI *ActivityTypeAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	activityTypes, err := activityTypeAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve activity types", http.StatusInternalServerError}
@@ -31,7 +31,7 @@ func (activityTypeAPI *ActivityTypeAPI) GetListHandler(w http.ResponseWriter, r 
 	return activityTypes, nil
 }
 
-func (activityTypeAPI *ActivityTypeAPI) GetActivityViewListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) GetActivityViewListHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	list, err := activityTypeAPI.getProjectActivityTypeViewList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects/activities", http.StatusInternalServerError}
@@ -39,9 +39,9 @@ func (activityTypeAPI *ActivityTypeAPI) GetActivityViewListHandler(w http.Respon
 	return list, nil
 }
 
-func (activityTypeAPI *ActivityTypeAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityTypeAPI *ActivityTypeAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var activityType ActivityType
-	err := unmarshalJSON(r.Body, &activityType)
+	err := context.GetReqBodyJSON(&activityType)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -53,8 +53,8 @@ func (activityTypeAPI *ActivityTypeAPI) SaveHandler(w http.ResponseWriter, r *ht
 	return jsonResultInt(activityType.ID)
 }
 
-func (activityTypeAPI *ActivityTypeAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (activityTypeAPI *ActivityTypeAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}

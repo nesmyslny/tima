@@ -33,30 +33,30 @@ func main() {
 	createAnonRoute(router, "/signin", "POST", userAPI.SigninHandler)
 	createAnonRoute(router, "/issignedin", "GET", userAPI.IsSignedInHandler)
 
-	createAuthRoute(router, auth, "/activities/{day}", "GET", activityAPI.GetByDayHandler)
-	createAuthRoute(router, auth, "/activities", "POST", activityAPI.SaveHandler)
-	createAuthRoute(router, auth, "/activities/{id}", "DELETE", activityAPI.DeleteHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/activities/{day}", "GET", activityAPI.GetByDayHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/activities", "POST", activityAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/activities/{id}", "DELETE", activityAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, "/projects", "GET", projectAPI.GetListHandler)
-	createAuthRoute(router, auth, "/projects/{id}", "GET", projectAPI.GetHandler)
-	createAuthRoute(router, auth, "/projects", "POST", projectAPI.SaveHandler)
-	createAuthRoute(router, auth, "/projects/{id}", "DELETE", projectAPI.DeleteHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projects", "GET", projectAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projects/{id}", "GET", projectAPI.GetHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projects", "POST", projectAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projects/{id}", "DELETE", projectAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, "/projectCategories/tree", "GET", projectCategoryAPI.GetTreeHandler)
-	createAuthRoute(router, auth, "/projectCategories/list", "GET", projectCategoryAPI.GetListHandler)
-	createAuthRoute(router, auth, "/projectCategories", "POST", projectCategoryAPI.SaveHandler)
-	createAuthRoute(router, auth, "/projectCategories/{id}", "DELETE", projectCategoryAPI.DeleteHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/tree", "GET", projectCategoryAPI.GetTreeHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/list", "GET", projectCategoryAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories", "POST", projectCategoryAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/{id}", "DELETE", projectCategoryAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, "/activityTypes", "GET", activityTypeAPI.GetListHandler)
-	createAuthRoute(router, auth, "/activityTypes/{id}", "GET", activityTypeAPI.GetHandler)
-	createAuthRoute(router, auth, "/activityTypes", "POST", activityTypeAPI.SaveHandler)
-	createAuthRoute(router, auth, "/activityTypes/{id}", "DELETE", activityTypeAPI.DeleteHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes", "GET", activityTypeAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes/{id}", "GET", activityTypeAPI.GetHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes", "POST", activityTypeAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes/{id}", "DELETE", activityTypeAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, "/users", "GET", userAPI.GetListHandler)
-	createAuthRoute(router, auth, "/users/{id}", "GET", userAPI.GetHandler)
-	createAuthRoute(router, auth, "/users", "POST", userAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeAdmin, "/users", "GET", userAPI.GetListHandler)
+	createAuthRoute(router, auth, userAPI.AuthorizeGet, "/users/{id}", "GET", userAPI.GetHandler)
+	createAuthRoute(router, auth, userAPI.AuthorizeSave, "/users", "POST", userAPI.SaveHandler)
 
-	createAuthRoute(router, auth, "/projectActivityTypes", "GET", activityTypeAPI.GetActivityViewListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/projectActivityTypes", "GET", activityTypeAPI.GetActivityViewListHandler)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
@@ -64,13 +64,15 @@ func main() {
 }
 
 func createAnonRoute(router *mux.Router, path string, method string,
-	handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *server.HandlerError)) {
+	handlerFunc func(context *server.HandlerContext) (interface{}, *server.HandlerError)) {
 	router.Handle(path, server.NewAnonHandler(handlerFunc)).Methods(method)
 }
 
-func createAuthRoute(router *mux.Router, auth *server.Auth, path string, method string,
-	handlerFunc func(w http.ResponseWriter, r *http.Request, user *server.User) (interface{}, *server.HandlerError)) {
-	router.Handle(path, server.NewAuthHandler(handlerFunc, auth.AuthenticateRequest)).Methods(method)
+func createAuthRoute(router *mux.Router, auth *server.Auth,
+	authorizeFunc func(context *server.HandlerContext) (bool, error),
+	path string, method string,
+	handlerFunc func(context *server.HandlerContext) (interface{}, *server.HandlerError)) {
+	router.Handle(path, server.NewAuthHandler(handlerFunc, auth.AuthenticateUser, authorizeFunc)).Methods(method)
 }
 
 func initDB() *server.DB {

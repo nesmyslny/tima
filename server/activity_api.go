@@ -13,22 +13,22 @@ func NewActivityAPI(db *DB) *ActivityAPI {
 	return &ActivityAPI{db}
 }
 
-func (activityAPI *ActivityAPI) GetByDayHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	day, err := getRouteVarTime(r, "day", "2006-01-02")
+func (activityAPI *ActivityAPI) GetByDayHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	day, err := context.GetRouteVarTime("day", dateLayout)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	activities, err := activityAPI.getByDay(user.ID, day)
+	activities, err := activityAPI.getByDay(context.User.ID, day)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve activities", http.StatusInternalServerError}
 	}
 	return activities, nil
 }
 
-func (activityAPI *ActivityAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (activityAPI *ActivityAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var activity Activity
-	err := unmarshalJSON(r.Body, &activity)
+	err := context.GetReqBodyJSON(&activity)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -40,8 +40,8 @@ func (activityAPI *ActivityAPI) SaveHandler(w http.ResponseWriter, r *http.Reque
 	return jsonResultBool(true)
 }
 
-func (activityAPI *ActivityAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (activityAPI *ActivityAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}

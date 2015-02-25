@@ -2,8 +2,15 @@ package server
 
 import "time"
 
+const RoleUser int = 10
+const RoleManager int = 30
+const RoleAdmin int = 99
+
+const dateLayout string = "2006-01-02"
+
 type User struct {
 	ID                 int    `db:"id" json:"id"`
+	Role               *int   `db:"role" json:"role"`
 	Username           string `db:"username" json:"username"`
 	PasswordHash       []byte `db:"password_hash" json:"-"`
 	FirstName          string `db:"first_name" json:"firstName"`

@@ -13,8 +13,9 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	// here, they reflect the indexes of the slices, to referenced them more easy in further inserts/updates.
 
 	users := []interface{}{
-		&User{0, "admin", testPwdHash, "firstname", "lastname", "admin@example.com", "", ""},
-		&User{1, "user", testPwdHash, "userfirst", "userlast", "user@example.com", "", ""}}
+		&User{0, intPtr(RoleAdmin), "admin", testPwdHash, "Nny", "C.", "admin@example.com", "", ""},
+		&User{0, intPtr(RoleManager), "manager", testPwdHash, "Zim", "Irken", "manager@example.com", "", ""},
+		&User{1, intPtr(RoleUser), "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", "", ""}}
 	if err = db.insertTestData(trans, users); err != nil {
 		return err
 	}

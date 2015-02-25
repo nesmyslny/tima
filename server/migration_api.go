@@ -13,7 +13,7 @@ func NewMigrationAPI(db *DB, userAPI *UserAPI) *MigrationAPI {
 	return &MigrationAPI{db, userAPI}
 }
 
-func (migrationAPI *MigrationAPI) UpgradeHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
+func (migrationAPI *MigrationAPI) UpgradeHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	err := migrationAPI.migrate()
 	if err != nil {
 		// todo: logging

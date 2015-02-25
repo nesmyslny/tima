@@ -57,34 +57,40 @@ func (auth *Auth) createToken(user *User) (string, error) {
 	return token.SignedString(auth.privateKey)
 }
 
-func (auth *Auth) getValidToken(r *http.Request) *jwt.Token {
+func (auth *Auth) getToken(r *http.Request) (*jwt.Token, error) {
 	token, err := jwt.ParseFromRequest(r, func(token *jwt.Token) (interface{}, error) {
 		return auth.privateKey, nil
 	})
-	if err == nil && token.Valid {
-		return token
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	return token, nil
 }
 
-func (auth *Auth) ValidateToken(r *http.Request) bool {
-	token := auth.getValidToken(r)
-	if token == nil {
+func (auth *Auth) ValidateToken(context *HandlerContext) bool {
+	token, err := auth.getToken(context.Request)
+	if err != nil {
 		return false
 	}
-	return true
+	return token.Valid
 }
 
-func (auth *Auth) AuthenticateRequest(r *http.Request) (bool, *User) {
-	token := auth.getValidToken(r)
-	if token != nil {
-		user, err := auth.extractUser(token.Raw)
-		if err != nil {
-			return false, nil
-		}
-		return true, user
+func (auth *Auth) AuthenticateUser(context *HandlerContext) (bool, error) {
+	token, err := auth.getToken(context.Request)
+	if err != nil {
+		return false, err
 	}
-	return false, nil
+	if !token.Valid {
+		return false, errors.New("Invalid token")
+	}
+
+	user, err := auth.extractUser(token.Raw)
+	if err != nil {
+		return false, err
+	}
+	context.User = user
+	return true, nil
 }
 
 func (auth *Auth) extractUser(token string) (*User, error) {
@@ -92,7 +98,7 @@ func (auth *Auth) extractUser(token string) (*User, error) {
 	// this seems lika a ridiculous solution:
 	// 1. get part of token, which contains claims (middle part):
 	//    eyJhb[...]XVCJ9.eyJle[...]IifX0.4ZEVb[...]xc8ig -> eyJle[...]IifX0
-	// 2. decote that segment using jwt -> []byte
+	// 2. decode that segment using jwt -> []byte
 	// 3. []byte to string:
 	//    {"exp":1414463656,"user":{"id":1,"username":"admin","first_name":"","last_name":"","email":""}}
 	// 4. extract user json part (using regexp):
