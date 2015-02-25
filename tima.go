@@ -30,8 +30,8 @@ func main() {
 	// todo: secure upgrade route (-> implement installation/upgrading
 	createAnonRoute(router, "/upgrade", "POST", migrationAPI.UpgradeHandler)
 
-	createAnonRoute(router, "/signin", "POST", userAPI.SigninHandler)
-	createAnonRoute(router, "/issignedin", "GET", userAPI.IsSignedInHandler)
+	createAnonRoute(router, "/signIn", "POST", userAPI.SigninHandler)
+	createAnonRoute(router, "/isSignedIn", "GET", userAPI.IsSignedInHandler)
 
 	createAuthRoute(router, auth, server.AuthorizeUser, "/activities/{day}", "GET", activityAPI.GetByDayHandler)
 	createAuthRoute(router, auth, server.AuthorizeUser, "/activities", "POST", activityAPI.SaveHandler)
