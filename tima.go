@@ -28,39 +28,49 @@ func main() {
 	router := mux.NewRouter()
 
 	// todo: secure upgrade route (-> implement installation/upgrading
-	router.Handle("/upgrade", server.NewAnonHandler(migrationAPI.UpgradeHandler)).Methods("POST")
+	createAnonRoute(router, "/upgrade", "POST", migrationAPI.UpgradeHandler)
 
-	router.Handle("/signin", server.NewAnonHandler(userAPI.SigninHandler)).Methods("POST")
-	router.Handle("/issignedin", server.NewAnonHandler(userAPI.IsSignedInHandler)).Methods("GET")
+	createAnonRoute(router, "/signin", "POST", userAPI.SigninHandler)
+	createAnonRoute(router, "/issignedin", "GET", userAPI.IsSignedInHandler)
 
-	router.Handle("/activities/{day}", server.NewAuthHandler(activityAPI.GetByDayHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/activities", server.NewAuthHandler(activityAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
-	router.Handle("/activities/{id}", server.NewAuthHandler(activityAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+	createAuthRoute(router, auth, "/activities/{day}", "GET", activityAPI.GetByDayHandler)
+	createAuthRoute(router, auth, "/activities", "POST", activityAPI.SaveHandler)
+	createAuthRoute(router, auth, "/activities/{id}", "DELETE", activityAPI.DeleteHandler)
 
-	router.Handle("/projects", server.NewAuthHandler(projectAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/projects/{id}", server.NewAuthHandler(projectAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/projects", server.NewAuthHandler(projectAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
-	router.Handle("/projects/{id}", server.NewAuthHandler(projectAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+	createAuthRoute(router, auth, "/projects", "GET", projectAPI.GetListHandler)
+	createAuthRoute(router, auth, "/projects/{id}", "GET", projectAPI.GetHandler)
+	createAuthRoute(router, auth, "/projects", "POST", projectAPI.SaveHandler)
+	createAuthRoute(router, auth, "/projects/{id}", "DELETE", projectAPI.DeleteHandler)
 
-	router.Handle("/projectCategories/tree", server.NewAuthHandler(projectCategoryAPI.GetTreeHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/projectCategories/list", server.NewAuthHandler(projectCategoryAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/projectCategories", server.NewAuthHandler(projectCategoryAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
-	router.Handle("/projectCategories/{id}", server.NewAuthHandler(projectCategoryAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+	createAuthRoute(router, auth, "/projectCategories/tree", "GET", projectCategoryAPI.GetTreeHandler)
+	createAuthRoute(router, auth, "/projectCategories/list", "GET", projectCategoryAPI.GetListHandler)
+	createAuthRoute(router, auth, "/projectCategories", "POST", projectCategoryAPI.SaveHandler)
+	createAuthRoute(router, auth, "/projectCategories/{id}", "DELETE", projectCategoryAPI.DeleteHandler)
 
-	router.Handle("/activityTypes", server.NewAuthHandler(activityTypeAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/activityTypes/{id}", server.NewAuthHandler(activityTypeAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/activityTypes", server.NewAuthHandler(activityTypeAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
-	router.Handle("/activityTypes/{id}", server.NewAuthHandler(activityTypeAPI.DeleteHandler, auth.AuthenticateRequest)).Methods("DELETE")
+	createAuthRoute(router, auth, "/activityTypes", "GET", activityTypeAPI.GetListHandler)
+	createAuthRoute(router, auth, "/activityTypes/{id}", "GET", activityTypeAPI.GetHandler)
+	createAuthRoute(router, auth, "/activityTypes", "POST", activityTypeAPI.SaveHandler)
+	createAuthRoute(router, auth, "/activityTypes/{id}", "DELETE", activityTypeAPI.DeleteHandler)
 
-	router.Handle("/users", server.NewAuthHandler(userAPI.GetListHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/users/{id}", server.NewAuthHandler(userAPI.GetHandler, auth.AuthenticateRequest)).Methods("GET")
-	router.Handle("/users", server.NewAuthHandler(userAPI.SaveHandler, auth.AuthenticateRequest)).Methods("POST")
+	createAuthRoute(router, auth, "/users", "GET", userAPI.GetListHandler)
+	createAuthRoute(router, auth, "/users/{id}", "GET", userAPI.GetHandler)
+	createAuthRoute(router, auth, "/users", "POST", userAPI.SaveHandler)
 
-	router.Handle("/projectActivityTypes", server.NewAuthHandler(activityTypeAPI.GetActivityViewListHandler, auth.AuthenticateRequest)).Methods("GET")
+	createAuthRoute(router, auth, "/projectActivityTypes", "GET", activityTypeAPI.GetActivityViewListHandler)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
 	http.ListenAndServe(":8080", nil)
+}
+
+func createAnonRoute(router *mux.Router, path string, method string,
+	handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *server.HandlerError)) {
+	router.Handle(path, server.NewAnonHandler(handlerFunc)).Methods(method)
+}
+
+func createAuthRoute(router *mux.Router, auth *server.Auth, path string, method string,
+	handlerFunc func(w http.ResponseWriter, r *http.Request, user *server.User) (interface{}, *server.HandlerError)) {
+	router.Handle(path, server.NewAuthHandler(handlerFunc, auth.AuthenticateRequest)).Methods(method)
 }
 
 func initDB() *server.DB {
