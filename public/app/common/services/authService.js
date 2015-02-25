@@ -32,7 +32,7 @@ function($location, $q, JwtDecode, sessionService, Auth) {
         },
 
         isAuthorized: function(role) {
-            return true;
+            return sessionService.user.role >= role;
         },
 
         checkPermission: function(role) {
@@ -43,6 +43,7 @@ function($location, $q, JwtDecode, sessionService, Auth) {
                 }
 
                 if (!service.isAuthorized(role)) {
+                    $location.path("/");
                     return $q.reject();
                 }
             });
