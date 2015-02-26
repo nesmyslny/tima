@@ -18,8 +18,6 @@ type DB struct {
 	migrationTable   string
 }
 
-const dateLayout string = "2006-01-02"
-
 func NewDB(connectionString string) *DB {
 	dbAccess := &DB{
 		connectionString: connectionString,

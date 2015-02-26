@@ -12,38 +12,57 @@ type HandlerError struct {
 }
 
 type AnonHandler struct {
-	HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)
+	HandlerFunc func(context *HandlerContext) (interface{}, *HandlerError)
 }
 
 type AuthHandler struct {
-	HandlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError)
-	AuthFunc    func(r *http.Request) (bool, *User)
+	HandlerFunc      func(context *HandlerContext) (interface{}, *HandlerError)
+	AuthenticateFunc func(context *HandlerContext) (bool, error)
+	AuthorizeFunc    func(context *HandlerContext) (bool, error)
 }
 
-func NewAnonHandler(handlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError)) AnonHandler {
+func NewAnonHandler(handlerFunc func(context *HandlerContext) (interface{}, *HandlerError)) AnonHandler {
 	return AnonHandler{handlerFunc}
 }
 
 func NewAuthHandler(
-	handlerFunc func(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError),
-	authFunc func(r *http.Request) (bool, *User)) AuthHandler {
-	return AuthHandler{handlerFunc, authFunc}
+	handlerFunc func(context *HandlerContext) (interface{}, *HandlerError),
+	authenticateFunc func(context *HandlerContext) (bool, error),
+	authorizeFunc func(context *HandlerContext) (bool, error)) AuthHandler {
+	return AuthHandler{handlerFunc, authenticateFunc, authorizeFunc}
 }
 
 func (anonHandler AnonHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	response, hErr := anonHandler.HandlerFunc(w, r)
+	context := NewHandlerContext(w, r)
+	response, hErr := anonHandler.HandlerFunc(context)
 	serveHTTP(w, response, hErr)
 }
 
 func (authHandler AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	authorized, user := authHandler.AuthFunc(r)
+	context := NewHandlerContext(w, r)
 
-	if !authorized {
+	authenticated, err := authHandler.AuthenticateFunc(context)
+	if err != nil {
+		http.Error(w, "Error while authenticating the user.", http.StatusInternalServerError)
+		return
+	}
+	if !authenticated {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	response, hErr := authHandler.HandlerFunc(w, r, user)
+	authorized, err := authHandler.AuthorizeFunc(context)
+
+	if err != nil {
+		http.Error(w, "Error while authorize the user.", http.StatusInternalServerError)
+		return
+	}
+	if !authorized {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	response, hErr := authHandler.HandlerFunc(context)
 	serveHTTP(w, response, hErr)
 }
 

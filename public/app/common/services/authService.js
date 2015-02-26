@@ -1,20 +1,18 @@
 angular.module('tima').factory('authService',
-['$http', '$location', 'JwtDecode', 'sessionService',
-function($http, $location, JwtDecode, sessionService) {
+['$location', '$q', 'JwtDecode', 'sessionService', 'Auth',
+function($location, $q, JwtDecode, sessionService, Auth) {
     var service = {
         getUser: function() {
             return sessionService.user;
         },
 
         signIn: function(credentials, redirectPath) {
-            $http.post('/signin', credentials)
-            .success(function(data, status, headers, config) {
+            Auth.signIn(credentials, function(data) {
                 var tokenData = JwtDecode.decode(data.stringResult);
                 sessionService.init(data.stringResult, tokenData.user);
                 $location.path(redirectPath);
                 credentials.clear();
-            })
-            .error(function(data, status, headers, config) {
+            }, function() {
                 sessionService.delete();
                 credentials.clear();
             });
@@ -25,22 +23,30 @@ function($http, $location, JwtDecode, sessionService) {
             $location.path('signin');
         },
 
-        isSignedIn : function($q, $timeout, $http, $location, $rootScope){
-            var deferred = $q.defer();
-            $http.get('/issignedin')
-            .success(function(data, status, headers, config) {
-                if (data.boolResult) {
-                    $timeout(deferred.resolve, 0);
-                } else {
-                    $timeout(function(){deferred.reject();}, 0);
-                    service.signOut();
-                }
-            })
-            .error(function(data, status, headers, config) {
-                $timeout(function(){deferred.reject();}, 0);
-                service.signOut();
+        isAuthenticated: function() {
+            return Auth.isSignedIn().$promise.then(function(data) {
+                return data.boolResult;
+            }, function() {
+                return false;
             });
-            return deferred.promise;
+        },
+
+        isAuthorized: function(role) {
+            return sessionService.user.role >= role;
+        },
+
+        checkPermission: function(role) {
+            return service.isAuthenticated().then(function(authenticated) {
+                if (!authenticated) {
+                    service.signOut();
+                    return $q.reject();
+                }
+
+                if (!service.isAuthorized(role)) {
+                    $location.path("/");
+                    return $q.reject();
+                }
+            });
         }
     };
 

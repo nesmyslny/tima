@@ -10,8 +10,8 @@ func NewProjectAPI(db *DB) *ProjectAPI {
 	return &ProjectAPI{db}
 }
 
-func (projectAPI *ProjectAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (projectAPI *ProjectAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -23,7 +23,7 @@ func (projectAPI *ProjectAPI) GetHandler(w http.ResponseWriter, r *http.Request,
 	return project, nil
 }
 
-func (projectAPI *ProjectAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectAPI *ProjectAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	projects, err := projectAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
@@ -31,9 +31,9 @@ func (projectAPI *ProjectAPI) GetListHandler(w http.ResponseWriter, r *http.Requ
 	return projects, nil
 }
 
-func (projectAPI *ProjectAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var project Project
-	err := unmarshalJSON(r.Body, &project)
+	err := context.GetReqBodyJSON(&project)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -48,8 +48,8 @@ func (projectAPI *ProjectAPI) SaveHandler(w http.ResponseWriter, r *http.Request
 	return jsonResultInt(project.ID)
 }
 
-func (projectAPI *ProjectAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (projectAPI *ProjectAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}

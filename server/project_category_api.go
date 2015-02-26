@@ -10,7 +10,7 @@ func NewProjectCategoryAPI(db *DB) *ProjectCategoryAPI {
 	return &ProjectCategoryAPI{db}
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	projectCategories, err := projectCategoryAPI.getTree()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
@@ -18,7 +18,7 @@ func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(w http.ResponseWrit
 	return projectCategories, nil
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	projectCategories, err := projectCategoryAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
@@ -26,9 +26,9 @@ func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(w http.ResponseWrit
 	return projectCategories, nil
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var projectCategory ProjectCategory
-	err := unmarshalJSON(r.Body, &projectCategory)
+	err := context.GetReqBodyJSON(&projectCategory)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -40,8 +40,8 @@ func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(w http.ResponseWriter,
 	return jsonResultInt(projectCategory.ID)
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}

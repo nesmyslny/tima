@@ -14,9 +14,9 @@ func NewUserAPI(db *DB, auth *Auth) *UserAPI {
 	return &UserAPI{db, auth}
 }
 
-func (userAPI *UserAPI) SigninHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
+func (userAPI *UserAPI) SigninHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var credentials UserCredentials
-	err := unmarshalJSON(r.Body, &credentials)
+	err := context.GetReqBodyJSON(&credentials)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
@@ -34,25 +34,46 @@ func (userAPI *UserAPI) SigninHandler(w http.ResponseWriter, r *http.Request) (i
 	return jsonResultString(token)
 }
 
-func (userAPI *UserAPI) IsSignedInHandler(w http.ResponseWriter, r *http.Request) (interface{}, *HandlerError) {
-	signedIn := userAPI.auth.ValidateToken(r)
+func (userAPI *UserAPI) IsSignedInHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	signedIn := userAPI.auth.ValidateToken(context)
 	return jsonResultBool(signedIn)
 }
 
-func (userAPI *UserAPI) GetHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	id, err := getRouteVarInt(r, "id")
+func (userAPI *UserAPI) authorizeGetSave(requestUserId int, user *User) (bool, error) {
+	return *user.Role == RoleAdmin || requestUserId == user.ID, nil
+}
+
+func (userAPI *UserAPI) AuthorizeGet(context *HandlerContext) (bool, error) {
+	id, err := context.GetRouteVarInt("id")
+	if err != nil {
+		return false, err
+	}
+	return userAPI.authorizeGetSave(id, context.User)
+}
+
+func (userAPI *UserAPI) AuthorizeSave(context *HandlerContext) (bool, error) {
+	var user User
+	err := context.GetReqBodyJSON(&user)
+	if err != nil {
+		return false, err
+	}
+	return userAPI.authorizeGetSave(user.ID, context.User)
+}
+
+func (userAPI *UserAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	id, err := context.GetRouteVarInt("id")
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
 	requestedUser, err := userAPI.get(id)
 	if err != nil {
-		return nil, &HandlerError{err, "unknown id", http.StatusBadRequest}
+		return nil, &HandlerError{err, "Error: User could not be found.", http.StatusBadRequest}
 	}
 	return requestedUser, nil
 }
 
-func (userAPI *UserAPI) GetListHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
+func (userAPI *UserAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	users, err := userAPI.getList()
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve users", http.StatusInternalServerError}
@@ -60,21 +81,21 @@ func (userAPI *UserAPI) GetListHandler(w http.ResponseWriter, r *http.Request, u
 	return users, nil
 }
 
-func (userAPI *UserAPI) SaveHandler(w http.ResponseWriter, r *http.Request, user *User) (interface{}, *HandlerError) {
-	var userRequest User
-	err := unmarshalJSON(r.Body, &userRequest)
+func (userAPI *UserAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	var user User
+	err := context.GetReqBodyJSON(&user)
 	if err != nil {
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = userAPI.save(&userRequest)
+	err = userAPI.save(&user)
 	if err != nil {
 		if err == errUsernameUnavailable {
 			return nil, &HandlerError{err, "Error: Specified Username is not available.", http.StatusBadRequest}
 		}
 		return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(userRequest.ID)
+	return jsonResultInt(user.ID)
 }
 
 func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
