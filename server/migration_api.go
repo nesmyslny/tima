@@ -46,7 +46,7 @@ func (migrationAPI *MigrationAPI) postMigration() error {
 	}
 
 	if countUsers == 0 {
-		_, err = migrationAPI.userAPI.AddUser("admin", "pwd", "", "", "")
+		_, err = migrationAPI.userAPI.AddUser("admin", RoleAdmin, "pwd", "", "", "")
 	}
 
 	return err

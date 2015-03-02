@@ -98,7 +98,7 @@ func (userAPI *UserAPI) SaveHandler(context *HandlerContext) (interface{}, *Hand
 	return jsonResultInt(user.ID)
 }
 
-func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, lastName string, email string) (*User, error) {
+func (userAPI *UserAPI) AddUser(username string, role int, pwd string, firstName string, lastName string, email string) (*User, error) {
 	pwdHash, err := userAPI.auth.GeneratePasswordHash(pwd)
 	if err != nil {
 		return nil, err
@@ -106,6 +106,7 @@ func (userAPI *UserAPI) AddUser(username string, pwd string, firstName string, l
 
 	user := &User{
 		ID:           -1,
+		Role:         &role,
 		Username:     username,
 		PasswordHash: pwdHash,
 		FirstName:    firstName,
