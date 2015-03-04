@@ -33,6 +33,7 @@ func NewDB(connectionString string) *DB {
 	}
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
+	dbAccess.dbMap.AddTableWithName(Department{}, "department").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id")
 	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id")

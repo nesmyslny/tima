@@ -2,6 +2,7 @@
 create table user (
     id              integer         not null    auto_increment,
     role            integer         not null,
+    department_id   integer         not null,
     username        varchar(50)     not null,
     password_hash   binary(60)      not null,
     first_name      varchar(50)         null,

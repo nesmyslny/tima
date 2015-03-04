@@ -12,10 +12,18 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	// specified id in objects to insert will be overridden by auto-inc values in db.
 	// here, they reflect the indexes of the slices, to referenced them more easy in further inserts/updates.
 
+	departments := []interface{}{
+		&Department{0, nil, "Dept. 1"},
+		&Department{1, nil, "Dept. 1a"},
+		&Department{2, nil, "Dept. 1b"}}
+	if err = db.insertTestData(trans, departments); err != nil {
+		return err
+	}
+
 	users := []interface{}{
-		&User{0, intPtr(RoleAdmin), "admin", testPwdHash, "Nny", "C.", "admin@example.com", "", ""},
-		&User{1, intPtr(RoleManager), "manager", testPwdHash, "Zim", "Irken", "manager@example.com", "", ""},
-		&User{2, intPtr(RoleUser), "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", "", ""}}
+		&User{0, intPtr(RoleAdmin), &departments[0].(*Department).ID, "admin", testPwdHash, "Nny", "C.", "admin@example.com", "", ""},
+		&User{1, intPtr(RoleManager), &departments[1].(*Department).ID, "manager", testPwdHash, "Zim", "Irken", "manager@example.com", "", ""},
+		&User{2, intPtr(RoleUser), &departments[2].(*Department).ID, "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", "", ""}}
 	if err = db.insertTestData(trans, users); err != nil {
 		return err
 	}
@@ -65,6 +73,12 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	}
 
 	// todo: generate activity data (maybe random data for the current month?)
+
+	departments[1].(*Department).ParentID = &departments[0].(*Department).ID
+	departments[2].(*Department).ParentID = &departments[0].(*Department).ID
+	if err = db.updateTestData(trans, departments); err != nil {
+		return err
+	}
 
 	projectCategories[1].(*ProjectCategory).ParentID = &projectCategories[0].(*ProjectCategory).ID
 	projectCategories[2].(*ProjectCategory).ParentID = &projectCategories[0].(*ProjectCategory).ID
