@@ -23,6 +23,34 @@
     </div>
 
     <div class="row form-group" show-errors>
+        <label for="responsibleUser" class="col-md-2 control-label">Responsible</label>
+        <div class="col-md-6">
+            <ui-select name="responsibleUser" id="responsibleUser" class="form-control form-control-ui-select" ng-model="selectedResponsibleUser.selected" required>
+                <ui-select-match placeholder="Choose project responsible">
+                    <span ng-bind="$select.selected.username"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
+                    <span ng-bind-html="user.username | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+
+    <div class="row form-group" show-errors>
+        <label for="managerUser" class="col-md-2 control-label">Manager</label>
+        <div class="col-md-6">
+            <ui-select name="managerUser" id="managerUser" class="form-control form-control-ui-select" ng-model="selectedManagerUser.selected" required>
+                <ui-select-match placeholder="Choose project manager">
+                    <span ng-bind="$select.selected.username"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
+                    <span ng-bind-html="user.username | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+
+    <div class="row form-group" show-errors>
         <label for="projectCategory" class="col-md-2 control-label">Project category</label>
         <div class="col-md-6">
             <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" required>
@@ -42,7 +70,7 @@
         <label for="activityType" class="col-md-2 control-label">Activity types</label>
         <div class="col-md-5">
             <ui-select name="activityType" id="activityType" ng-model="selectedActivityType.selected">
-                <ui-select-match placeholder="Choose global activity type">{{$select.selected.title}}</ui-select-match>
+                <ui-select-match placeholder="Choose activity type">{{$select.selected.title}}</ui-select-match>
                 <ui-select-choices repeat="at in activityTypes | propsFilter: {title: $select.search}">
                     <div ng-bind-html="at.title | highlight: $select.search"></div>
                 </ui-select-choices>

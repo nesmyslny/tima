@@ -25,6 +25,8 @@ type Project struct {
 	ProjectCategoryID int            `db:"project_category_id" json:"projectCategoryId"`
 	RefID             string         `db:"ref_id" json:"refId"`
 	RefIDComplete     string         `db:"ref_id_complete" json:"refIdComplete"`
+	ResponsibleUserID *int           `db:"responsible_user_id" json:"responsibleUserId"`
+	ManagerUserID     *int           `db:"manager_user_id" json:"managerUserId"`
 	Title             string         `db:"title" json:"title"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
 }

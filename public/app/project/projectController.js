@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType',
-function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'User',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, User) {
 
     $scope.project = {
         id: -1,
@@ -14,11 +14,16 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.projectCategories = [];
     $scope.selectedProjectCategory = {};
 
+    $scope.users = [];
+    $scope.selectedResponsibleUser = {};
+    $scope.selectedManagerUser = {};
+
     $scope.fetch = function() {
         var id = parseInt($routeParams.id);
 
         $scope.projectCategories = ProjectCategory.queryList();
         $scope.activityTypes = ActivityType.query();
+        $scope.users = User.query();
 
         if (id > -1) {
             $scope.project = Project.get({id:id});
@@ -26,9 +31,12 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
 
         $q.all([
             $scope.project.$promise,
-            $scope.projectCategories.$promise
+            $scope.projectCategories.$promise,
+            $scope.users.$promise
         ]).then(function() {
             $scope.selectedProjectCategory.selected = _.find($scope.projectCategories, { 'id': $scope.project.projectCategoryId });
+            $scope.selectedResponsibleUser.selected = _.find($scope.users, { 'id': $scope.project.responsibleUserId });
+            $scope.selectedManagerUser.selected = _.find($scope.users, { 'id': $scope.project.managerUserId });
         });
     };
     $scope.fetch();
@@ -62,6 +70,8 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
         }
 
         $scope.project.projectCategoryId = $scope.selectedProjectCategory.selected.id;
+        $scope.project.responsibleUserId = $scope.selectedResponsibleUser.selected.id;
+        $scope.project.managerUserId = $scope.selectedManagerUser.selected.id;
 
         Project.save($scope.project, function() {
             $location.path('/projects');

@@ -14,8 +14,8 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 
 	users := []interface{}{
 		&User{0, intPtr(RoleAdmin), "admin", testPwdHash, "Nny", "C.", "admin@example.com", "", ""},
-		&User{0, intPtr(RoleManager), "manager", testPwdHash, "Zim", "Irken", "manager@example.com", "", ""},
-		&User{1, intPtr(RoleUser), "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", "", ""}}
+		&User{1, intPtr(RoleManager), "manager", testPwdHash, "Zim", "Irken", "manager@example.com", "", ""},
+		&User{2, intPtr(RoleUser), "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", "", ""}}
 	if err = db.insertTestData(trans, users); err != nil {
 		return err
 	}
@@ -34,10 +34,10 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	}
 
 	projects := []interface{}{
-		&Project{0, projectCategories[1].(*ProjectCategory).ID, "01", "AA/01", "Project 1", nil},
-		&Project{1, projectCategories[3].(*ProjectCategory).ID, "01", "AA02001/01", "Project 2", nil},
-		&Project{2, projectCategories[6].(*ProjectCategory).ID, "01", "BB01/01", "Project 3", nil},
-		&Project{3, projectCategories[7].(*ProjectCategory).ID, "02", "BB02/02", "Project 4", nil}}
+		&Project{0, projectCategories[1].(*ProjectCategory).ID, "01", "AA/01", &users[0].(*User).ID, &users[1].(*User).ID, "Project 1", nil},
+		&Project{1, projectCategories[3].(*ProjectCategory).ID, "01", "AA02001/01", &users[0].(*User).ID, &users[2].(*User).ID, "Project 2", nil},
+		&Project{2, projectCategories[6].(*ProjectCategory).ID, "01", "BB01/01", &users[1].(*User).ID, &users[0].(*User).ID, "Project 3", nil},
+		&Project{3, projectCategories[7].(*ProjectCategory).ID, "02", "BB02/02", &users[1].(*User).ID, &users[2].(*User).ID, "Project 4", nil}}
 	if err = db.insertTestData(trans, projects); err != nil {
 		return err
 	}
