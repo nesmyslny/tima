@@ -1,10 +1,5 @@
 package server
 
-import "errors"
-
-var errItemInUse = errors.New("Item is already in use")
-var errUsernameUnavailable = errors.New("Username unavailable")
-
 func AuthorizeUser(context *HandlerContext) (bool, error) {
 	return *context.User.Role >= RoleUser, nil
 }

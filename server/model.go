@@ -1,6 +1,12 @@
 package server
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var errItemInUse = errors.New("Item is already in use")
+var errUsernameUnavailable = errors.New("Username unavailable")
 
 const RoleUser int = 10
 const RoleManager int = 30
