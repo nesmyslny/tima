@@ -63,6 +63,11 @@ angular
         controller: 'UserController',
         resolve: createPermissionResolve(userRoles.user)
     })
+    .when('/departments', {
+        templateUrl: 'app/department/departmentList.html',
+        controller: 'DepartmentListController',
+        resolve: createPermissionResolve(userRoles.admin)
+    })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')
     })

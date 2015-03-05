@@ -18,6 +18,7 @@ func main() {
 	defer db.Close()
 
 	auth := server.NewAuth()
+	departmentAPI := server.NewDepartmentAPI(db)
 	userAPI := server.NewUserAPI(db, auth)
 	projectAPI := server.NewProjectAPI(db)
 	projectCategoryAPI := server.NewProjectCategoryAPI(db)
@@ -55,6 +56,11 @@ func main() {
 	createAuthRoute(router, auth, server.AuthorizeManager, "/users", "GET", userAPI.GetListHandler)
 	createAuthRoute(router, auth, userAPI.AuthorizeGet, "/users/{id}", "GET", userAPI.GetHandler)
 	createAuthRoute(router, auth, userAPI.AuthorizeSave, "/users", "POST", userAPI.SaveHandler)
+
+	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/tree", "GET", departmentAPI.GetTreeHandler)
+	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/list", "GET", departmentAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments", "POST", departmentAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/{id}", "DELETE", departmentAPI.DeleteHandler)
 
 	createAuthRoute(router, auth, server.AuthorizeUser, "/projectActivityTypes", "GET", activityTypeAPI.GetActivityViewListHandler)
 

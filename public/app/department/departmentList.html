@@ -1,0 +1,24 @@
+<div class="row margin-bottom-20">
+    <div class="col-md-12">
+        <h1>Departments</h1>
+    </div>
+</div>
+
+<div class="row margin-bottom-20">
+    <div class="col-md-8">
+        <button type="button" ng-click="add(null)" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> New Department</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <ul class="list-group">
+            <li class="list-group-item recursive-admin-list-item"
+                ng-repeat="dept in departments | orderObjectBy:'title'"
+                ng-include="'app/department/departmentListTemplate.html'"
+                ng-class="{'recursive-admin-list-item-hover': hasFocus(dept.id)}"
+                ng-mouseenter="focus(dept.id)" ng-mouseleave="focus(null)">
+            </li>
+        </ul>
+    </div>
+</div>
