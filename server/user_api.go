@@ -88,17 +88,18 @@ func (userAPI *UserAPI) SaveHandler(context *HandlerContext) (interface{}, *Hand
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = userAPI.save(&user)
+	err = userAPI.save(&user, *context.User.Role == RoleAdmin)
 	if err != nil {
 		if err == errUsernameUnavailable {
 			return nil, &HandlerError{err, "Error: Specified Username is not available.", http.StatusBadRequest}
 		}
-		return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
+		// return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
+		return nil, &HandlerError{err, err.Error(), http.StatusInternalServerError}
 	}
 	return jsonResultInt(user.ID)
 }
 
-func (userAPI *UserAPI) AddUser(username string, role int, pwd string, firstName string, lastName string, email string) (*User, error) {
+func (userAPI *UserAPI) AddUser(username string, role int, departmentId int, pwd string, firstName string, lastName string, email string) (*User, error) {
 	pwdHash, err := userAPI.auth.GeneratePasswordHash(pwd)
 	if err != nil {
 		return nil, err
@@ -107,6 +108,7 @@ func (userAPI *UserAPI) AddUser(username string, role int, pwd string, firstName
 	user := &User{
 		ID:           -1,
 		Role:         &role,
+		DepartmentID: &departmentId,
 		Username:     username,
 		PasswordHash: pwdHash,
 		FirstName:    firstName,
@@ -114,7 +116,7 @@ func (userAPI *UserAPI) AddUser(username string, role int, pwd string, firstName
 		Email:        email,
 	}
 
-	err = userAPI.db.SaveUser(user)
+	err = userAPI.db.SaveUser(user, true)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +140,7 @@ func (userAPI *UserAPI) getList() ([]User, error) {
 	return users, nil
 }
 
-func (userAPI *UserAPI) save(user *User) error {
+func (userAPI *UserAPI) save(user *User, saveAsAdmin bool) error {
 	var err error
 
 	if user.ID < 0 {
@@ -162,5 +164,5 @@ func (userAPI *UserAPI) save(user *User) error {
 		}
 	}
 
-	return userAPI.db.SaveUser(user)
+	return userAPI.db.SaveUser(user, saveAsAdmin)
 }

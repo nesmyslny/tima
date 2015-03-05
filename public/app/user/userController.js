@@ -1,12 +1,15 @@
 angular.module('tima').controller('UserController',
-['$scope', '$routeParams', '$location', '_', 'User', 'sessionService', 'messageService',
-function ($scope, $routeParams, $location, _, User, sessionService, messageService) {
+['$scope', '$routeParams', '$location', '$q', '_', 'User', 'Department', 'sessionService', 'messageService',
+function ($scope, $routeParams, $location, $q, _, User, Department, sessionService, messageService) {
 
     var modeUserSettings = false;
     $scope.user = {
         id: -1,
         title: '',
     };
+
+    $scope.departments = [];
+    $scope.selectedDepartment = {};
 
     $scope.fetch = function() {
         var id = -1;
@@ -16,6 +19,7 @@ function ($scope, $routeParams, $location, _, User, sessionService, messageServi
             modeUserSettings = true;
         } else {
             id = parseInt($routeParams.id);
+            $scope.departments = Department.queryList();
         }
 
         if (id > -1) {
@@ -23,6 +27,15 @@ function ($scope, $routeParams, $location, _, User, sessionService, messageServi
                 $scope.user.newPassword = undefined;
                 $scope.user.newPasswordConfirm = undefined;
             });
+
+            if (!modeUserSettings) {
+                $q.all([
+                    $scope.user.$promise,
+                    $scope.departments.$promise
+                ]).then(function() {
+                    $scope.selectedDepartment.selected = _.find($scope.departments, { 'id': $scope.user.departmentId });
+                });
+            }
         }
     };
     $scope.fetch();
@@ -31,6 +44,10 @@ function ($scope, $routeParams, $location, _, User, sessionService, messageServi
         $scope.$broadcast('show-errors-check-validity');
         if (!$scope.formUser.$valid) {
             return;
+        }
+
+        if (!modeUserSettings) {
+            $scope.user.departmentId = $scope.selectedDepartment.selected.id;
         }
 
         User.save($scope.user, function() {

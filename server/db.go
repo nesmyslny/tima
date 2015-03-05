@@ -89,22 +89,33 @@ func (db *DB) GetUserByName(username string) *User {
 	return user
 }
 
-func (db *DB) SaveUser(user *User) error {
+func (db *DB) SaveUser(user *User, saveAsAdmin bool) error {
 	var err error
 	if user.ID < 0 {
 		err = db.dbMap.Insert(user)
 	} else {
+		sql := "update user set username = ?, first_name = ?, last_name = ?, email = ?%s%s where id = ?"
+
+		params := []interface{}{user.Username, user.FirstName, user.LastName, user.Email}
+
 		// password hash is only provided, if password needs to be changed. to prevent empty password hashes, this
 		// statement is explicitly specified.
-		sql := "update user set username = ?, first_name = ?, last_name = ?, email = ?%s where id = ?"
-
-		if len(user.PasswordHash) == 0 {
-			sql := fmt.Sprintf(sql, "")
-			_, err = db.dbMap.Exec(sql, user.Username, user.FirstName, user.LastName, user.Email, user.ID)
-		} else {
-			sql := fmt.Sprintf(sql, ", password_hash = ?")
-			_, err = db.dbMap.Exec(sql, user.Username, user.FirstName, user.LastName, user.Email, user.PasswordHash, user.ID)
+		pwHashUpdate := ""
+		if len(user.PasswordHash) > 0 {
+			pwHashUpdate = ", password_hash = ?"
+			params = append(params, user.PasswordHash)
 		}
+
+		// department of a user may only changed by an admin
+		deptUpdate := ""
+		if saveAsAdmin {
+			deptUpdate = ", department_id = ?"
+			params = append(params, user.DepartmentID)
+		}
+
+		sql = fmt.Sprintf(sql, pwHashUpdate, deptUpdate)
+		params = append(params, user.ID)
+		_, err = db.dbMap.Exec(sql, params...)
 	}
 	return err
 }
