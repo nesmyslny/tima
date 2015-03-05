@@ -54,6 +54,7 @@ function ($scope, _, ProjectCategory, popupService) {
 
     $scope.edit = function(category) {
         var data = _.clone(category);
+        data.refIdPrefix = "";
         parent = findCategory(category.parentId, $scope.projectCategories);
         if (parent) {
             data.refIdPrefix = parent.refIdComplete;
@@ -61,11 +62,21 @@ function ($scope, _, ProjectCategory, popupService) {
 
         popupService.showForm("Edit Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", data, "Save", "Cancel")
         .result.then(function() {
+            data.refIdComplete = data.refIdPrefix + data.refId;
             ProjectCategory.save(data, function() {
                 _.assign(category, data);
+                updateChildren(category);
             });
         });
     };
+
+    function updateChildren(parentCat) {
+        _.forEach(parentCat.projectCategories, function(category) {
+            category.refIdPrefix = parentCat.refIdComplete;
+            category.refIdComplete = parentCat.refIdComplete + category.refId;
+            updateChildren(category);
+        });
+    }
 
     $scope.delete = function(category) {
         var categories = $scope.projectCategories;
