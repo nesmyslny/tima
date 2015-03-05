@@ -11,7 +11,7 @@ func NewProjectCategoryAPI(db *DB) *ProjectCategoryAPI {
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	projectCategories, err := projectCategoryAPI.getTree()
+	projectCategories, err := projectCategoryAPI.getTree(nil)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
 	}
@@ -19,7 +19,7 @@ func (projectCategoryAPI *ProjectCategoryAPI) GetTreeHandler(context *HandlerCon
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	projectCategories, err := projectCategoryAPI.getList()
+	projectCategories, err := projectCategoryAPI.getList(nil)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve project categories", http.StatusInternalServerError}
 	}
@@ -57,19 +57,40 @@ func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(context *HandlerCont
 	return jsonResultBool(true)
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) getTree() ([]ProjectCategory, error) {
-	projectCategories, err := projectCategoryAPI.db.GetProjectCategoryTree(nil)
+func (projectCategoryAPI *ProjectCategoryAPI) getTree(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := projectCategoryAPI.db.GetProjectCategories(parent)
 	if err != nil {
 		return nil, err
 	}
+
+	for i := range projectCategories {
+		projectCategories[i].ProjectCategories, err = projectCategoryAPI.getTree(&projectCategories[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return projectCategories, nil
 }
 
-func (projectCategoryAPI *ProjectCategoryAPI) getList() ([]ProjectCategory, error) {
-	projectCategories, err := projectCategoryAPI.db.GetProjectCategoryList(nil)
+func (projectCategoryAPI *ProjectCategoryAPI) getList(parent *ProjectCategory) ([]ProjectCategory, error) {
+	projectCategories, err := projectCategoryAPI.db.GetProjectCategories(parent)
 	if err != nil {
 		return nil, err
 	}
+
+	for i := 0; i < len(projectCategories); i++ {
+		children, err := projectCategoryAPI.getList(&projectCategories[i])
+		if err != nil {
+			return nil, err
+		}
+
+		// inserting children into slice after parent
+		slicingIndex := i + 1
+		projectCategories = append(projectCategories[:slicingIndex], append(children, projectCategories[slicingIndex:]...)...)
+		i += len(children)
+	}
+
 	return projectCategories, nil
 }
 

@@ -11,7 +11,7 @@ func NewDepartmentAPI(db *DB) *DepartmentAPI {
 }
 
 func (departmentAPI *DepartmentAPI) GetTreeHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	departments, err := departmentAPI.getTree()
+	departments, err := departmentAPI.getTree(nil)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve departments", http.StatusInternalServerError}
 	}
@@ -19,7 +19,7 @@ func (departmentAPI *DepartmentAPI) GetTreeHandler(context *HandlerContext) (int
 }
 
 func (departmentAPI *DepartmentAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	departments, err := departmentAPI.getList()
+	departments, err := departmentAPI.getList(nil)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve departments", http.StatusInternalServerError}
 	}
@@ -57,19 +57,40 @@ func (departmentAPI *DepartmentAPI) DeleteHandler(context *HandlerContext) (inte
 	return jsonResultBool(true)
 }
 
-func (departmentAPI *DepartmentAPI) getTree() ([]Department, error) {
-	departments, err := departmentAPI.db.GetDepartmentTree(nil)
+func (departmentAPI *DepartmentAPI) getTree(parent *Department) ([]Department, error) {
+	departments, err := departmentAPI.db.GetDepartments(parent)
 	if err != nil {
 		return nil, err
 	}
+
+	for i := range departments {
+		departments[i].Departments, err = departmentAPI.getTree(&departments[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return departments, nil
 }
 
-func (departmentAPI *DepartmentAPI) getList() ([]Department, error) {
-	departments, err := departmentAPI.db.GetDepartmentList(nil)
+func (departmentAPI *DepartmentAPI) getList(parent *Department) ([]Department, error) {
+	departments, err := departmentAPI.db.GetDepartments(parent)
 	if err != nil {
 		return nil, err
 	}
+
+	for i := 0; i < len(departments); i++ {
+		children, err := departmentAPI.getList(&departments[i])
+		if err != nil {
+			return nil, err
+		}
+
+		// inserting children into slice after parent
+		slicingIndex := i + 1
+		departments = append(departments[:slicingIndex], append(children, departments[slicingIndex:]...)...)
+		i += len(children)
+	}
+
 	return departments, nil
 }
 

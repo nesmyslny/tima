@@ -373,7 +373,7 @@ func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error
 	return list, nil
 }
 
-func (db *DB) getProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
+func (db *DB) GetProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
 	var projectCategories []ProjectCategory
 	const sqlTemplate string = "select * from project_category where parent_id %s order by ref_id_complete"
 	var err error
@@ -402,43 +402,6 @@ func (db *DB) setProjectCategoryPath(projectCategory *ProjectCategory, parentCat
 		parentPath = parentCategory.Path + " \u203A "
 	}
 	projectCategory.Path = parentPath + projectCategory.Title
-}
-
-func (db *DB) GetProjectCategoryTree(parent *ProjectCategory) ([]ProjectCategory, error) {
-	projectCategories, err := db.getProjectCategories(parent)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := range projectCategories {
-		projectCategories[i].ProjectCategories, err = db.GetProjectCategoryTree(&projectCategories[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return projectCategories, nil
-}
-
-func (db *DB) GetProjectCategoryList(parent *ProjectCategory) ([]ProjectCategory, error) {
-	projectCategories, err := db.getProjectCategories(parent)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := 0; i < len(projectCategories); i++ {
-		children, err := db.GetProjectCategoryList(&projectCategories[i])
-		if err != nil {
-			return nil, err
-		}
-
-		// inserting children into slice after parent
-		slicingIndex := i + 1
-		projectCategories = append(projectCategories[:slicingIndex], append(children, projectCategories[slicingIndex:]...)...)
-		i += len(children)
-	}
-
-	return projectCategories, nil
 }
 
 func (db *DB) getProjectCategory(trans *gorp.Transaction, id int) (*ProjectCategory, error) {
@@ -479,18 +442,19 @@ func (db *DB) getProjectCategoryRefIDComplete(trans *gorp.Transaction, projectCa
 	return refID, nil
 }
 
-func (db *DB) updateProjectCategoryRefIDComplete(trans *gorp.Transaction, projectCategory *ProjectCategory) error {
-	categories, err := db.GetProjectCategoryList(projectCategory)
-	if err != nil {
-		return err
-	}
+func (db *DB) updateProjectCategoryRefIDComplete(trans *gorp.Transaction, projectCategories []ProjectCategory) error {
+	var err error
 
-	for i := range categories {
-		categories[i].RefIDComplete, err = db.getProjectCategoryRefIDComplete(trans, &categories[i])
+	for i := range projectCategories {
+		projectCategories[i].RefIDComplete, err = db.getProjectCategoryRefIDComplete(trans, &projectCategories[i])
 		if err != nil {
 			return err
 		}
-		if _, err = trans.Update(&categories[i]); err != nil {
+		if _, err = trans.Update(&projectCategories[i]); err != nil {
+			return err
+		}
+		err = db.updateProjectCategoryRefIDComplete(trans, projectCategories[i].ProjectCategories)
+		if err != nil {
 			return err
 		}
 	}
@@ -546,7 +510,7 @@ func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 			return err
 		}
 
-		err = db.updateProjectCategoryRefIDComplete(trans, projectCategory)
+		err = db.updateProjectCategoryRefIDComplete(trans, projectCategory.ProjectCategories)
 		if err != nil {
 			trans.Rollback()
 			return err
@@ -581,7 +545,7 @@ func (db *DB) IsProjectCategoryReferenced(projectCategory *ProjectCategory) (boo
 		return true, nil
 	}
 
-	children, err := db.getProjectCategories(projectCategory)
+	children, err := db.GetProjectCategories(projectCategory)
 	for _, child := range children {
 		isReferenced, err := db.IsProjectCategoryReferenced(&child)
 		if err != nil {
@@ -621,7 +585,7 @@ func (db *DB) IsUsernameAvailable(username string) (bool, error) {
 	return exists == 0, nil
 }
 
-func (db *DB) getDepartments(parent *Department) ([]Department, error) {
+func (db *DB) GetDepartments(parent *Department) ([]Department, error) {
 	var departments []Department
 	const sqlTemplate string = "select * from department where parent_id %s order by title"
 	var err error
@@ -650,43 +614,6 @@ func (db *DB) setDepartmentPath(department *Department, parentDepartment *Depart
 		parentPath = parentDepartment.Path + " \u203A "
 	}
 	department.Path = parentPath + department.Title
-}
-
-func (db *DB) GetDepartmentTree(parent *Department) ([]Department, error) {
-	departments, err := db.getDepartments(parent)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := range departments {
-		departments[i].Departments, err = db.GetDepartmentTree(&departments[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return departments, nil
-}
-
-func (db *DB) GetDepartmentList(parent *Department) ([]Department, error) {
-	departments, err := db.getDepartments(parent)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := 0; i < len(departments); i++ {
-		children, err := db.GetDepartmentList(&departments[i])
-		if err != nil {
-			return nil, err
-		}
-
-		// inserting children into slice after parent
-		slicingIndex := i + 1
-		departments = append(departments[:slicingIndex], append(children, departments[slicingIndex:]...)...)
-		i += len(children)
-	}
-
-	return departments, nil
 }
 
 func (db *DB) GetDepartment(id int) (*Department, error) {
@@ -726,7 +653,7 @@ func (db *DB) IsDepartmentReferenced(department *Department) (bool, error) {
 		return true, nil
 	}
 
-	children, err := db.getDepartments(department)
+	children, err := db.GetDepartments(department)
 	for _, child := range children {
 		isReferenced, err := db.IsDepartmentReferenced(&child)
 		if err != nil {
