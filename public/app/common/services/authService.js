@@ -32,7 +32,7 @@ function($location, $q, JwtDecode, sessionService, Auth) {
         },
 
         isAuthorized: function(role) {
-            return sessionService.user.role >= role;
+            return sessionService.user.role >= role.id;
         },
 
         checkPermission: function(role) {

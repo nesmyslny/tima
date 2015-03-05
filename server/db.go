@@ -106,14 +106,14 @@ func (db *DB) SaveUser(user *User, saveAsAdmin bool) error {
 			params = append(params, user.PasswordHash)
 		}
 
-		// department of a user may only changed by an admin
-		deptUpdate := ""
+		// some attributes of a user may only changed by an admin
+		adminUpdate := ""
 		if saveAsAdmin {
-			deptUpdate = ", department_id = ?"
-			params = append(params, user.DepartmentID)
+			adminUpdate = ", department_id = ?, role = ?"
+			params = append(params, user.DepartmentID, user.Role)
 		}
 
-		sql = fmt.Sprintf(sql, pwHashUpdate, deptUpdate)
+		sql = fmt.Sprintf(sql, pwHashUpdate, adminUpdate)
 		params = append(params, user.ID)
 		_, err = db.dbMap.Exec(sql, params...)
 	}

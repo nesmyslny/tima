@@ -21,6 +21,20 @@
         </div>
     </div>
 
+    <div class="row form-group" show-errors>
+        <label for="role" class="col-md-2 control-label">Role</label>
+        <div class="col-md-6">
+            <ui-select name="role" id="role" class="form-control form-control-ui-select" ng-model="selectedRole.selected" required>
+                <ui-select-match placeholder="Choose role">
+                    <span ng-bind="$select.selected.desc"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="r in roles | propsFilter: {desc: $select.search}">
+                    <span ng-bind-html="r.desc | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-8">
             <div class="pull-right">

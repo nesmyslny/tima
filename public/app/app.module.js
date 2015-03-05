@@ -2,9 +2,9 @@ angular
 .module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'validation.match', 'ui.select', 'jwt-decode', 'angular-momentjs'])
 .constant('_', window._) // use lodash via DI in controllers, etc.
 .constant('userRoles', {
-    user: 10,
-    manager: 30,
-    admin: 99
+    user: {id: 10, desc: "User"},
+    manager: {id: 30, desc: "Manager"},
+    admin: {id: 99, desc: "Administrator"}
 })
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', 'userRoles', function($routeProvider, $httpProvider, uiSelectConfig, userRoles) {
 

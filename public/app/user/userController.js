@@ -1,6 +1,6 @@
 angular.module('tima').controller('UserController',
-['$scope', '$routeParams', '$location', '$q', '_', 'User', 'Department', 'sessionService', 'messageService',
-function ($scope, $routeParams, $location, $q, _, User, Department, sessionService, messageService) {
+['$scope', '$routeParams', '$location', '$q', '_', 'User', 'Department', 'sessionService', 'messageService', 'userRoles',
+function ($scope, $routeParams, $location, $q, _, User, Department, sessionService, messageService, userRoles) {
 
     var modeUserSettings = false;
     $scope.user = {
@@ -10,6 +10,9 @@ function ($scope, $routeParams, $location, $q, _, User, Department, sessionServi
 
     $scope.departments = [];
     $scope.selectedDepartment = {};
+
+    $scope.roles = _.values(userRoles);
+    $scope.selectedRole = {};
 
     $scope.fetch = function() {
         var id = -1;
@@ -34,6 +37,7 @@ function ($scope, $routeParams, $location, $q, _, User, Department, sessionServi
                     $scope.departments.$promise
                 ]).then(function() {
                     $scope.selectedDepartment.selected = _.find($scope.departments, { 'id': $scope.user.departmentId });
+                    $scope.selectedRole.selected = _.find($scope.roles, { 'id': $scope.user.role });
                 });
             }
         }
@@ -48,6 +52,7 @@ function ($scope, $routeParams, $location, $q, _, User, Department, sessionServi
 
         if (!modeUserSettings) {
             $scope.user.departmentId = $scope.selectedDepartment.selected.id;
+            $scope.user.role = $scope.selectedRole.selected.id;
         }
 
         User.save($scope.user, function() {
