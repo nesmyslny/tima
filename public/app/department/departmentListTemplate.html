@@ -1,0 +1,38 @@
+<div class="btn-group btn-admin-list-item" role="group">
+    <button class="btn btn-default btn-sm"
+        ng-disabled="!dept.departments.length"
+        ng-click="showToggle(dept)">
+        <i class="fa" ng-class="{'fa-chevron-right': !dept.showChildren, 'fa-chevron-down': dept.showChildren}"></i>
+    </button>
+</div>
+
+<span ng-bind="dept.title"></span>
+<span ng-bind="dept.parent.title"></span>
+
+<div class="btn-group pull-right btn-admin-list-item" role="group">
+    <button class="btn btn-sm"
+        ng-class="{'btn-primary': hasFocus(dept.id), 'btn-default': !hasFocus(dept.id)}"
+        ng-click="add(dept)">
+        <i class="fa fa-plus"></i> New
+    </button>
+    <button class="btn btn-sm"
+        ng-class="{'btn-primary': hasFocus(dept.id), 'btn-default': !hasFocus(dept.id)}"
+        ng-click="edit(dept)">
+        <i class="fa fa-pencil"></i> Edit
+    </button>
+    <button class="btn btn-sm"
+        ng-class="{'btn-danger': hasFocus(dept.id), 'btn-default': !hasFocus(dept.id)}"
+        ng-click="delete(dept)">
+        <i class="fa fa-times"></i>
+    </button>
+</div>
+<div class="clearfix"></div>
+
+<ul class="list-group" ng-class="{'recursive-admin-list-hidden': !dept.showChildren}">
+    <li class="list-group-item recursive-admin-list-item"
+        ng-repeat="dept in dept.departments | orderObjectBy:'title'"
+        ng-include="'app/department/departmentListTemplate.html'"
+        ng-class="{'recursive-admin-list-item-hover': hasFocus(dept.id)}"
+        ng-mouseenter="focus(dept.id)" ng-mouseleave="focus(dept.parentId)">
+    </li>
+</ul>

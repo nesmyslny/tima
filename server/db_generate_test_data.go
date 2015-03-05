@@ -13,9 +13,9 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	// here, they reflect the indexes of the slices, to referenced them more easy in further inserts/updates.
 
 	departments := []interface{}{
-		&Department{0, nil, "Dept. 1"},
-		&Department{1, nil, "Dept. 1a"},
-		&Department{2, nil, "Dept. 1b"}}
+		&Department{0, nil, "Dept. 1", "", nil},
+		&Department{1, nil, "Dept. 1a", "", nil},
+		&Department{2, nil, "Dept. 1b", "", nil}}
 	if err = db.insertTestData(trans, departments); err != nil {
 		return err
 	}

@@ -9,9 +9,11 @@ const RoleAdmin int = 99
 const dateLayout string = "2006-01-02"
 
 type Department struct {
-	ID       int    `db:"id" json:"id"`
-	ParentID *int   `db:"parent_id" json:"parentId"`
-	Title    string `db:"title" json:"title"`
+	ID          int          `db:"id" json:"id"`
+	ParentID    *int         `db:"parent_id" json:"parentId"`
+	Title       string       `db:"title" json:"title"`
+	Path        string       `db:"-" json:"path"`
+	Departments []Department `db:"-" json:"departments"`
 }
 
 type User struct {

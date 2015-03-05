@@ -41,7 +41,7 @@ function ($scope, _, ProjectCategory, popupService) {
 
             ProjectCategory.save(category, function(response) {
                 category.id = response.intResult;
-                category.refIdComplete = category.refIdPrefix + category.refId
+                category.refIdComplete = category.refIdPrefix + category.refId;
                 categories.push(category);
 
                 if (parent) {

@@ -609,3 +609,121 @@ func (db *DB) IsUsernameAvailable(username string) (bool, error) {
 
 	return exists == 0, nil
 }
+
+func (db *DB) getDepartments(parent *Department) ([]Department, error) {
+	var departments []Department
+	const sqlTemplate string = "select * from department where parent_id %s order by title"
+	var err error
+
+	if parent == nil {
+		sql := fmt.Sprintf(sqlTemplate, "is null")
+		_, err = db.dbMap.Select(&departments, sql)
+	} else {
+		sql := fmt.Sprintf(sqlTemplate, "= ?")
+		_, err = db.dbMap.Select(&departments, sql, parent.ID)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range departments {
+		db.setDepartmentPath(&departments[i], parent)
+	}
+
+	return departments, nil
+}
+
+func (db *DB) setDepartmentPath(department *Department, parentDepartment *Department) {
+	parentPath := ""
+	if parentDepartment != nil {
+		parentPath = parentDepartment.Path + " \u203A "
+	}
+	department.Path = parentPath + department.Title
+}
+
+func (db *DB) GetDepartmentTree(parent *Department) ([]Department, error) {
+	departments, err := db.getDepartments(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range departments {
+		departments[i].Departments, err = db.GetDepartmentTree(&departments[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return departments, nil
+}
+
+func (db *DB) GetDepartmentList(parent *Department) ([]Department, error) {
+	departments, err := db.getDepartments(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(departments); i++ {
+		children, err := db.GetDepartmentList(&departments[i])
+		if err != nil {
+			return nil, err
+		}
+
+		// inserting children into slice after parent
+		slicingIndex := i + 1
+		departments = append(departments[:slicingIndex], append(children, departments[slicingIndex:]...)...)
+		i += len(children)
+	}
+
+	return departments, nil
+}
+
+func (db *DB) GetDepartment(id int) (*Department, error) {
+	obj, err := db.dbMap.Get(Department{}, id)
+	if err != nil {
+		return nil, err
+	}
+	return obj.(*Department), nil
+}
+
+func (db *DB) SaveDepartment(department *Department) error {
+	var err error
+	if department.ID < 0 {
+		err = db.dbMap.Insert(department)
+	} else {
+		_, err = db.dbMap.Update(department)
+	}
+	return err
+}
+
+func (db *DB) DeleteDepartment(department *Department) error {
+	_, err := db.dbMap.Delete(department)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) IsDepartmentReferenced(department *Department) (bool, error) {
+	exists, err := db.dbMap.SelectInt("select exists(select id from user where department_id = ?)", department.ID)
+	if err != nil {
+		return false, err
+	}
+
+	if exists == 1 {
+		return true, nil
+	}
+
+	children, err := db.getDepartments(department)
+	for _, child := range children {
+		isReferenced, err := db.IsDepartmentReferenced(&child)
+		if err != nil {
+			return false, err
+		} else if isReferenced {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
