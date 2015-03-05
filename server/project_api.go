@@ -42,6 +42,8 @@ func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{},
 	if err != nil {
 		if err == errItemInUse {
 			return nil, &HandlerError{err, "Error: It is not possible to delete activity types that are already in use.", http.StatusBadRequest}
+		} else if err == errIDNotUnique {
+			return nil, &HandlerError{err, "Error: Reference ID is already in use.", http.StatusBadRequest}
 		}
 		return nil, &HandlerError{err, "Error: Project could not be saved.", http.StatusInternalServerError}
 	}

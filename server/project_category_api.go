@@ -35,6 +35,9 @@ func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(context *HandlerContex
 
 	err = projectCategoryAPI.save(&projectCategory)
 	if err != nil {
+		if err == errIDNotUnique {
+			return nil, &HandlerError{err, "Error: Reference ID is already in use.", http.StatusBadRequest}
+		}
 		return nil, &HandlerError{err, "Error: Project category could not be saved.", http.StatusInternalServerError}
 	}
 	return jsonResultInt(projectCategory.ID)

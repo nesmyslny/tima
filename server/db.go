@@ -234,6 +234,14 @@ func (db *DB) getProjectRefIDComplete(trans *gorp.Transaction, project *Project)
 	return refIDCategory + "/" + project.RefID, nil
 }
 
+func (db *DB) isProjectRefIDCompleteUnique(refIDComplete string) (bool, error) {
+	exists, err := db.dbMap.SelectInt("select exists(select id from project where ref_id_complete = ?)", refIDComplete)
+	if err != nil {
+		return false, err
+	}
+	return exists == 0, nil
+}
+
 func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
@@ -243,6 +251,14 @@ func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivity
 	project.RefIDComplete, err = db.getProjectRefIDComplete(trans, project)
 	if err != nil {
 		return err
+	}
+
+	isUnique, err := db.isProjectRefIDCompleteUnique(project.RefIDComplete)
+	if err != nil {
+		return err
+	}
+	if !isUnique {
+		return errIDNotUnique
 	}
 
 	if project.ID < 0 {
@@ -486,6 +502,14 @@ func (db *DB) updateProjectRefIDComplete(trans *gorp.Transaction, projectCategor
 	return nil
 }
 
+func (db *DB) isProjectCategoryRefIDCompleteUnique(refIDComplete string) (bool, error) {
+	exists, err := db.dbMap.SelectInt("select exists(select id from project_category where ref_id_complete = ?)", refIDComplete)
+	if err != nil {
+		return false, err
+	}
+	return exists == 0, nil
+}
+
 func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
@@ -495,6 +519,14 @@ func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 	projectCategory.RefIDComplete, err = db.getProjectCategoryRefIDComplete(trans, projectCategory)
 	if err != nil {
 		return err
+	}
+
+	isUnique, err := db.isProjectCategoryRefIDCompleteUnique(projectCategory.RefIDComplete)
+	if err != nil {
+		return err
+	}
+	if !isUnique {
+		return errIDNotUnique
 	}
 
 	if projectCategory.ID < 0 {

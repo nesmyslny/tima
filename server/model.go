@@ -7,6 +7,7 @@ import (
 
 var errItemInUse = errors.New("Item is already in use")
 var errUsernameUnavailable = errors.New("Username unavailable")
+var errIDNotUnique = errors.New("ID must be unique")
 
 const RoleUser int = 10
 const RoleManager int = 30
