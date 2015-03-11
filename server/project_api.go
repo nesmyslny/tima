@@ -44,10 +44,12 @@ func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{},
 			return nil, &HandlerError{err, "Error: It is not possible to delete activity types that are already in use.", http.StatusBadRequest}
 		} else if err == errIDNotUnique {
 			return nil, &HandlerError{err, "Error: Reference ID is already in use.", http.StatusBadRequest}
+		} else if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: The project was changed/deleted by another user.", http.StatusInternalServerError}
 		}
 		return nil, &HandlerError{err, "Error: Project could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(project.ID)
+	return project, nil
 }
 
 func (projectAPI *ProjectAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {

@@ -8,6 +8,7 @@ import (
 var errItemInUse = errors.New("Item is already in use")
 var errUsernameUnavailable = errors.New("Username unavailable")
 var errIDNotUnique = errors.New("ID must be unique")
+var errOptimisticLocking = errors.New("Data was changed/deleted")
 
 const RoleUser int = 10
 const RoleManager int = 30
@@ -19,6 +20,7 @@ type Department struct {
 	ID          int          `db:"id" json:"id"`
 	ParentID    *int         `db:"parent_id" json:"parentId"`
 	Title       string       `db:"title" json:"title"`
+	Version     int          `db:"version" json:"version"`
 	Path        string       `db:"-" json:"path"`
 	Departments []Department `db:"-" json:"departments"`
 }
@@ -32,6 +34,7 @@ type User struct {
 	FirstName          string `db:"first_name" json:"firstName"`
 	LastName           string `db:"last_name" json:"lastName"`
 	Email              string `db:"email" json:"email"`
+	Version            int    `db:"version" json:"version"`
 	NewPassword        string `db:"-" json:"newPassword"`
 	NewPasswordConfirm string `db:"-" json:"newPasswordConfirm"`
 }
@@ -44,6 +47,7 @@ type Project struct {
 	ResponsibleUserID *int           `db:"responsible_user_id" json:"responsibleUserId"`
 	ManagerUserID     *int           `db:"manager_user_id" json:"managerUserId"`
 	Title             string         `db:"title" json:"title"`
+	Version           int            `db:"version" json:"version"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
 }
 
@@ -53,13 +57,15 @@ type ProjectCategory struct {
 	RefID             string            `db:"ref_id" json:"refId"`
 	RefIDComplete     string            `db:"ref_id_complete" json:"refIdComplete"`
 	Title             string            `db:"title" json:"title"`
+	Version           int               `db:"version" json:"version"`
 	Path              string            `db:"-" json:"path"`
 	ProjectCategories []ProjectCategory `db:"-" json:"projectCategories"`
 }
 
 type ActivityType struct {
-	ID    int    `db:"id" json:"id"`
-	Title string `db:"title" json:"title"`
+	ID      int    `db:"id" json:"id"`
+	Title   string `db:"title" json:"title"`
+	Version int    `db:"version" json:"version"`
 }
 
 type ProjectActivityType struct {

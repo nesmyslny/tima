@@ -1,5 +1,10 @@
 angular.module('tima').factory('Project',
-['$resource',
-function($resource) {
-    return $resource("/projects/:id");
+['$resource', 'resourceSaveInterceptor',
+function($resource, resourceSaveInterceptor) {
+    return $resource("/projects/:id", {}, {
+        save: {
+            method: "POST",
+            interceptor: resourceSaveInterceptor
+        },
+    });
 }]);

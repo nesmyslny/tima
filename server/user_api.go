@@ -92,11 +92,12 @@ func (userAPI *UserAPI) SaveHandler(context *HandlerContext) (interface{}, *Hand
 	if err != nil {
 		if err == errUsernameUnavailable {
 			return nil, &HandlerError{err, "Error: Specified Username is not available.", http.StatusBadRequest}
+		} else if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: User was changed/deleted by another user.", http.StatusInternalServerError}
 		}
-		// return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
-		return nil, &HandlerError{err, err.Error(), http.StatusInternalServerError}
+		return nil, &HandlerError{err, "Error: User could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(user.ID)
+	return user, nil
 }
 
 func (userAPI *UserAPI) AddUser(username string, role int, departmentId int, pwd string, firstName string, lastName string, email string) (*User, error) {

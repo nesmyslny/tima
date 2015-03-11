@@ -48,9 +48,12 @@ func (activityTypeAPI *ActivityTypeAPI) SaveHandler(context *HandlerContext) (in
 
 	err = activityTypeAPI.save(&activityType)
 	if err != nil {
+		if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: Activity type was changed/deleted by another user.", http.StatusInternalServerError}
+		}
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
-	return jsonResultInt(activityType.ID)
+	return activityType, nil
 }
 
 func (activityTypeAPI *ActivityTypeAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {

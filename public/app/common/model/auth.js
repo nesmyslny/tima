@@ -7,7 +7,7 @@ function($resource) {
             method: "POST"
         },
         isSignedIn: {
-            url: "isSignedIn",
+            url: "/isSignedIn",
             method: "GET"
         }
     });

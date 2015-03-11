@@ -28,8 +28,7 @@ function ($scope, ActivityType, messageService, popupService) {
 
         popupService.showForm("Add Activity Type", "app/activityType/activityTypePopupTemplate.html", activityType, "Add", "Cancel")
         .result.then(function() {
-            ActivityType.save(activityType, function(response) {
-                activityType.id = response.intResult;
+            ActivityType.save(activityType, function() {
                 $scope.activityTypes.push(activityType);
             });
         });

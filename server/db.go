@@ -33,11 +33,11 @@ func NewDB(connectionString string) *DB {
 	}
 
 	dbAccess.dbMap = &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{}}
-	dbAccess.dbMap.AddTableWithName(Department{}, "department").SetKeys(true, "id")
-	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id")
-	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id")
-	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id")
-	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id")
+	dbAccess.dbMap.AddTableWithName(Department{}, "department").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(ProjectActivityType{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
 	dbAccess.dbMap.AddTableWithName(Activity{}, "activity").SetKeys(true, "id")
 
@@ -75,6 +75,20 @@ func (db *DB) Downgrade(max int) error {
 	return err
 }
 
+func (db *DB) Update(trans *gorp.Transaction, model interface{}) error {
+	var err error
+	if trans != nil {
+		_, err = trans.Update(model)
+	} else {
+		_, err = db.dbMap.Update(model)
+	}
+
+	if _, ok := err.(gorp.OptimisticLockError); ok {
+		return errOptimisticLocking
+	}
+	return err
+}
+
 func (db *DB) GetNumberOfUsers() (int, error) {
 	count, err := db.dbMap.SelectInt("select count(*) from user")
 	return int(count), err
@@ -90,34 +104,27 @@ func (db *DB) GetUserByName(username string) *User {
 }
 
 func (db *DB) SaveUser(user *User, saveAsAdmin bool) error {
-	var err error
 	if user.ID < 0 {
-		err = db.dbMap.Insert(user)
-	} else {
-		sql := "update user set username = ?, first_name = ?, last_name = ?, email = ?%s%s where id = ?"
-
-		params := []interface{}{user.Username, user.FirstName, user.LastName, user.Email}
-
-		// password hash is only provided, if password needs to be changed. to prevent empty password hashes, this
-		// statement is explicitly specified.
-		pwHashUpdate := ""
-		if len(user.PasswordHash) > 0 {
-			pwHashUpdate = ", password_hash = ?"
-			params = append(params, user.PasswordHash)
-		}
-
-		// some attributes of a user may only changed by an admin
-		adminUpdate := ""
-		if saveAsAdmin {
-			adminUpdate = ", department_id = ?, role = ?"
-			params = append(params, user.DepartmentID, user.Role)
-		}
-
-		sql = fmt.Sprintf(sql, pwHashUpdate, adminUpdate)
-		params = append(params, user.ID)
-		_, err = db.dbMap.Exec(sql, params...)
+		return db.dbMap.Insert(user)
 	}
-	return err
+
+	// todo: in future versions of gorp it should be possible to just update specific fields.
+	userOrig, err := db.GetUser(user.ID)
+	if err != nil {
+		return err
+	}
+
+	// password hash is only provided, if password needs to be changed. if it's not set, reset it to the original.
+	if len(user.PasswordHash) == 0 {
+		user.PasswordHash = userOrig.PasswordHash
+	}
+	// some attributes may only be changed by admins -> reset these attributes in other cases.
+	if !saveAsAdmin {
+		user.Role = userOrig.Role
+		user.DepartmentID = userOrig.DepartmentID
+	}
+
+	return db.Update(nil, user)
 }
 
 func (db *DB) GetActivitiesByDay(userID int, day time.Time) ([]ActivityView, error) {
@@ -144,13 +151,10 @@ func (db *DB) GetActivity(id int) (*Activity, error) {
 }
 
 func (db *DB) SaveActivity(activity *Activity) error {
-	var err error
 	if activity.ID < 0 {
-		err = db.dbMap.Insert(activity)
-	} else {
-		_, err = db.dbMap.Update(activity)
+		return db.dbMap.Insert(activity)
 	}
-	return err
+	return db.Update(nil, activity)
 }
 
 func (db *DB) TryGetActivity(day time.Time, userID int, projectID int, activityTypeID int) (*Activity, error) {
@@ -264,7 +268,7 @@ func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivity
 	if project.ID < 0 {
 		err = trans.Insert(project)
 	} else {
-		_, err = trans.Update(project)
+		err = db.Update(trans, project)
 	}
 	if err != nil {
 		trans.Rollback()
@@ -340,13 +344,10 @@ func (db *DB) GetProjectActivityTypes(projectID int) ([]ProjectActivityType, err
 }
 
 func (db *DB) SaveActivityType(activityType *ActivityType) error {
-	var err error
 	if activityType.ID < 0 {
-		err = db.dbMap.Insert(activityType)
-	} else {
-		_, err = db.dbMap.Update(activityType)
+		return db.dbMap.Insert(activityType)
 	}
-	return err
+	return db.Update(nil, activityType)
 }
 
 func (db *DB) DeleteActivityType(activityType *ActivityType) error {
@@ -466,7 +467,7 @@ func (db *DB) updateProjectCategoryRefIDComplete(trans *gorp.Transaction, projec
 		if err != nil {
 			return err
 		}
-		if _, err = trans.Update(&projectCategories[i]); err != nil {
+		if err = db.Update(trans, &projectCategories[i]); err != nil {
 			return err
 		}
 		err = db.updateProjectCategoryRefIDComplete(trans, projectCategories[i].ProjectCategories)
@@ -489,7 +490,7 @@ func (db *DB) updateProjectRefIDComplete(trans *gorp.Transaction, projectCategor
 		if err != nil {
 			return err
 		}
-		_, err = trans.Update(&projects[i])
+		err = db.Update(trans, &projects[i])
 		if err != nil {
 			return err
 		}
@@ -536,7 +537,7 @@ func (db *DB) SaveProjectCategory(projectCategory *ProjectCategory) error {
 			return err
 		}
 	} else {
-		_, err = trans.Update(projectCategory)
+		err = db.Update(trans, projectCategory)
 		if err != nil {
 			trans.Rollback()
 			return err
@@ -657,13 +658,10 @@ func (db *DB) GetDepartment(id int) (*Department, error) {
 }
 
 func (db *DB) SaveDepartment(department *Department) error {
-	var err error
 	if department.ID < 0 {
-		err = db.dbMap.Insert(department)
-	} else {
-		_, err = db.dbMap.Update(department)
+		return db.dbMap.Insert(department)
 	}
-	return err
+	return db.Update(nil, department)
 }
 
 func (db *DB) DeleteDepartment(department *Department) error {

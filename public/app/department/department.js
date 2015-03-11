@@ -1,7 +1,11 @@
 angular.module('tima').factory('Department',
-['$resource',
-function($resource) {
+['$resource', 'resourceSaveInterceptor',
+function($resource, resourceSaveInterceptor) {
     return $resource("/departments/:id", {}, {
+        save: {
+            method: "POST",
+            interceptor: resourceSaveInterceptor
+        },
         queryTree: {
             url: "/departments/tree",
             method: "GET",

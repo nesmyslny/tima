@@ -37,10 +37,12 @@ func (projectCategoryAPI *ProjectCategoryAPI) SaveHandler(context *HandlerContex
 	if err != nil {
 		if err == errIDNotUnique {
 			return nil, &HandlerError{err, "Error: Reference ID is already in use.", http.StatusBadRequest}
+		} else if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: Project category (or dependent data) was changed/deleted by another user.", http.StatusInternalServerError}
 		}
 		return nil, &HandlerError{err, "Error: Project category could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(projectCategory.ID)
+	return projectCategory, nil
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {

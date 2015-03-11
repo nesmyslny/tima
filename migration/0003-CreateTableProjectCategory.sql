@@ -5,6 +5,7 @@ create table project_category (
     ref_id          varchar(5)      not null,
     ref_id_complete varchar(25)     not null,
     title           varchar(100)    not null,
+    version         integer         not null,
     primary key (id),
     index idx_project_category_parent_id (parent_id),
     index idx_project_category_ref_id (ref_id),

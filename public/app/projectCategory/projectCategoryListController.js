@@ -39,8 +39,7 @@ function ($scope, _, ProjectCategory, popupService) {
         popupService.showForm("Add Project Category", "app/projectCategory/projectCategoryPopupTemplate.html", category, "Add", "Cancel")
         .result.then(function() {
 
-            ProjectCategory.save(category, function(response) {
-                category.id = response.intResult;
+            ProjectCategory.save(category, function() {
                 category.refIdComplete = category.refIdPrefix + category.refId;
                 categories.push(category);
 

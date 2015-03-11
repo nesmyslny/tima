@@ -36,8 +36,7 @@ function ($scope, _, Department, popupService) {
         popupService.showForm("Add Department", "app/department/departmentPopupTemplate.html", department, "Add", "Cancel")
         .result.then(function() {
 
-            Department.save(department, function(response) {
-                department.id = response.intResult;
+            Department.save(department, function() {
                 departments.push(department);
 
                 if (parent) {

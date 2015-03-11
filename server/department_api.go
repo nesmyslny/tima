@@ -35,9 +35,12 @@ func (departmentAPI *DepartmentAPI) SaveHandler(context *HandlerContext) (interf
 
 	err = departmentAPI.save(&department)
 	if err != nil {
+		if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: Department was changed/deleted by another user.", http.StatusInternalServerError}
+		}
 		return nil, &HandlerError{err, "Error: Department could not be saved.", http.StatusInternalServerError}
 	}
-	return jsonResultInt(department.ID)
+	return department, nil
 }
 
 func (departmentAPI *DepartmentAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
