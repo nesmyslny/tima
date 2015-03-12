@@ -1,97 +1,102 @@
 angular.module('tima').factory('activityService',
-['_', '$moment', 'Activity', 'ProjectActivityType',
-function(_, $moment, Activity, ProjectActivityType) {
-
-    function removeDeletedActivities(source, dest) {
-        dest.forEach(function(activity) {
-            var found = _.any(source, { 'id': activity.id });
-            if (!found) {
-                var index = dest.indexOf(activity);
-                dest.splice(index, 1);
-            }
-        });
-    }
-
-    function mergeActivities(source, dest) {
-        source.forEach(function(activity) {
-            var found = _.find(dest, { 'id': activity.id });
-            if (found) {
-                found.duration = activity.duration;
-            } else {
-                dest.push(activity);
-            }
-        });
-    }
-
-    function refreshActivitiesViewValues(activities) {
-        activities.forEach(function(activity) {
-            var m = $moment.duration(activity.duration, 'minutes');
-            activity.durationHours = m.hours();
-            activity.durationMinutes = m.minutes();
-            activity.durationFormatted = getTimeFormatted(activity.durationHours, activity.durationMinutes);
-        });
-    }
-
-    function getTotalDuration(activities) {
-        var totalDuration = 0;
-        activities.forEach(function(activity) {
-            totalDuration += activity.duration;
-        });
-
-        return {
-            minutes: totalDuration,
-            formatted: getDurationFormatted(totalDuration)
-        };
-    }
+['_', '$moment', 'authService', 'Activity', 'ProjectActivityType', 'util',
+function(_, $moment, authService, Activity, ProjectActivityType, util) {
 
     function getDurationFormatted(duration) {
         var m = $moment.duration(duration, 'minutes');
-        return getTimeFormatted(m.hours(), m.minutes());
-    }
-
-    function getTimeFormatted(hours, minutes) {
-        var durationFormatted = hours > 0 ? hours + 'h' : '';
-        durationFormatted += minutes > 0 ? ' ' + minutes + 'min' : '';
-        return durationFormatted;
+        return util.formatTime(m.hours(), m.minutes());
     }
 
     function calculateDuration(hours, minutes) {
-        return hours * 60 + minutes;
+        return (hours || 0) * 60 + (minutes || 0);
+    }
+
+    function createNewActivity(day, projectActivity, hours, minutes) {
+        return {
+            id: -1,
+            day: $moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
+            userId: authService.getUser().id,
+            projectId: projectActivity.projectId,
+            activityTypeId: projectActivity.activityTypeId,
+            duration: calculateDuration(hours, minutes),
+            durationHours: hours || 0,
+            durationMinutes: minutes || 0,
+            durationFormatted: util.formatTime(hours, minutes),
+            projectTitle: projectActivity.projectTitle,
+            activityTypeTitle: projectActivity.activityTypeTitle
+        };
+    }
+
+    function extendActivityDuration(activity, hours, minutes) {
+        var duration = activity.duration + calculateDuration(hours, minutes);
+        setActivityDuration(activity, duration);
+    }
+
+    function setActivityDuration(activity, duration) {
+        activity.duration = duration;
+        var m = $moment.duration(duration, 'minutes');
+        activity.durationHours = m.hours();
+        activity.durationMinutes = m.minutes();
+        activity.durationFormatted = util.formatTime(m.hours(), m.minutes());
+    }
+
+    function refreshAfterSave(activities, activity, activityOrig) {
+        if (_.isUndefined(activityOrig)) {
+            activities.push(activity);
+        } else {
+            _.assign(activityOrig, activity);
+        }
     }
 
     var service = {
-        refresh: function(day, activities) {
-            return Activity.query({day:day})
-            .$promise.then(function(data) {
-                removeDeletedActivities(data, activities);
-                mergeActivities(data, activities);
-                refreshActivitiesViewValues(activities);
-                return getTotalDuration(activities);
-            });
+        get: function(day, callback) {
+            return Activity.query({day:day}, function() { callback(); });
         },
 
         getProjectActivityList: function() {
             return ProjectActivityType.query();
         },
 
-        save: function(activity) {
-            activity.duration = calculateDuration(activity.durationHours, activity.durationMinutes);
-            return Activity.save(activity).$promise;
+        save: function(activities, activity, callback) {
+            var clone = _.clone(activity);
+            var duration = calculateDuration(clone.durationHours, clone.durationMinutes);
+            setActivityDuration(clone, duration);
+
+            Activity.save(clone, function() {
+                refreshAfterSave(activities, clone, activity);
+                callback();
+            });
         },
 
-        delete: function(id) {
-            return Activity.delete({id:id}).$promise;
+        add: function(activities, day, projectActivity, hours, minutes, callback) {
+            var activityOrig = _.find(activities, { "projectId": projectActivity.projectId, "activityTypeId": projectActivity.activityTypeId});
+            var activity = {};
+
+            if (_.isUndefined(activityOrig)) {
+                activity = createNewActivity(day, projectActivity, hours, minutes);
+            } else {
+                activity = _.clone(activityOrig);
+                extendActivityDuration(activity, hours, minutes);
+            }
+
+            Activity.save(activity, function() {
+                refreshAfterSave(activities, activity, activityOrig);
+                callback();
+            });
         },
 
-        createNew: function(day, userId, projectId, activityTypeId, hours, minutes) {
+        delete: function(id, callback) {
+            Activity.delete({id:id}, callback);
+        },
+
+        calculateTotalDuration: function(activities) {
+            var duration = 0;
+            _.forEach(activities, function(activity) {
+                duration += activity.duration;
+            });
             return {
-                id: -1,
-                day: $moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
-                userId: userId,
-                projectId: projectId,
-                activityTypeId: activityTypeId,
-                durationHours: hours,
-                durationMinutes: minutes
+                duration: duration,
+                durationFormatted: getDurationFormatted(duration)
             };
         }
     };

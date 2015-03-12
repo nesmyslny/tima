@@ -37,7 +37,7 @@ func (activityAPI *ActivityAPI) SaveHandler(context *HandlerContext) (interface{
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't save activity", http.StatusInternalServerError}
 	}
-	return jsonResultBool(true)
+	return activity, nil
 }
 
 func (activityAPI *ActivityAPI) DeleteHandler(context *HandlerContext) (interface{}, *HandlerError) {
@@ -63,21 +63,6 @@ func (activityAPI *ActivityAPI) getByDay(userID int, day time.Time) ([]ActivityV
 }
 
 func (activityAPI *ActivityAPI) save(activity *Activity) error {
-	var err error
-	var existingActivity *Activity
-
-	if activity.ID == -1 {
-		existingActivity, err = activityAPI.db.TryGetActivity(activity.Day, activity.UserID, activity.ProjectID, activity.ActivityTypeID)
-		if err != nil {
-			return err
-		}
-	}
-
-	if existingActivity != nil {
-		existingActivity.Duration += activity.Duration
-		return activityAPI.db.SaveActivity(existingActivity)
-	}
-
 	return activityAPI.db.SaveActivity(activity)
 }
 

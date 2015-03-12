@@ -1,6 +1,6 @@
 angular.module('tima').controller('ActivityController',
-['activityService', '$scope', '$routeParams', '$location', '$moment', 'authService',
-function (activityService, $scope, $routeParams, $location, $moment, authService) {
+['activityService', '$scope', '$routeParams', '$location', '_', '$moment',
+function (activityService, $scope, $routeParams, $location, _, $moment) {
 
     $scope.day = $routeParams.day;
     $scope.dayHeader = $moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
@@ -21,52 +21,50 @@ function (activityService, $scope, $routeParams, $location, $moment, authService
     };
 
     $scope.list = function() {
-        var promise = activityService.refresh($scope.day, $scope.activities);
-        promise.then(function(data) {
-            $scope.totalDuration = data.minutes;
-            $scope.durationHeader = data.formatted;
+        $scope.activities = activityService.get($scope.day, function() {
+            refreshTotalDuration();
         });
     };
     $scope.list();
 
     $scope.add = function() {
-        $scope.$broadcast('show-errors-check-validity');
+        $scope.$broadcast("show-errors-check-validity");
         if (!$scope.formAddActivity.$valid) {
             return;
         }
 
-        var activity = activityService.createNew(
-            $scope.day,
-            authService.getUser().id,
-            $scope.formData.projectActivity.selected.projectId,
-            $scope.formData.projectActivity.selected.activityTypeId,
-            $scope.formData.hours,
-            $scope.formData.minutes
-        );
-
-        activityService.save(activity).then(function() {
-            $scope.list();
-        });
+        activityService.add($scope.activities, $scope.day, $scope.formData.projectActivity.selected, $scope.formData.hours, $scope.formData.minutes,
+            function() {
+                refreshTotalDuration();
+            });
 
         $scope.formData.clear();
-        $scope.$broadcast('show-errors-reset');
+        $scope.$broadcast("show-errors-reset");
 
         // workaround: ui-select doesn't play nice with showErrors.js
         // todo: find solution (replace/remove showErrors.js? fix/enahnce showErrors.js? replace ui-select?)
         $scope.formAddActivity.$setPristine();
     };
 
-    $scope.delete = function(id) {
-        activityService.delete(id).then(function() {
-            $scope.list();
+    $scope.delete = function(activity) {
+        activityService.delete(activity.id, function() {
+            var index = _.indexOf($scope.activities, activity);
+            $scope.activities.splice(index, 1);
+            refreshTotalDuration();
         });
     };
 
     $scope.save = function(activity) {
-        activityService.save(activity).then(function() {
-            $scope.list();
+        activityService.save($scope.activities, activity, function() {
+            refreshTotalDuration();
         });
     };
+
+    function refreshTotalDuration() {
+        var totalDuration = activityService.calculateTotalDuration($scope.activities);
+        $scope.totalDuration = totalDuration.duration;
+        $scope.durationHeader = totalDuration.durationFormatted;
+    }
 
     $scope.openDatePicker = function($event) {
         $event.preventDefault();

@@ -157,22 +157,6 @@ func (db *DB) SaveActivity(activity *Activity) error {
 	return db.Update(nil, activity)
 }
 
-func (db *DB) TryGetActivity(day time.Time, userID int, projectID int, activityTypeID int) (*Activity, error) {
-	var activity *Activity
-	err := db.dbMap.SelectOne(&activity,
-		"select * from activity where user_id = ? and day = ? and project_id = ? and activity_type_id = ?",
-		userID, day.Format(dateLayout), projectID, activityTypeID)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return activity, nil
-}
-
 func (db *DB) IsProjectReferenced(id int) (bool, error) {
 	exists, err := db.dbMap.SelectInt("select exists(select id from activity where project_id = ?)", id)
 	if err != nil {
