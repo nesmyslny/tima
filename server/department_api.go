@@ -57,7 +57,7 @@ func (departmentAPI *DepartmentAPI) DeleteHandler(context *HandlerContext) (inte
 		return nil, &HandlerError{err, "Error: Department could not deleted.", http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (departmentAPI *DepartmentAPI) getTree(parent *Department) ([]Department, error) {

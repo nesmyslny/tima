@@ -66,7 +66,7 @@ func (projectAPI *ProjectAPI) DeleteHandler(context *HandlerContext) (interface{
 		return nil, &HandlerError{err, "Error: Project could not deleted.", http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (projectAPI *ProjectAPI) get(id int) (*Project, error) {

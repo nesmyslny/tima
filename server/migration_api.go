@@ -22,7 +22,7 @@ func (migrationAPI *MigrationAPI) UpgradeHandler(context *HandlerContext) (inter
 		return nil, &HandlerError{err, err.Error(), http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (migrationAPI *MigrationAPI) migrate() error {

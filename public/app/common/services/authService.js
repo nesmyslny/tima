@@ -8,8 +8,8 @@ function($location, $q, JwtDecode, sessionService, Auth) {
 
         signIn: function(credentials, redirectPath) {
             Auth.signIn(credentials, function(data) {
-                var tokenData = JwtDecode.decode(data.stringResult);
-                sessionService.init(data.stringResult, tokenData.user);
+                var tokenData = JwtDecode.decode(data.value);
+                sessionService.init(data.value, tokenData.user);
                 $location.path(redirectPath);
                 credentials.clear();
             }, function() {
@@ -25,7 +25,7 @@ function($location, $q, JwtDecode, sessionService, Auth) {
 
         isAuthenticated: function() {
             return Auth.isSignedIn().$promise.then(function(data) {
-                return data.boolResult;
+                return data.value;
             }, function() {
                 return false;
             });

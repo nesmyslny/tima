@@ -108,8 +108,6 @@ type UserCredentials struct {
 	Password string `json:"password"`
 }
 
-type JsonResult struct {
-	BoolResult   bool   `json:"boolResult"`
-	StringResult string `json:"stringResult"`
-	IntResult    int    `json:"intResult"`
+type SingleValue struct {
+	Value interface{} `json:"value"`
 }

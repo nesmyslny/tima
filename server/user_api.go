@@ -31,12 +31,12 @@ func (userAPI *UserAPI) SigninHandler(context *HandlerContext) (interface{}, *Ha
 		return nil, &HandlerError{err, "Invalid username/password", http.StatusBadRequest}
 	}
 
-	return jsonResultString(token)
+	return &SingleValue{token}, nil
 }
 
 func (userAPI *UserAPI) IsSignedInHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	signedIn := userAPI.auth.ValidateToken(context)
-	return jsonResultBool(signedIn)
+	return &SingleValue{signedIn}, nil
 }
 
 func (userAPI *UserAPI) authorizeGetSave(requestUserId int, user *User) (bool, error) {

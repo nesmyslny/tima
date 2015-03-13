@@ -70,7 +70,7 @@ func (activityTypeAPI *ActivityTypeAPI) DeleteHandler(context *HandlerContext) (
 		return nil, &HandlerError{err, "Error: Activity type could not deleted.", http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (activityTypeAPI *ActivityTypeAPI) get(id int) (*ActivityType, error) {

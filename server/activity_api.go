@@ -54,7 +54,7 @@ func (activityAPI *ActivityAPI) DeleteHandler(context *HandlerContext) (interfac
 		return nil, &HandlerError{err, "couldn't delete activity", http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (activityAPI *ActivityAPI) getByDay(userID int, day time.Time) ([]ActivityView, error) {

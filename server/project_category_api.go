@@ -59,7 +59,7 @@ func (projectCategoryAPI *ProjectCategoryAPI) DeleteHandler(context *HandlerCont
 		return nil, &HandlerError{err, "Error: Project category could not deleted.", http.StatusInternalServerError}
 	}
 
-	return jsonResultBool(true)
+	return &SingleValue{true}, nil
 }
 
 func (projectCategoryAPI *ProjectCategoryAPI) getTree(parent *ProjectCategory) ([]ProjectCategory, error) {
