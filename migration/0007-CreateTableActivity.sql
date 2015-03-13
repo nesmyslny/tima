@@ -6,6 +6,7 @@ create table activity (
     project_id          integer         not null,
     activity_type_id    integer         not null,
     duration            integer         not null,
+    version             integer         not null,
     primary key (id),
     index idx_activity_day (day),
     index idx_activity_user_id (user_id),

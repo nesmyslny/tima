@@ -35,6 +35,9 @@ func (activityAPI *ActivityAPI) SaveHandler(context *HandlerContext) (interface{
 
 	err = activityAPI.save(&activity)
 	if err != nil {
+		if err == errOptimisticLocking {
+			return nil, &HandlerError{err, "Error: The activity was changed/deleted by another user.", http.StatusInternalServerError}
+		}
 		return nil, &HandlerError{err, "couldn't save activity", http.StatusInternalServerError}
 	}
 	return activity, nil
