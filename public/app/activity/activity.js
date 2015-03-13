@@ -6,17 +6,21 @@ function($resource, _, $moment, resourceSaveInterceptor, util) {
             url: "/activities/:day",
             method: "GET",
             isArray: true,
-            transformResponse: function(data) {
-                var activities = angular.fromJson(data);
+            transformResponse: function(data, headers) {
+                var contentType = headers("content-type");
 
-                _.forEach(activities, function(activity) {
-                    var m = $moment.duration(activity.duration, 'minutes');
-                    activity.durationHours = m.hours();
-                    activity.durationMinutes = m.minutes();
-                    activity.durationFormatted = util.formatTime(activity.durationHours, activity.durationMinutes);
-                });
+                if (contentType && _.startsWith(contentType, "application/json")) {
+                    data = angular.fromJson(data);
 
-                return activities;
+                    _.forEach(data, function(activity) {
+                        var m = $moment.duration(activity.duration, 'minutes');
+                        activity.durationHours = m.hours();
+                        activity.durationMinutes = m.minutes();
+                        activity.durationFormatted = util.formatTime(activity.durationHours, activity.durationMinutes);
+                    });
+                }
+
+                return data;
             }
         },
         save: {
