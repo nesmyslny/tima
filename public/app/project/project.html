@@ -83,18 +83,17 @@
 
     <div class="row">
         <div class="col-md-offset-2 col-md-6">
-            <ul class="list-group">
-                <li class="list-group-item admin-list-item" ng-repeat="at in project.activityTypes | orderObjectBy:'title'" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
-                    <span ng-bind="at.title"></span>
-                    <div class="pull-right btn-admin-list-item" role="group">
-                        <button type="button" class="btn btn-sm" ng-class="{'btn-danger': hover, 'btn-default': !hover}" ng-click="deleteActivityType(at)"><i class="fa fa-times"></i></button>
-                    </div>
-                    <div class="clearfix"></div>
+            <ul class="list-inline">
+                <li ng-repeat="at in project.activityTypes | orderObjectBy:'title'">
+                    <span class="label label-default">
+                        <span ng-bind="at.title"></span>
+                        <a href ng-click="deleteActivityType(at)" class="label-delete"><i class="fa fa-times"></i></a>
+                    </span>
                 </li>
             </ul>
         </div>
-
     </div>
+
     <div class="row">
         <div class="col-md-8">
             <div class="pull-right">

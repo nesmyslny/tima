@@ -123,6 +123,14 @@
     z-index: 1000;
 }
 
+.list-inline > li {
+    padding-bottom: 5px;
+}
+
+.label-delete, .label-delete:hover {
+    color: #843534;
+}
+
 /*
 angular-bootstrap uses glyphicons (e.g. datepicker). -> replace with font awesome
 https://github.com/angular-ui/bootstrap/issues/2475
