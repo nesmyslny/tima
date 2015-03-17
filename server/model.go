@@ -49,6 +49,7 @@ type Project struct {
 	Title             string         `db:"title" json:"title"`
 	Version           int            `db:"version" json:"version"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
+	Users             []User         `db:"-" json:"users"`
 }
 
 type ProjectCategory struct {
@@ -60,6 +61,11 @@ type ProjectCategory struct {
 	Version           int               `db:"version" json:"version"`
 	Path              string            `db:"-" json:"path"`
 	ProjectCategories []ProjectCategory `db:"-" json:"projectCategories"`
+}
+
+type ProjectUser struct {
+	ProjectID int `db:"project_id"`
+	UserID    int `db:"user_id"`
 }
 
 type ActivityType struct {

@@ -36,6 +36,7 @@ func NewDB(connectionString string) *DB {
 	dbAccess.dbMap.AddTableWithName(Department{}, "department").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(ProjectUser{}, "project_user").SetKeys(false, "project_id", "user_id")
 	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(ProjectActivityType{}, "project_activity_type").SetKeys(false, "project_id", "activity_type_id")
@@ -180,9 +181,14 @@ func (db *DB) GetProject(id int) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	project := obj.(*Project)
-	project.ActivityTypes, err = db.getActivityTypes(project.ID)
+
+	project.ActivityTypes, err = db.getActivityTypesOfProject(project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	project.Users, err = db.getUsersOfProject(project.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +236,9 @@ func (db *DB) isProjectRefIDCompleteUnique(projectID int, refIDComplete string) 
 	return exists == 0, nil
 }
 
-func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType) error {
+func (db *DB) SaveProject(project *Project,
+	addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType,
+	addedUsers []ProjectUser, removedUsers []ProjectUser) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
 		return err
@@ -266,14 +274,30 @@ func (db *DB) SaveProject(project *Project, addedActivityTypes []ProjectActivity
 			return err
 		}
 	}
-
 	for _, addedActivityType := range addedActivityTypes {
 		// project id must be set, if it's a new project
 		if addedActivityType.ProjectID < 0 {
 			addedActivityType.ProjectID = project.ID
 		}
-
 		err = trans.Insert(&addedActivityType)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+	}
+
+	for _, removedUser := range removedUsers {
+		count, err := trans.Delete(&removedUser)
+		if err != nil || count != 1 {
+			trans.Rollback()
+			return err
+		}
+	}
+	for _, addedUser := range addedUsers {
+		if addedUser.ProjectID < 0 {
+			addedUser.ProjectID = project.ID
+		}
+		err = trans.Insert(&addedUser)
 		if err != nil {
 			trans.Rollback()
 			return err
@@ -309,7 +333,7 @@ func (db *DB) GetActivityTypes() ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (db *DB) getActivityTypes(projectID int) ([]ActivityType, error) {
+func (db *DB) getActivityTypesOfProject(projectID int) ([]ActivityType, error) {
 	var activityTypes []ActivityType
 	_, err := db.dbMap.Select(&activityTypes, "select * from activity_type where id in (select activity_type_id from project_activity_type where project_id = ?)", projectID)
 	if err != nil {
@@ -584,6 +608,15 @@ func (db *DB) GetUsers() ([]User, error) {
 	return users, nil
 }
 
+func (db *DB) getUsersOfProject(projectID int) ([]User, error) {
+	var users []User
+	_, err := db.dbMap.Select(&users, "select * from user where id in (select user_id from project_user where project_id = ?)", projectID)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (db *DB) GetUser(id int) (*User, error) {
 	obj, err := db.dbMap.Get(User{}, id)
 	if err != nil {
@@ -678,4 +711,13 @@ func (db *DB) IsDepartmentReferenced(department *Department) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (db *DB) GetProjectUsers(projectID int) ([]ProjectUser, error) {
+	var projectUsers []ProjectUser
+	_, err := db.dbMap.Select(&projectUsers, "select * from project_user where project_id = ?", projectID)
+	if err != nil {
+		return nil, err
+	}
+	return projectUsers, nil
 }

@@ -86,23 +86,37 @@ func (projectAPI *ProjectAPI) getList() ([]Project, error) {
 }
 
 func (projectAPI *ProjectAPI) save(project *Project) error {
-	addedItems, err := projectAPI.getAddedActivityTypes(project)
+	addedActivityTypes, removedActivityItems, err := projectAPI.getChangedActivityTypes(project)
 	if err != nil {
 		return err
 	}
-	deletedItems, err := projectAPI.getRemovedActivityTypes(project)
+	addedUsers, removedUsers, err := projectAPI.getChangedUsers(project)
 	if err != nil {
 		return err
 	}
-	return projectAPI.db.SaveProject(project, addedItems, deletedItems)
+	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityItems, addedUsers, removedUsers)
 }
 
-func (projectAPI *ProjectAPI) getAddedActivityTypes(project *Project) ([]ProjectActivityType, error) {
+func (projectAPI *ProjectAPI) getChangedActivityTypes(project *Project) ([]ProjectActivityType, []ProjectActivityType, error) {
 	projectActivityTypes, err := projectAPI.db.GetProjectActivityTypes(project.ID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
+	addedItems, err := projectAPI.getAddedActivityTypes(project, projectActivityTypes)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	removedItems, err := projectAPI.getRemovedActivityTypes(project, projectActivityTypes)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return addedItems, removedItems, nil
+}
+
+func (projectAPI *ProjectAPI) getAddedActivityTypes(project *Project, projectActivityTypes []ProjectActivityType) ([]ProjectActivityType, error) {
 	var addedItems []ProjectActivityType
 	for _, activityType := range project.ActivityTypes {
 		added := true
@@ -121,13 +135,8 @@ func (projectAPI *ProjectAPI) getAddedActivityTypes(project *Project) ([]Project
 	return addedItems, nil
 }
 
-func (projectAPI *ProjectAPI) getRemovedActivityTypes(project *Project) ([]ProjectActivityType, error) {
-	projectActivityTypes, err := projectAPI.db.GetProjectActivityTypes(project.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	var deleteditems []ProjectActivityType
+func (projectAPI *ProjectAPI) getRemovedActivityTypes(project *Project, projectActivityTypes []ProjectActivityType) ([]ProjectActivityType, error) {
+	var removedItems []ProjectActivityType
 	for _, projectActivityType := range projectActivityTypes {
 		deleted := true
 		for _, activityType := range project.ActivityTypes {
@@ -146,11 +155,68 @@ func (projectAPI *ProjectAPI) getRemovedActivityTypes(project *Project) ([]Proje
 				return nil, errItemInUse
 			}
 
-			deleteditems = append(deleteditems, projectActivityType)
+			removedItems = append(removedItems, projectActivityType)
 		}
 	}
 
-	return deleteditems, nil
+	return removedItems, nil
+}
+
+func (projectAPI *ProjectAPI) getChangedUsers(project *Project) ([]ProjectUser, []ProjectUser, error) {
+	projectUsers, err := projectAPI.db.GetProjectUsers(project.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	addedItems, err := projectAPI.getAddedUsers(project, projectUsers)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	removedItems, err := projectAPI.getRemovedUsers(project, projectUsers)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return addedItems, removedItems, nil
+}
+
+func (projectAPI *ProjectAPI) getAddedUsers(project *Project, projectUsers []ProjectUser) ([]ProjectUser, error) {
+	var addedItems []ProjectUser
+	for _, user := range project.Users {
+		added := true
+		for _, projectUser := range projectUsers {
+			if projectUser.UserID == user.ID {
+				added = false
+				break
+			}
+		}
+
+		if added {
+			addedItems = append(addedItems, ProjectUser{project.ID, user.ID})
+		}
+	}
+
+	return addedItems, nil
+}
+
+func (projectAPI *ProjectAPI) getRemovedUsers(project *Project, projectUsers []ProjectUser) ([]ProjectUser, error) {
+	var removedItems []ProjectUser
+	for _, projectUser := range projectUsers {
+		deleted := true
+		for _, user := range project.Users {
+			if user.ID == projectUser.UserID {
+				deleted = false
+				break
+			}
+		}
+
+		if deleted {
+			removedItems = append(removedItems, projectUser)
+		}
+	}
+
+	return removedItems, nil
 }
 
 func (projectAPI *ProjectAPI) delete(id int) error {

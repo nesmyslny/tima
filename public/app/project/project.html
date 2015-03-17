@@ -94,6 +94,34 @@
         </div>
     </div>
 
+    <div class="row form-group">
+        <label for="users" class="col-md-2 control-label">Users</label>
+        <div class="col-md-5">
+            <ui-select name="users" id="users" ng-model="selectedUser.selected">
+                <ui-select-match placeholder="Choose user">{{$select.selected.username}}</ui-select-match>
+                <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
+                    <div ng-bind-html="user.username | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-default pull-right" ng-click="addUser()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-6">
+            <ul class="list-inline">
+                <li ng-repeat="user in project.users | orderObjectBy:'username'">
+                    <span class="label label-default">
+                        <span ng-bind="user.username"></span>
+                        <a href ng-click="deleteUser(user)" class="label-delete"><i class="fa fa-times"></i></a>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-8">
             <div class="pull-right">

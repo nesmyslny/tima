@@ -42,10 +42,10 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	}
 
 	projects := []interface{}{
-		&Project{0, projectCategories[1].(*ProjectCategory).ID, "01", "AA/01", &users[0].(*User).ID, &users[1].(*User).ID, "Project 1", 0, nil},
-		&Project{1, projectCategories[3].(*ProjectCategory).ID, "01", "AA02001/01", &users[0].(*User).ID, &users[2].(*User).ID, "Project 2", 0, nil},
-		&Project{2, projectCategories[6].(*ProjectCategory).ID, "01", "BB01/01", &users[1].(*User).ID, &users[0].(*User).ID, "Project 3", 0, nil},
-		&Project{3, projectCategories[6].(*ProjectCategory).ID, "02", "BB01/02", &users[1].(*User).ID, &users[2].(*User).ID, "Project 4", 0, nil}}
+		&Project{0, projectCategories[1].(*ProjectCategory).ID, "01", "AA/01", &users[0].(*User).ID, &users[1].(*User).ID, "Project 1", 0, nil, nil},
+		&Project{1, projectCategories[3].(*ProjectCategory).ID, "01", "AA02001/01", &users[0].(*User).ID, &users[2].(*User).ID, "Project 2", 0, nil, nil},
+		&Project{2, projectCategories[6].(*ProjectCategory).ID, "01", "BB01/01", &users[1].(*User).ID, &users[0].(*User).ID, "Project 3", 0, nil, nil},
+		&Project{3, projectCategories[6].(*ProjectCategory).ID, "02", "BB01/02", &users[1].(*User).ID, &users[2].(*User).ID, "Project 4", 0, nil, nil}}
 	if err = db.insertTestData(trans, &projects); err != nil {
 		return err
 	}
@@ -69,6 +69,17 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 		&ProjectActivityType{projects[3].(*Project).ID, activityTypes[0].(*ActivityType).ID},
 		&ProjectActivityType{projects[3].(*Project).ID, activityTypes[2].(*ActivityType).ID}}
 	if err = db.insertTestData(trans, &projectActivityTypes); err != nil {
+		return err
+	}
+
+	projectUsers := []interface{}{
+		&ProjectUser{projects[0].(*Project).ID, users[0].(*User).ID},
+		&ProjectUser{projects[1].(*Project).ID, users[1].(*User).ID},
+		&ProjectUser{projects[2].(*Project).ID, users[2].(*User).ID},
+		&ProjectUser{projects[3].(*Project).ID, users[0].(*User).ID},
+		&ProjectUser{projects[3].(*Project).ID, users[1].(*User).ID},
+		&ProjectUser{projects[3].(*Project).ID, users[2].(*User).ID}}
+	if err = db.insertTestData(trans, &projectUsers); err != nil {
 		return err
 	}
 

@@ -5,7 +5,8 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.project = {
         id: -1,
         title: '',
-        activityTypes: []
+        activityTypes: [],
+        users: []
     };
 
     $scope.activityTypes = [];
@@ -17,6 +18,7 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.users = [];
     $scope.selectedResponsibleUser = {};
     $scope.selectedManagerUser = {};
+    $scope.selectedUser = {};
 
     $scope.fetch = function() {
         var id = parseInt($routeParams.id);
@@ -61,6 +63,28 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.deleteActivityType = function(activityType) {
         var index = $scope.project.activityTypes.indexOf(activityType);
         $scope.project.activityTypes.splice(index, 1);
+    };
+
+    $scope.addUser = function() {
+        if (_.isUndefined($scope.selectedUser.selected)) {
+            return;
+        }
+
+        var user = $scope.selectedUser.selected;
+        var alreadyInList = $scope.project.users.some(function(u) {
+            return u.id == user.id;
+        });
+
+        if (!alreadyInList) {
+            $scope.project.users.push(user);
+        }
+
+        $scope.selectedUser = {};
+    };
+
+    $scope.deleteUser = function(user) {
+        var index = $scope.project.users.indexOf(user);
+        $scope.project.users.splice(index, 1);
     };
 
     $scope.save = function() {
