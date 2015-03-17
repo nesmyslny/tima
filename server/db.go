@@ -384,14 +384,15 @@ func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool
 	return exists == 1, nil
 }
 
-func (db *DB) GetProjectActivityTypeViewList() ([]ProjectActivityTypeView, error) {
+func (db *DB) GetProjectActivityTypeViewList(userID int) ([]ProjectActivityTypeView, error) {
 	sql := "select pat.*, p.ref_id_complete project_ref_id_complete, p.title project_title, at.title activity_type_title " +
 		"from project_activity_type pat, project p, activity_type at " +
 		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
+		" and (p.responsible_user_id = ? or p.manager_user_id = ? or p.id in (select project_id from project_user where user_id = ?))" +
 		"order by p.title, at.title"
 
 	var list []ProjectActivityTypeView
-	_, err := db.dbMap.Select(&list, sql)
+	_, err := db.dbMap.Select(&list, sql, userID, userID, userID)
 	if err != nil {
 		return nil, err
 	}
