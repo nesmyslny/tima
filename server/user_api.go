@@ -117,7 +117,7 @@ func (userAPI *UserAPI) AddUser(username string, role int, departmentId int, pwd
 		Email:        email,
 	}
 
-	err = userAPI.db.SaveUser(user, true)
+	err = userAPI.save(user, true)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (userAPI *UserAPI) getList() ([]User, error) {
 }
 
 func (userAPI *UserAPI) save(user *User, saveAsAdmin bool) error {
-	var err error
+	var passwordHashOrig []byte
 
 	if user.ID < 0 {
 		available, err := userAPI.db.IsUsernameAvailable(user.Username)
@@ -152,10 +152,33 @@ func (userAPI *UserAPI) save(user *User, saveAsAdmin bool) error {
 		if !available {
 			return errUsernameUnavailable
 		}
+	} else {
+		userOrig, err := userAPI.db.GetUser(user.ID)
+		if err != nil {
+			return err
+		}
+
+		passwordHashOrig = userOrig.PasswordHash
+
+		// some attributes may only be changed by admins -> reset these attributes in other cases.
+		if !saveAsAdmin {
+			user.Role = userOrig.Role
+			user.DepartmentID = userOrig.DepartmentID
+		}
 	}
 
+	err := userAPI.setPasswordBeforeSave(user, passwordHashOrig)
+	if err != nil {
+		return err
+	}
+
+	return userAPI.db.SaveUser(user)
+}
+
+func (userAPI *UserAPI) setPasswordBeforeSave(user *User, passwordHasOrig []byte) error {
 	if user.NewPassword != "" {
 		if user.NewPassword == user.NewPasswordConfirm {
+			var err error
 			user.PasswordHash, err = userAPI.auth.GeneratePasswordHash(user.NewPassword)
 			if err != nil {
 				return err
@@ -163,7 +186,9 @@ func (userAPI *UserAPI) save(user *User, saveAsAdmin bool) error {
 		} else {
 			return errors.New("Passwords do not match")
 		}
+	} else {
+		// password is only provided, if password needs to be changed. if it's not set, reset it to the original.
+		user.PasswordHash = passwordHasOrig
 	}
-
-	return userAPI.db.SaveUser(user, saveAsAdmin)
+	return nil
 }

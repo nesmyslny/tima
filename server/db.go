@@ -104,27 +104,10 @@ func (db *DB) GetUserByName(username string) *User {
 	return user
 }
 
-func (db *DB) SaveUser(user *User, saveAsAdmin bool) error {
+func (db *DB) SaveUser(user *User) error {
 	if user.ID < 0 {
 		return db.dbMap.Insert(user)
 	}
-
-	// todo: in future versions of gorp it should be possible to just update specific fields.
-	userOrig, err := db.GetUser(user.ID)
-	if err != nil {
-		return err
-	}
-
-	// password hash is only provided, if password needs to be changed. if it's not set, reset it to the original.
-	if len(user.PasswordHash) == 0 {
-		user.PasswordHash = userOrig.PasswordHash
-	}
-	// some attributes may only be changed by admins -> reset these attributes in other cases.
-	if !saveAsAdmin {
-		user.Role = userOrig.Role
-		user.DepartmentID = userOrig.DepartmentID
-	}
-
 	return db.Update(nil, user)
 }
 
