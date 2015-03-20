@@ -23,6 +23,22 @@
     </div>
 
     <div class="row form-group" show-errors>
+        <label for="projectCategory" class="col-md-2 control-label">Project category</label>
+        <div class="col-md-6">
+            <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" ng-disabled="disableForUsers(false)" required>
+                <ui-select-match placeholder="Choose project category">
+                    <small ng-bind="$select.selected.refIdComplete"></small>
+                    <span ng-bind="$select.selected.path"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="cat in projectCategories | propsFilter: {refIdComplete: $select.search, path: $select.search}">
+                    <small ng-bind-html="cat.refIdComplete | highlight: $select.search"></small>
+                    <span ng-bind-html="cat.path | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+
+    <div class="row form-group" show-errors>
         <label for="responsibleUser" class="col-md-2 control-label">Responsible</label>
         <div class="col-md-6">
             <ui-select name="responsibleUser" id="responsibleUser" class="form-control form-control-ui-select" ng-model="selectedResponsibleUser.selected" ng-disabled="disableForUsers(false)" required>
@@ -45,22 +61,6 @@
                 </ui-select-match>
                 <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
                     <span ng-bind-html="user.username | highlight: $select.search"></span>
-                </ui-select-choices>
-            </ui-select>
-        </div>
-    </div>
-
-    <div class="row form-group" show-errors>
-        <label for="projectCategory" class="col-md-2 control-label">Project category</label>
-        <div class="col-md-6">
-            <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" ng-disabled="disableForUsers(false)" required>
-                <ui-select-match placeholder="Choose project category">
-                    <small ng-bind="$select.selected.refIdComplete"></small>
-                    <span ng-bind="$select.selected.path"></span>
-                </ui-select-match>
-                <ui-select-choices repeat="cat in projectCategories | propsFilter: {refIdComplete: $select.search, path: $select.search}">
-                    <small ng-bind-html="cat.refIdComplete | highlight: $select.search"></small>
-                    <span ng-bind-html="cat.path | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
         </div>
