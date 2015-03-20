@@ -1,6 +1,6 @@
 angular.module('tima').factory('activityService',
-['_', '$moment', 'authService', 'Activity', 'ProjectActivityType', 'util',
-function(_, $moment, authService, Activity, ProjectActivityType, util) {
+['_', '$moment', 'sessionService', 'Activity', 'ProjectActivityType', 'util',
+function(_, $moment, sessionService, Activity, ProjectActivityType, util) {
 
     function getDurationFormatted(duration) {
         var m = $moment.duration(duration, 'minutes');
@@ -15,7 +15,7 @@ function(_, $moment, authService, Activity, ProjectActivityType, util) {
         return {
             id: -1,
             day: $moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
-            userId: authService.getUser().id,
+            userId: sessionService.user.id,
             projectId: projectActivity.projectId,
             activityTypeId: projectActivity.activityTypeId,
             duration: calculateDuration(hours, minutes),
