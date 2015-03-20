@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'User',
-function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, User) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'User', 'authService', 'userRoles',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, User, authService, userRoles) {
 
     $scope.project = {
         id: -1,
@@ -19,6 +19,11 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.selectedResponsibleUser = {};
     $scope.selectedManagerUser = {};
     $scope.selectedUser = {};
+
+    $scope.returnPath = $routeParams.returnPath;
+    if (_.isUndefined($scope.returnPath)) {
+        $scope.returnPath = "projects";
+    }
 
     $scope.fetch = function() {
         var id = parseInt($routeParams.id);
@@ -98,8 +103,12 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
         $scope.project.managerUserId = $scope.selectedManagerUser.selected.id;
 
         Project.save($scope.project, function() {
-            $location.path('/projects');
+            $location.path($scope.returnPath);
         });
+    };
+
+    $scope.disableForUsers = function(enableForResponsible) {
+        return !(authService.isAuthorized(userRoles.manager) || ($scope.project.isResponsible && enableForResponsible));
     };
 
 }]);

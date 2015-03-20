@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon" id="ref-id-pre" ng-bind="selectedProjectCategory.selected.refIdComplete || '...'"></span>
-                <input type="text" class="form-control" id="ref-id" name="ref-id" ng-model="project.refId" maxlength="5" placeholder="Reference ID" aria-describedby="ref-id-pre" required />
+                <input type="text" class="form-control" id="ref-id" name="ref-id" ng-model="project.refId" maxlength="5" placeholder="Reference ID" aria-describedby="ref-id-pre" ng-disabled="disableForUsers(false)" required />
             </div>
         </div>
     </div>
@@ -18,14 +18,14 @@
     <div class="row form-group" show-errors>
         <label for="title" class="col-md-2 control-label">Title</label>
         <div class="col-md-6">
-            <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" required />
+            <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" ng-disabled="disableForUsers(false)" required />
         </div>
     </div>
 
     <div class="row form-group" show-errors>
         <label for="responsibleUser" class="col-md-2 control-label">Responsible</label>
         <div class="col-md-6">
-            <ui-select name="responsibleUser" id="responsibleUser" class="form-control form-control-ui-select" ng-model="selectedResponsibleUser.selected" required>
+            <ui-select name="responsibleUser" id="responsibleUser" class="form-control form-control-ui-select" ng-model="selectedResponsibleUser.selected" ng-disabled="disableForUsers(false)" required>
                 <ui-select-match placeholder="Choose project responsible">
                     <span ng-bind="$select.selected.username"></span>
                 </ui-select-match>
@@ -39,7 +39,7 @@
     <div class="row form-group" show-errors>
         <label for="managerUser" class="col-md-2 control-label">Manager</label>
         <div class="col-md-6">
-            <ui-select name="managerUser" id="managerUser" class="form-control form-control-ui-select" ng-model="selectedManagerUser.selected" required>
+            <ui-select name="managerUser" id="managerUser" class="form-control form-control-ui-select" ng-model="selectedManagerUser.selected" ng-disabled="disableForUsers(true)" required>
                 <ui-select-match placeholder="Choose project manager">
                     <span ng-bind="$select.selected.username"></span>
                 </ui-select-match>
@@ -53,7 +53,7 @@
     <div class="row form-group" show-errors>
         <label for="projectCategory" class="col-md-2 control-label">Project category</label>
         <div class="col-md-6">
-            <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" required>
+            <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" ng-disabled="disableForUsers(false)" required>
                 <ui-select-match placeholder="Choose project category">
                     <small ng-bind="$select.selected.refIdComplete"></small>
                     <span ng-bind="$select.selected.path"></span>
@@ -128,7 +128,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="fa fa-check"></i> Save
                 </button>
-                <a href="#/projects" class="btn btn-default">Cancel</a>
+                <a ng-href="#/{{returnPath}}" class="btn btn-default">Cancel</a>
             </div>
         </div>
     </div>

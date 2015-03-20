@@ -7,9 +7,7 @@ function($resource, _, $moment, resourceSaveInterceptor, util) {
             method: "GET",
             isArray: true,
             transformResponse: function(data, headers) {
-                var contentType = headers("content-type");
-
-                if (contentType && _.startsWith(contentType, "application/json")) {
+                if (util.isJsonResponse(headers)) {
                     data = angular.fromJson(data);
 
                     _.forEach(data, function(activity) {

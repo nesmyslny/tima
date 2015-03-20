@@ -16,6 +16,12 @@
     margin-top: .1em;
 }
 
+.nav .fa-stack {
+    height: 1.2em;
+    line-height: 1em;
+    width: 1.28571429em;
+}
+
 .dropdown .fa-stack {
     height: 1.3em;
     line-height: 1em;

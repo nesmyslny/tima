@@ -39,21 +39,22 @@ func main() {
 	createAuthRoute(router, auth, server.AuthorizeUser, "/activities/{id}", "DELETE", activityAPI.DeleteHandler)
 
 	createAuthRoute(router, auth, server.AuthorizeManager, "/projects", "GET", projectAPI.GetListHandler)
-	createAuthRoute(router, auth, server.AuthorizeManager, "/projects/{id}", "GET", projectAPI.GetHandler)
-	createAuthRoute(router, auth, server.AuthorizeManager, "/projects", "POST", projectAPI.SaveHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/myprojects", "GET", projectAPI.GetListUserHandler)
+	createAuthRoute(router, auth, projectAPI.AuthorizeGet, "/projects/{id}", "GET", projectAPI.GetHandler)
+	createAuthRoute(router, auth, projectAPI.AuthorizeSave, "/projects", "POST", projectAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/projects/{id}", "DELETE", projectAPI.DeleteHandler)
 
 	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/tree", "GET", projectCategoryAPI.GetTreeHandler)
-	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/list", "GET", projectCategoryAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/projectCategories/list", "GET", projectCategoryAPI.GetListHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories", "POST", projectCategoryAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/projectCategories/{id}", "DELETE", projectCategoryAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes", "GET", activityTypeAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/activityTypes", "GET", activityTypeAPI.GetListHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes/{id}", "GET", activityTypeAPI.GetHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes", "POST", activityTypeAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeManager, "/activityTypes/{id}", "DELETE", activityTypeAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, server.AuthorizeManager, "/users", "GET", userAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/users", "GET", userAPI.GetListHandler)
 	createAuthRoute(router, auth, userAPI.AuthorizeGet, "/users/{id}", "GET", userAPI.GetHandler)
 	createAuthRoute(router, auth, userAPI.AuthorizeSave, "/users", "POST", userAPI.SaveHandler)
 

@@ -28,6 +28,11 @@ angular
         controller: 'ActivityController',
         resolve: createPermissionResolve(userRoles.user)
     })
+    .when('/myprojects', {
+        templateUrl: 'app/project/myProjectList.html',
+        controller: 'MyProjectListController',
+        resolve: createPermissionResolve(userRoles.user)
+    })
     .when('/projects', {
         templateUrl: 'app/project/projectList.html',
         controller: 'ProjectListController',
@@ -36,7 +41,7 @@ angular
     .when('/projects/:id', {
         templateUrl: 'app/project/project.html',
         controller: 'ProjectController',
-        resolve: createPermissionResolve(userRoles.manager)
+        resolve: createPermissionResolve(userRoles.user)
     })
     .when('/projectCategories', {
         templateUrl: 'app/projectCategory/projectCategoryList.html',

@@ -10,6 +10,31 @@ func NewProjectAPI(db *DB) *ProjectAPI {
 	return &ProjectAPI{db}
 }
 
+func (projectAPI *ProjectAPI) authorizeGetSave(projectID int, user *User) (bool, error) {
+	project, err := projectAPI.db.GetProject(projectID)
+	if err != nil {
+		return false, err
+	}
+	return *user.Role >= RoleManager || *project.ResponsibleUserID == user.ID || *project.ManagerUserID == user.ID, nil
+}
+
+func (projectAPI *ProjectAPI) AuthorizeGet(context *HandlerContext) (bool, error) {
+	id, err := context.GetRouteVarInt("id")
+	if err != nil {
+		return false, err
+	}
+	return projectAPI.authorizeGetSave(id, context.User)
+}
+
+func (projectAPI *ProjectAPI) AuthorizeSave(context *HandlerContext) (bool, error) {
+	var project Project
+	err := context.GetReqBodyJSON(&project)
+	if err != nil {
+		return false, err
+	}
+	return projectAPI.authorizeGetSave(project.ID, context.User)
+}
+
 func (projectAPI *ProjectAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	id, err := context.GetRouteVarInt("id")
 	if err != nil {
@@ -31,6 +56,14 @@ func (projectAPI *ProjectAPI) GetListHandler(context *HandlerContext) (interface
 	return projects, nil
 }
 
+func (projectAPI *ProjectAPI) GetListUserHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	projects, err := projectAPI.getListUser(context.User.ID)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
+	}
+	return projects, nil
+}
+
 func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var project Project
 	err := context.GetReqBodyJSON(&project)
@@ -38,7 +71,7 @@ func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{},
 		return nil, &HandlerError{err, err.Error(), http.StatusBadRequest}
 	}
 
-	err = projectAPI.save(&project)
+	err = projectAPI.save(&project, context.User)
 	if err != nil {
 		if err == errItemInUse {
 			return nil, &HandlerError{err, "Error: It is not possible to delete activity types that are already in use.", http.StatusBadRequest}
@@ -85,7 +118,41 @@ func (projectAPI *ProjectAPI) getList() ([]Project, error) {
 	return projects, nil
 }
 
-func (projectAPI *ProjectAPI) save(project *Project) error {
+func (projectAPI *ProjectAPI) getListUser(userID int) ([]Project, error) {
+	projects, err := projectAPI.db.GetProjectsOfUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
+	// creating projects is only allowd for admins and managers
+	// updating projects is partially allowed for users, who are responsible or manager of the project
+	if project.ID < 0 && *user.Role < RoleManager {
+		return errForbidden
+	} else if project.ID >= 0 && *user.Role < RoleManager {
+		projectOrig, err := projectAPI.db.GetProject(project.ID)
+		if *projectOrig.ResponsibleUserID == user.ID || *projectOrig.ManagerUserID == user.ID {
+			if err != nil {
+				return err
+			}
+
+			project.RefID = projectOrig.RefID
+			project.RefIDComplete = projectOrig.RefIDComplete
+			project.Title = projectOrig.Title
+			project.ProjectCategoryID = projectOrig.ProjectCategoryID
+			project.ResponsibleUserID = projectOrig.ResponsibleUserID
+
+			// when the user is only project manager, changing manager is not allowed
+			if *projectOrig.ResponsibleUserID != user.ID && *projectOrig.ManagerUserID == user.ID {
+				project.ManagerUserID = projectOrig.ManagerUserID
+			}
+		} else {
+			return errForbidden
+		}
+	}
+
 	addedActivityTypes, removedActivityItems, err := projectAPI.getChangedActivityTypes(project)
 	if err != nil {
 		return err

@@ -9,6 +9,7 @@ var errItemInUse = errors.New("Item is already in use")
 var errUsernameUnavailable = errors.New("Username unavailable")
 var errIDNotUnique = errors.New("ID must be unique")
 var errOptimisticLocking = errors.New("Data was changed/deleted")
+var errForbidden = errors.New("Forbidden")
 
 const RoleUser int = 10
 const RoleManager int = 30

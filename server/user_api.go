@@ -39,8 +39,8 @@ func (userAPI *UserAPI) IsSignedInHandler(context *HandlerContext) (interface{},
 	return &SingleValue{signedIn}, nil
 }
 
-func (userAPI *UserAPI) authorizeGetSave(requestUserId int, user *User) (bool, error) {
-	return *user.Role == RoleAdmin || requestUserId == user.ID, nil
+func (userAPI *UserAPI) authorizeGetSave(requestUserId int, user *User) bool {
+	return *user.Role == RoleAdmin || requestUserId == user.ID
 }
 
 func (userAPI *UserAPI) AuthorizeGet(context *HandlerContext) (bool, error) {
@@ -48,7 +48,7 @@ func (userAPI *UserAPI) AuthorizeGet(context *HandlerContext) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return userAPI.authorizeGetSave(id, context.User)
+	return userAPI.authorizeGetSave(id, context.User), nil
 }
 
 func (userAPI *UserAPI) AuthorizeSave(context *HandlerContext) (bool, error) {
@@ -57,7 +57,7 @@ func (userAPI *UserAPI) AuthorizeSave(context *HandlerContext) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return userAPI.authorizeGetSave(user.ID, context.User)
+	return userAPI.authorizeGetSave(user.ID, context.User), nil
 }
 
 func (userAPI *UserAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {

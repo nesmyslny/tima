@@ -188,6 +188,17 @@ func (db *DB) GetProjects() ([]Project, error) {
 	return projects, nil
 }
 
+func (db *DB) GetProjectsOfUser(userID int) ([]Project, error) {
+	var projects []Project
+	_, err := db.dbMap.Select(&projects,
+		"select * from project where responsible_user_id = ? or manager_user_id = ? "+
+			"order by ref_id_complete", userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
 func (db *DB) getProjectsByProjectCategory(trans *gorp.Transaction, projectCategoryId int) ([]Project, error) {
 	var projects []Project
 	_, err := trans.Select(&projects, "select * from project where project_category_id = ? order by ref_id_complete", projectCategoryId)
