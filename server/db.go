@@ -36,6 +36,7 @@ func NewDB(connectionString string) *DB {
 	dbAccess.dbMap.AddTableWithName(Department{}, "department").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(User{}, "user").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(Project{}, "project").SetKeys(true, "id").SetVersionCol("version")
+	dbAccess.dbMap.AddTableWithName(ProjectDepartment{}, "project_department").SetKeys(false, "project_id", "department_id")
 	dbAccess.dbMap.AddTableWithName(ProjectUser{}, "project_user").SetKeys(false, "project_id", "user_id")
 	dbAccess.dbMap.AddTableWithName(ProjectCategory{}, "project_category").SetKeys(true, "id").SetVersionCol("version")
 	dbAccess.dbMap.AddTableWithName(ActivityType{}, "activity_type").SetKeys(true, "id").SetVersionCol("version")
@@ -171,6 +172,11 @@ func (db *DB) GetProject(id int) (*Project, error) {
 		return nil, err
 	}
 
+	project.Departments, err = db.getDepartmentsOfProject(project.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	project.Users, err = db.getUsersOfProject(project.ID)
 	if err != nil {
 		return nil, err
@@ -232,6 +238,7 @@ func (db *DB) isProjectRefIDCompleteUnique(projectID int, refIDComplete string) 
 
 func (db *DB) SaveProject(project *Project,
 	addedActivityTypes []ProjectActivityType, removedActivityTypes []ProjectActivityType,
+	addedDepartments []ProjectDepartment, removedDepartments []ProjectDepartment,
 	addedUsers []ProjectUser, removedUsers []ProjectUser) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
@@ -274,6 +281,24 @@ func (db *DB) SaveProject(project *Project,
 			addedActivityType.ProjectID = project.ID
 		}
 		err = trans.Insert(&addedActivityType)
+		if err != nil {
+			trans.Rollback()
+			return err
+		}
+	}
+
+	for _, removedDepartment := range removedDepartments {
+		count, err := trans.Delete(&removedDepartment)
+		if err != nil || count != 1 {
+			trans.Rollback()
+			return err
+		}
+	}
+	for _, addedDepartment := range addedDepartments {
+		if addedDepartment.ProjectID < 0 {
+			addedDepartment.ProjectID = project.ID
+		}
+		err = trans.Insert(&addedDepartment)
 		if err != nil {
 			trans.Rollback()
 			return err
@@ -711,6 +736,24 @@ func (db *DB) IsDepartmentReferenced(department *Department) (bool, error) {
 func (db *DB) GetProjectUserIDs(projectID int) ([]int, error) {
 	var IDs []int
 	_, err := db.dbMap.Select(&IDs, "select user_id from project_user where project_id = ?", projectID)
+	if err != nil {
+		return nil, err
+	}
+	return IDs, nil
+}
+
+func (db *DB) getDepartmentsOfProject(projectID int) ([]Department, error) {
+	var depts []Department
+	_, err := db.dbMap.Select(&depts, "select * from department where id in (select department_id from project_department where project_id = ?)", projectID)
+	if err != nil {
+		return nil, err
+	}
+	return depts, nil
+}
+
+func (db *DB) GetProjectDepartmentIDs(projectID int) ([]int, error) {
+	var IDs []int
+	_, err := db.dbMap.Select(&IDs, "select department_id from project_department where project_id = ?", projectID)
 	if err != nil {
 		return nil, err
 	}

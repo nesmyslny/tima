@@ -161,7 +161,11 @@ func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
 	if err != nil {
 		return err
 	}
-	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityTypes, addedUsers, removedUsers)
+	addedDepartments, removedDepartments, err := projectAPI.getChangedDepartments(project)
+	if err != nil {
+		return err
+	}
+	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityTypes, addedDepartments, removedDepartments, addedUsers, removedUsers)
 }
 
 func (projectAPI *ProjectAPI) getChangedActivityTypes(project *Project) ([]ProjectActivityType, []ProjectActivityType, error) {
@@ -200,6 +204,29 @@ func (projectAPI *ProjectAPI) createRemovedActivityTypesCheck(projectID, activit
 		return errItemInUse
 	}
 	return nil
+}
+
+func (projectAPI *ProjectAPI) getChangedDepartments(project *Project) ([]ProjectDepartment, []ProjectDepartment, error) {
+	savedDepartmentIDs, err := projectAPI.db.GetProjectDepartmentIDs(project.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	departmentIDs := project.GetDepartmentIDs()
+	addedProjectDepartments := projectAPI.getAddedDepartments(project.ID, departmentIDs, savedDepartmentIDs)
+	removedProjectDepartments := projectAPI.getRemovedDepartments(project.ID, departmentIDs, savedDepartmentIDs)
+
+	return addedProjectDepartments, removedProjectDepartments, nil
+}
+
+func (projectAPI *ProjectAPI) getAddedDepartments(projectID int, departmentIDs, savedDepartmentIDs []int) []ProjectDepartment {
+	addedIDs := diffInt(departmentIDs, savedDepartmentIDs)
+	return createProjectDepartments(projectID, addedIDs)
+}
+
+func (projectAPI *ProjectAPI) getRemovedDepartments(projectID int, departmentIDs, savedDepartmentIDs []int) []ProjectDepartment {
+	removedIDs := diffInt(savedDepartmentIDs, departmentIDs)
+	return createProjectDepartments(projectID, removedIDs)
 }
 
 func (projectAPI *ProjectAPI) getChangedUsers(project *Project) ([]ProjectUser, []ProjectUser, error) {
@@ -244,6 +271,14 @@ func (projectAPI *ProjectAPI) delete(id int) error {
 	}
 
 	return nil
+}
+
+func createProjectDepartments(projectID int, departmentIDs []int) []ProjectDepartment {
+	var projectDepartments []ProjectDepartment
+	for _, departmentID := range departmentIDs {
+		projectDepartments = append(projectDepartments, ProjectDepartment{projectID, departmentID})
+	}
+	return projectDepartments
 }
 
 func createProjectUsers(projectID int, userIDs []int) []ProjectUser {

@@ -59,7 +59,7 @@ func main() {
 	createAuthRoute(router, auth, userAPI.AuthorizeSave, "/users", "POST", userAPI.SaveHandler)
 
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/tree", "GET", departmentAPI.GetTreeHandler)
-	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/list", "GET", departmentAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/departments/list", "GET", departmentAPI.GetListHandler)
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments", "POST", departmentAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/{id}", "DELETE", departmentAPI.DeleteHandler)
 

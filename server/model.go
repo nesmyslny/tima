@@ -50,6 +50,7 @@ type Project struct {
 	Title             string         `db:"title" json:"title"`
 	Version           int            `db:"version" json:"version"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
+	Departments       []Department   `db:"-" json:"departments"`
 	Users             []User         `db:"-" json:"users"`
 }
 
@@ -57,6 +58,14 @@ func (project *Project) getActivityTypeIDs() []int {
 	var IDs []int
 	for _, activityType := range project.ActivityTypes {
 		IDs = append(IDs, activityType.ID)
+	}
+	return IDs
+}
+
+func (project *Project) GetDepartmentIDs() []int {
+	var IDs []int
+	for _, dept := range project.Departments {
+		IDs = append(IDs, dept.ID)
 	}
 	return IDs
 }
@@ -78,6 +87,11 @@ type ProjectCategory struct {
 	Version           int               `db:"version" json:"version"`
 	Path              string            `db:"-" json:"path"`
 	ProjectCategories []ProjectCategory `db:"-" json:"projectCategories"`
+}
+
+type ProjectDepartment struct {
+	ProjectID    int `db:"project_id"`
+	DepartmentID int `db:"department_id"`
 }
 
 type ProjectUser struct {

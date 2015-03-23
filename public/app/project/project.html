@@ -95,6 +95,34 @@
     </div>
 
     <div class="row form-group">
+        <label for="depts" class="col-md-2 control-label">Departments</label>
+        <div class="col-md-5">
+            <ui-select name="depts" id="depts" ng-model="selectedDepartment.selected">
+                <ui-select-match placeholder="Choose department">{{$select.selected.path}}</ui-select-match>
+                <ui-select-choices repeat="dept in departments | propsFilter: {path: $select.search}">
+                    <div ng-bind-html="dept.path | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-default pull-right" ng-click="addDepartment()"><i class="fa fa-plus"></i> Add</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-6">
+            <ul class="list-inline">
+                <li ng-repeat="dept in project.departments | orderObjectBy:'title'">
+                    <span class="label label-default">
+                        <span ng-bind="dept.title"></span>
+                        <a href ng-click="deleteDepartment(dept)" class="label-delete"><i class="fa fa-times"></i></a>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row form-group">
         <label for="users" class="col-md-2 control-label">Users</label>
         <div class="col-md-5">
             <ui-select name="users" id="users" ng-model="selectedUser.selected">

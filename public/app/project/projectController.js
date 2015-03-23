@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'User', 'authService', 'userRoles',
-function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, User, authService, userRoles) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'Department', 'User', 'authService', 'userRoles',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, Department, User, authService, userRoles) {
 
     $scope.project = {
         id: -1,
@@ -14,6 +14,9 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
 
     $scope.projectCategories = [];
     $scope.selectedProjectCategory = {};
+
+    $scope.departments = [];
+    $scope.selectedDepartment = {};
 
     $scope.users = [];
     $scope.selectedResponsibleUser = {};
@@ -30,6 +33,7 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
 
         $scope.projectCategories = ProjectCategory.queryList();
         $scope.activityTypes = ActivityType.query();
+        $scope.departments = Department.queryList();
         $scope.users = User.query();
 
         if (id > -1) {
@@ -49,7 +53,7 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.fetch();
 
     $scope.addActivityType = function() {
-        if (typeof $scope.selectedActivityType.selected === "undefined") {
+        if (_.isUndefined($scope.selectedActivityType.selected)) {
             return;
         }
 
@@ -68,6 +72,28 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.deleteActivityType = function(activityType) {
         var index = $scope.project.activityTypes.indexOf(activityType);
         $scope.project.activityTypes.splice(index, 1);
+    };
+
+    $scope.addDepartment = function() {
+        if (_.isUndefined($scope.selectedDepartment.selected)) {
+            return;
+        }
+
+        var dept = $scope.selectedDepartment.selected;
+        var alreadyInList = $scope.project.departments.some(function(d) {
+            return d.id == dept.id;
+        });
+
+        if (!alreadyInList) {
+            $scope.project.departments.push(dept);
+        }
+
+        $scope.selectedDepartment = {};
+    };
+
+    $scope.deleteDepartment = function(dept) {
+        var index = $scope.project.departments.indexOf(dept);
+        $scope.project.departments.splice(index, 1);
     };
 
     $scope.addUser = function() {
