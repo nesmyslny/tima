@@ -53,6 +53,22 @@ type Project struct {
 	Users             []User         `db:"-" json:"users"`
 }
 
+func (project *Project) getActivityTypeIDs() []int {
+	var IDs []int
+	for _, activityType := range project.ActivityTypes {
+		IDs = append(IDs, activityType.ID)
+	}
+	return IDs
+}
+
+func (project *Project) GetUserIDs() []int {
+	var IDs []int
+	for _, user := range project.Users {
+		IDs = append(IDs, user.ID)
+	}
+	return IDs
+}
+
 type ProjectCategory struct {
 	ID                int               `db:"id" json:"id"`
 	ParentID          *int              `db:"parent_id" json:"parentId"`

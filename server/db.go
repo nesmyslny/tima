@@ -336,13 +336,13 @@ func (db *DB) getActivityTypesOfProject(projectID int) ([]ActivityType, error) {
 	return activityTypes, nil
 }
 
-func (db *DB) GetProjectActivityTypes(projectID int) ([]ProjectActivityType, error) {
-	var projectActivityTypes []ProjectActivityType
-	_, err := db.dbMap.Select(&projectActivityTypes, "select * from project_activity_type where project_id = ?", projectID)
+func (db *DB) GetProjectActivityTypeIDs(projectID int) ([]int, error) {
+	var IDs []int
+	_, err := db.dbMap.Select(&IDs, "select activity_type_id from project_activity_type where project_id = ?", projectID)
 	if err != nil {
 		return nil, err
 	}
-	return projectActivityTypes, nil
+	return IDs, nil
 }
 
 func (db *DB) SaveActivityType(activityType *ActivityType) error {
@@ -708,11 +708,11 @@ func (db *DB) IsDepartmentReferenced(department *Department) (bool, error) {
 	return false, nil
 }
 
-func (db *DB) GetProjectUsers(projectID int) ([]ProjectUser, error) {
-	var projectUsers []ProjectUser
-	_, err := db.dbMap.Select(&projectUsers, "select * from project_user where project_id = ?", projectID)
+func (db *DB) GetProjectUserIDs(projectID int) ([]int, error) {
+	var IDs []int
+	_, err := db.dbMap.Select(&IDs, "select user_id from project_user where project_id = ?", projectID)
 	if err != nil {
 		return nil, err
 	}
-	return projectUsers, nil
+	return IDs, nil
 }

@@ -153,7 +153,7 @@ func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
 		}
 	}
 
-	addedActivityTypes, removedActivityItems, err := projectAPI.getChangedActivityTypes(project)
+	addedActivityTypes, removedActivityTypes, err := projectAPI.getChangedActivityTypes(project)
 	if err != nil {
 		return err
 	}
@@ -161,129 +161,68 @@ func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
 	if err != nil {
 		return err
 	}
-	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityItems, addedUsers, removedUsers)
+	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityTypes, addedUsers, removedUsers)
 }
 
 func (projectAPI *ProjectAPI) getChangedActivityTypes(project *Project) ([]ProjectActivityType, []ProjectActivityType, error) {
-	projectActivityTypes, err := projectAPI.db.GetProjectActivityTypes(project.ID)
+	savedProjectActivityTypeIDs, err := projectAPI.db.GetProjectActivityTypeIDs(project.ID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	addedItems, err := projectAPI.getAddedActivityTypes(project, projectActivityTypes)
+	projectActivityTypeIDs := project.getActivityTypeIDs()
+	addedProjectActivityTypes := projectAPI.getAddedActivityTypes(project.ID, projectActivityTypeIDs, savedProjectActivityTypeIDs)
+	removedActivityTypes, err := projectAPI.getRemovedActivityTypes(project.ID, projectActivityTypeIDs, savedProjectActivityTypeIDs)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	removedItems, err := projectAPI.getRemovedActivityTypes(project, projectActivityTypes)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return addedItems, removedItems, nil
+	return addedProjectActivityTypes, removedActivityTypes, nil
 }
 
-func (projectAPI *ProjectAPI) getAddedActivityTypes(project *Project, projectActivityTypes []ProjectActivityType) ([]ProjectActivityType, error) {
-	var addedItems []ProjectActivityType
-	for _, activityType := range project.ActivityTypes {
-		added := true
-		for _, projectActivityType := range projectActivityTypes {
-			if projectActivityType.ActivityTypeID == activityType.ID {
-				added = false
-				break
-			}
-		}
-
-		if added {
-			addedItems = append(addedItems, ProjectActivityType{project.ID, activityType.ID})
-		}
-	}
-
-	return addedItems, nil
+func (projectAPI *ProjectAPI) getAddedActivityTypes(projectID int, projectActivityTypeIDs, savedProjectActivityTypeIDs []int) []ProjectActivityType {
+	addedIDs := diffInt(projectActivityTypeIDs, savedProjectActivityTypeIDs)
+	addedProjectActivityTypes, _ := createProjectActivityTypes(projectID, addedIDs, nil)
+	return addedProjectActivityTypes
 }
 
-func (projectAPI *ProjectAPI) getRemovedActivityTypes(project *Project, projectActivityTypes []ProjectActivityType) ([]ProjectActivityType, error) {
-	var removedItems []ProjectActivityType
-	for _, projectActivityType := range projectActivityTypes {
-		deleted := true
-		for _, activityType := range project.ActivityTypes {
-			if activityType.ID == projectActivityType.ActivityTypeID {
-				deleted = false
-				break
-			}
-		}
+func (projectAPI *ProjectAPI) getRemovedActivityTypes(projectID int, projectActivityTypeIDs, savedProjectActivityTypeIDs []int) ([]ProjectActivityType, error) {
+	removedIDs := diffInt(savedProjectActivityTypeIDs, projectActivityTypeIDs)
+	return createProjectActivityTypes(projectID, removedIDs, projectAPI.createRemovedActivityTypesCheck)
+}
 
-		if deleted {
-			isReferenced, err := projectAPI.db.IsActivityTypeReferenced(projectActivityType.ActivityTypeID, &project.ID)
-			if err != nil {
-				return nil, err
-			}
-			if isReferenced {
-				return nil, errItemInUse
-			}
-
-			removedItems = append(removedItems, projectActivityType)
-		}
+func (projectAPI *ProjectAPI) createRemovedActivityTypesCheck(projectID, activityTypeID int) error {
+	isReferenced, err := projectAPI.db.IsActivityTypeReferenced(activityTypeID, &projectID)
+	if err != nil {
+		return err
 	}
-
-	return removedItems, nil
+	if isReferenced {
+		return errItemInUse
+	}
+	return nil
 }
 
 func (projectAPI *ProjectAPI) getChangedUsers(project *Project) ([]ProjectUser, []ProjectUser, error) {
-	projectUsers, err := projectAPI.db.GetProjectUsers(project.ID)
+	savedUserIDs, err := projectAPI.db.GetProjectUserIDs(project.ID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	addedItems, err := projectAPI.getAddedUsers(project, projectUsers)
-	if err != nil {
-		return nil, nil, err
-	}
+	userIDs := project.GetUserIDs()
+	addedProjectUsers := projectAPI.getAddedUsers(project.ID, userIDs, savedUserIDs)
+	removedProjectUsers := projectAPI.getRemovedUsers(project.ID, userIDs, savedUserIDs)
 
-	removedItems, err := projectAPI.getRemovedUsers(project, projectUsers)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return addedItems, removedItems, nil
+	return addedProjectUsers, removedProjectUsers, nil
 }
 
-func (projectAPI *ProjectAPI) getAddedUsers(project *Project, projectUsers []ProjectUser) ([]ProjectUser, error) {
-	var addedItems []ProjectUser
-	for _, user := range project.Users {
-		added := true
-		for _, projectUser := range projectUsers {
-			if projectUser.UserID == user.ID {
-				added = false
-				break
-			}
-		}
-
-		if added {
-			addedItems = append(addedItems, ProjectUser{project.ID, user.ID})
-		}
-	}
-
-	return addedItems, nil
+func (projectAPI *ProjectAPI) getAddedUsers(projectID int, userIDs, savedUserIDs []int) []ProjectUser {
+	addedIDs := diffInt(userIDs, savedUserIDs)
+	return createProjectUsers(projectID, addedIDs)
 }
 
-func (projectAPI *ProjectAPI) getRemovedUsers(project *Project, projectUsers []ProjectUser) ([]ProjectUser, error) {
-	var removedItems []ProjectUser
-	for _, projectUser := range projectUsers {
-		deleted := true
-		for _, user := range project.Users {
-			if user.ID == projectUser.UserID {
-				deleted = false
-				break
-			}
-		}
-
-		if deleted {
-			removedItems = append(removedItems, projectUser)
-		}
-	}
-
-	return removedItems, nil
+func (projectAPI *ProjectAPI) getRemovedUsers(projectID int, userIDs, savedUserIDs []int) []ProjectUser {
+	removedIDs := diffInt(savedUserIDs, userIDs)
+	return createProjectUsers(projectID, removedIDs)
 }
 
 func (projectAPI *ProjectAPI) delete(id int) error {
@@ -305,4 +244,25 @@ func (projectAPI *ProjectAPI) delete(id int) error {
 	}
 
 	return nil
+}
+
+func createProjectUsers(projectID int, userIDs []int) []ProjectUser {
+	var projectUsers []ProjectUser
+	for _, userID := range userIDs {
+		projectUsers = append(projectUsers, ProjectUser{projectID, userID})
+	}
+	return projectUsers
+}
+
+func createProjectActivityTypes(projectID int, activityTypeIDs []int, checkCallback func(int, int) error) ([]ProjectActivityType, error) {
+	var projectActivityTypes []ProjectActivityType
+	for _, activityTypeID := range activityTypeIDs {
+		if checkCallback != nil {
+			if err := checkCallback(projectID, activityTypeID); err != nil {
+				return nil, err
+			}
+		}
+		projectActivityTypes = append(projectActivityTypes, ProjectActivityType{projectID, activityTypeID})
+	}
+	return projectActivityTypes, nil
 }
