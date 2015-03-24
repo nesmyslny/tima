@@ -32,7 +32,7 @@ func (activityTypeAPI *ActivityTypeAPI) GetListHandler(context *HandlerContext) 
 }
 
 func (activityTypeAPI *ActivityTypeAPI) GetActivityViewListHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	list, err := activityTypeAPI.getProjectActivityTypeViewList(context.User.ID)
+	list, err := activityTypeAPI.getProjectActivityTypeViewList(context.User)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects/activities", http.StatusInternalServerError}
 	}
@@ -114,6 +114,6 @@ func (activityTypeAPI *ActivityTypeAPI) delete(id int) error {
 	return nil
 }
 
-func (activityTypeAPI *ActivityTypeAPI) getProjectActivityTypeViewList(userID int) ([]ProjectActivityTypeView, error) {
-	return activityTypeAPI.db.GetProjectActivityTypeViewList(userID)
+func (activityTypeAPI *ActivityTypeAPI) getProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeView, error) {
+	return activityTypeAPI.db.GetProjectActivityTypeViewList(user)
 }

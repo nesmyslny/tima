@@ -33,3 +33,14 @@ func diffInt(x, y []int) []int {
 	}
 	return diff
 }
+
+func createSqlArgString(count int) string {
+	var str string
+	for i := 0; i < count; i++ {
+		if i > 0 {
+			str += ", "
+		}
+		str += "?"
+	}
+	return str
+}

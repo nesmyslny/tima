@@ -403,19 +403,48 @@ func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool
 	return exists == 1, nil
 }
 
-func (db *DB) GetProjectActivityTypeViewList(userID int) ([]ProjectActivityTypeView, error) {
+func (db *DB) GetProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeView, error) {
+	deptIDs, err := db.getDepartmentIDsUpward(*user.DepartmentID)
+	if err != nil {
+		return nil, err
+	}
+	deptArgString := createSqlArgString(len(deptIDs))
+
 	sql := "select pat.*, p.ref_id_complete project_ref_id_complete, p.title project_title, at.title activity_type_title " +
 		"from project_activity_type pat, project p, activity_type at " +
 		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
-		" and (p.responsible_user_id = ? or p.manager_user_id = ? or p.id in (select project_id from project_user where user_id = ?))" +
+		"and (p.responsible_user_id = ? or p.manager_user_id = ? or p.id in (select project_id from project_user where user_id = ?) " +
+		"or p.id in (select project_id from project_department where department_id in (" + deptArgString + "))) " +
 		"order by p.title, at.title"
 
 	var list []ProjectActivityTypeView
-	_, err := db.dbMap.Select(&list, sql, userID, userID, userID)
+	args := []interface{}{user.ID, user.ID, user.ID}
+	args = append(args, deptIDs...)
+
+	_, err = db.dbMap.Select(&list, sql, args...)
 	if err != nil {
 		return nil, err
 	}
 	return list, nil
+}
+
+func (db *DB) getDepartmentIDsUpward(startDeptID int) ([]interface{}, error) {
+	deptIDs := []interface{}{startDeptID}
+
+	parentDeptID, err := db.dbMap.SelectNullInt("select parent_id from department where id = ?", startDeptID)
+	if err != nil {
+		return nil, err
+	}
+
+	if parentDeptID.Valid {
+		parentDeptIDs, err := db.getDepartmentIDsUpward(int(parentDeptID.Int64))
+		if err != nil {
+			return nil, err
+		}
+		deptIDs = append(deptIDs, parentDeptIDs...)
+	}
+
+	return deptIDs, nil
 }
 
 func (db *DB) GetProjectCategories(parent *ProjectCategory) ([]ProjectCategory, error) {
