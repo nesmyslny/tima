@@ -16,13 +16,6 @@
     </div>
 
     <div class="row form-group" show-errors>
-        <label for="title" class="col-md-2 control-label">Title</label>
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" ng-disabled="disableForUsers(false)" required />
-        </div>
-    </div>
-
-    <div class="row form-group" show-errors>
         <label for="projectCategory" class="col-md-2 control-label">Project category</label>
         <div class="col-md-6">
             <ui-select name="projectCategory" id="projectCategory" class="form-control form-control-ui-select" ng-model="selectedProjectCategory.selected" ng-disabled="disableForUsers(false)" required>
@@ -39,6 +32,13 @@
     </div>
 
     <div class="row form-group" show-errors>
+        <label for="title" class="col-md-2 control-label">Title</label>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="title" name="title" ng-model="project.title" maxlength="100" placeholder="Title" ng-disabled="disableForUsers(false)" required />
+        </div>
+    </div>
+
+    <div class="row form-group" show-errors>
         <label for="responsibleUser" class="col-md-2 control-label">Responsible</label>
         <div class="col-md-6">
             <ui-select name="responsibleUser" id="responsibleUser" class="form-control form-control-ui-select" ng-model="selectedResponsibleUser.selected" ng-disabled="disableForUsers(false)" required>
@@ -49,6 +49,9 @@
                     <span ng-bind-html="user.username | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
+            <small ng-show="adminAccess">
+                The responsible person also defines the department of the project. Department managers of the department of this person can view and edit the project details.
+            </small>
         </div>
     </div>
 
@@ -91,6 +94,12 @@
                     </span>
                 </li>
             </ul>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col-md-offset-2 col-md-5">
+            <h3>Activation for Users / Departments</h3>
         </div>
     </div>
 
