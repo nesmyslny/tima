@@ -15,7 +15,27 @@ func (projectAPI *ProjectAPI) authorizeGetSave(projectID int, user *User) (bool,
 	if err != nil {
 		return false, err
 	}
-	return *user.Role >= RoleManager || *project.ResponsibleUserID == user.ID || *project.ManagerUserID == user.ID, nil
+
+	// Authorized are...
+	// ...users with role 'Manager'.
+	// ...the user that is responsible for the project.
+	// ...the user that is the manager for the project.
+	if *user.Role >= RoleManager || *project.ResponsibleUserID == user.ID || *project.ManagerUserID == user.ID {
+		return true, nil
+	}
+
+	// ...users with role 'Department Manager', if the project is in the same department (or a child of the users' department).
+	// (the department of a project is defined by the responsible user.)
+	deptManAuth, err := projectAPI.isDeptManagerAuthorized(project, user)
+	if err != nil {
+		return false, err
+	}
+
+	if deptManAuth {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (projectAPI *ProjectAPI) AuthorizeGet(context *HandlerContext) (bool, error) {
@@ -35,6 +55,72 @@ func (projectAPI *ProjectAPI) AuthorizeSave(context *HandlerContext) (bool, erro
 	return projectAPI.authorizeGetSave(project.ID, context.User)
 }
 
+func (projectAPI *ProjectAPI) AuthorizeDelete(context *HandlerContext) (bool, error) {
+	id, err := context.GetRouteVarInt("id")
+	if err != nil {
+		return false, err
+	}
+
+	project, err := projectAPI.db.GetProject(id)
+	if err != nil {
+		return false, err
+	}
+
+	if *context.User.Role >= RoleManager {
+		return true, nil
+	}
+
+	deptManAuth, err := projectAPI.isDeptManagerAuthorized(project, context.User)
+	if err != nil {
+		return false, err
+	}
+
+	if deptManAuth {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (projectAPI *ProjectAPI) isDeptManagerAuthorized(project *Project, user *User) (bool, error) {
+	// ...users with role 'Department Manager', if the project is in the same department (or a child of the users' department).
+	// (the department of a project is defined by the responsible user.)
+	if *user.Role == RoleDeptManager {
+		isDeptProject, err := projectAPI.isProjectOfDepartment(project, *user.DepartmentID)
+		if err != nil {
+			return false, err
+		}
+
+		if isDeptProject {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// Checks if the project is of the given department.
+// Project don't have a department assign directly. The department of a project is defined by the responsible user.
+func (projectAPI *ProjectAPI) isProjectOfDepartment(project *Project, departmentID int) (bool, error) {
+	deptIDs, err := projectAPI.db.GetDepartmentIDsDownward(departmentID)
+	if err != nil {
+		return false, err
+	}
+
+	responsibleUser, err := projectAPI.db.GetUser(*project.ResponsibleUserID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, id := range deptIDs {
+		if *responsibleUser.DepartmentID == id {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (projectAPI *ProjectAPI) GetHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	id, err := context.GetRouteVarInt("id")
 	if err != nil {
@@ -49,7 +135,13 @@ func (projectAPI *ProjectAPI) GetHandler(context *HandlerContext) (interface{}, 
 }
 
 func (projectAPI *ProjectAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	projects, err := projectAPI.getList()
+	var deptID *int
+	// department manager are only allowed to edit/view the project of their department (or a descendant department).
+	if *context.User.Role == RoleDeptManager {
+		deptID = context.User.DepartmentID
+	}
+
+	projects, err := projectAPI.getList(deptID)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
 	}
@@ -110,8 +202,8 @@ func (projectAPI *ProjectAPI) get(id int) (*Project, error) {
 	return project, nil
 }
 
-func (projectAPI *ProjectAPI) getList() ([]Project, error) {
-	projects, err := projectAPI.db.GetProjects()
+func (projectAPI *ProjectAPI) getList(deptID *int) ([]Project, error) {
+	projects, err := projectAPI.db.GetProjects(deptID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,30 +219,9 @@ func (projectAPI *ProjectAPI) getListUser(userID int) ([]Project, error) {
 }
 
 func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
-	// creating projects is only allowd for admins and managers
-	// updating projects is partially allowed for users, who are responsible or manager of the project
-	if project.ID < 0 && *user.Role < RoleManager {
-		return errForbidden
-	} else if project.ID >= 0 && *user.Role < RoleManager {
-		projectOrig, err := projectAPI.db.GetProject(project.ID)
-		if *projectOrig.ResponsibleUserID == user.ID || *projectOrig.ManagerUserID == user.ID {
-			if err != nil {
-				return err
-			}
-
-			project.RefID = projectOrig.RefID
-			project.RefIDComplete = projectOrig.RefIDComplete
-			project.Title = projectOrig.Title
-			project.ProjectCategoryID = projectOrig.ProjectCategoryID
-			project.ResponsibleUserID = projectOrig.ResponsibleUserID
-
-			// when the user is only project manager, changing manager is not allowed
-			if *projectOrig.ResponsibleUserID != user.ID && *projectOrig.ManagerUserID == user.ID {
-				project.ManagerUserID = projectOrig.ManagerUserID
-			}
-		} else {
-			return errForbidden
-		}
+	err := projectAPI.prepareSave(project, user)
+	if err != nil {
+		return err
 	}
 
 	addedActivityTypes, removedActivityTypes, err := projectAPI.getChangedActivityTypes(project)
@@ -166,6 +237,61 @@ func (projectAPI *ProjectAPI) save(project *Project, user *User) error {
 		return err
 	}
 	return projectAPI.db.SaveProject(project, addedActivityTypes, removedActivityTypes, addedDepartments, removedDepartments, addedUsers, removedUsers)
+}
+
+func (projectAPI *ProjectAPI) prepareSave(project *Project, user *User) error {
+	// creating projects is only allowd for admins, managers and department manager
+	// updating projects is partially allowed for users, who are responsible or manager of the project
+	if project.ID < 0 && *user.Role < RoleDeptManager {
+		return errForbidden
+	} else if project.ID >= 0 && *user.Role < RoleManager {
+		projectSpecificPrivelege := true
+
+		projectOrig, err := projectAPI.db.GetProject(project.ID)
+		if err != nil {
+			return err
+		}
+
+		// department manager are allowed to save all attributes in projects, that are in their (or a descendant) department
+		// if the project is not in their department, the project specific privileges are crucial
+		if *user.Role == RoleDeptManager {
+			isDeptProject, err := projectAPI.isProjectOfDepartment(projectOrig, *user.DepartmentID)
+			if err != nil {
+				return err
+			}
+
+			if isDeptProject {
+				projectOfDept, err := projectAPI.isProjectOfDepartment(project, *user.DepartmentID)
+				if err != nil {
+					return err
+				}
+				if !projectOfDept {
+					return errForbidden
+				}
+
+				projectSpecificPrivelege = false
+			}
+		}
+
+		if projectSpecificPrivelege {
+			if *projectOrig.ResponsibleUserID == user.ID || *projectOrig.ManagerUserID == user.ID {
+				project.RefID = projectOrig.RefID
+				project.RefIDComplete = projectOrig.RefIDComplete
+				project.Title = projectOrig.Title
+				project.ProjectCategoryID = projectOrig.ProjectCategoryID
+				project.ResponsibleUserID = projectOrig.ResponsibleUserID
+
+				// when the user is only project manager, changing manager is not allowed
+				if *projectOrig.ResponsibleUserID != user.ID && *projectOrig.ManagerUserID == user.ID {
+					project.ManagerUserID = projectOrig.ManagerUserID
+				}
+			} else {
+				return errForbidden
+			}
+		}
+	}
+
+	return nil
 }
 
 func (projectAPI *ProjectAPI) getChangedActivityTypes(project *Project) ([]ProjectActivityType, []ProjectActivityType, error) {

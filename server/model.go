@@ -12,7 +12,8 @@ var errOptimisticLocking = errors.New("Data was changed/deleted")
 var errForbidden = errors.New("Forbidden")
 
 const RoleUser int = 10
-const RoleManager int = 30
+const RoleDeptManager int = 30
+const RoleManager int = 50
 const RoleAdmin int = 99
 
 const dateLayout string = "2006-01-02"

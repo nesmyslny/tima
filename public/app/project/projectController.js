@@ -19,13 +19,19 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.selectedDepartment = {};
 
     $scope.users = [];
+    $scope.usersResponsible = [];
     $scope.selectedResponsibleUser = {};
     $scope.selectedManagerUser = {};
     $scope.selectedUser = {};
 
     $scope.returnPath = $routeParams.returnPath;
+    $scope.adminAccess = false;
     if (_.isUndefined($scope.returnPath)) {
         $scope.returnPath = "projects";
+
+        if (authService.isAuthorized(userRoles.deptManager)) {
+            $scope.adminAccess = true;
+        }
     }
 
     $scope.fetch = function() {
@@ -34,7 +40,14 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
         $scope.projectCategories = ProjectCategory.queryList();
         $scope.activityTypes = ActivityType.query();
         $scope.departments = Department.queryList();
-        $scope.users = User.query();
+        $scope.users = User.queryAll();
+
+        if ($scope.adminAccess && authService.isDeptManager()) {
+            // department manager are allowed to set the responsible, but only users in the spedific department (or a descendant)
+            $scope.usersResponsible = User.queryDept();
+        } else {
+            $scope.usersResponsible = $scope.users;
+        }
 
         if (id > -1) {
             $scope.project = Project.get({id:id});
@@ -46,7 +59,7 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
             $scope.users.$promise
         ]).then(function() {
             $scope.selectedProjectCategory.selected = _.find($scope.projectCategories, { 'id': $scope.project.projectCategoryId });
-            $scope.selectedResponsibleUser.selected = _.find($scope.users, { 'id': $scope.project.responsibleUserId });
+            $scope.selectedResponsibleUser.selected = _.find($scope.usersResponsible, { 'id': $scope.project.responsibleUserId });
             $scope.selectedManagerUser.selected = _.find($scope.users, { 'id': $scope.project.managerUserId });
         });
     };
@@ -134,7 +147,7 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     };
 
     $scope.disableForUsers = function(enableForResponsible) {
-        return !(authService.isAuthorized(userRoles.manager) || ($scope.project.isResponsible && enableForResponsible));
+        return !($scope.adminAccess || ($scope.project.isResponsible && enableForResponsible));
     };
 
 }]);

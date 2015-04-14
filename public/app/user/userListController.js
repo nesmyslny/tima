@@ -6,7 +6,7 @@ function ($scope, User) {
     $scope.search = "";
 
     $scope.list = function() {
-        $scope.users = User.query(function() {
+        $scope.users = User.queryAll(function() {
             $scope.initializePagination();
         });
     };

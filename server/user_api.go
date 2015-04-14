@@ -74,7 +74,15 @@ func (userAPI *UserAPI) GetHandler(context *HandlerContext) (interface{}, *Handl
 }
 
 func (userAPI *UserAPI) GetListHandler(context *HandlerContext) (interface{}, *HandlerError) {
-	users, err := userAPI.getList()
+	return userAPI.getListHandler(nil)
+}
+
+func (userAPI *UserAPI) GetListDeptHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	return userAPI.getListHandler(context.User.DepartmentID)
+}
+
+func (userAPI *UserAPI) getListHandler(deptID *int) (interface{}, *HandlerError) {
+	users, err := userAPI.getList(deptID)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve users", http.StatusInternalServerError}
 	}
@@ -133,8 +141,8 @@ func (userAPI *UserAPI) get(id int) (*User, error) {
 	return user, nil
 }
 
-func (userAPI *UserAPI) getList() ([]User, error) {
-	users, err := userAPI.db.GetUsers()
+func (userAPI *UserAPI) getList(departmentID *int) ([]User, error) {
+	users, err := userAPI.db.GetUsers(departmentID)
 	if err != nil {
 		return nil, err
 	}

@@ -185,12 +185,30 @@ func (db *DB) GetProject(id int) (*Project, error) {
 	return project, nil
 }
 
-func (db *DB) GetProjects() ([]Project, error) {
+func (db *DB) GetProjects(departmentID *int) ([]Project, error) {
+	sqlTemplate := "select * from project %sorder by ref_id_complete"
+	sqlWhere := ""
+	var args []interface{}
+
+	// if a department id is present, only select project of that (or a descendant) department.
+	if departmentID != nil {
+		deptIDs, err := db.GetDepartmentIDsDownward(*departmentID)
+		if err != nil {
+			return nil, err
+		}
+
+		deptArgString := createSqlArgString(len(deptIDs))
+		args = sliceIntToInterface(deptIDs)
+		sqlWhere = "where responsible_user_id in (select id from user where department_id in (" + deptArgString + ")) "
+	}
+
+	sql := fmt.Sprintf(sqlTemplate, sqlWhere)
 	var projects []Project
-	_, err := db.dbMap.Select(&projects, "select * from project order by ref_id_complete")
+	_, err := db.dbMap.Select(&projects, sql, args...)
 	if err != nil {
 		return nil, err
 	}
+
 	return projects, nil
 }
 
@@ -404,11 +422,12 @@ func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool
 }
 
 func (db *DB) GetProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeView, error) {
-	deptIDs, err := db.getDepartmentIDsUpward(*user.DepartmentID)
+	deptIDs, err := db.GetDepartmentIDsUpward(*user.DepartmentID)
 	if err != nil {
 		return nil, err
 	}
 	deptArgString := createSqlArgString(len(deptIDs))
+	deptIDsInterface := sliceIntToInterface(deptIDs)
 
 	sql := "select pat.*, p.ref_id_complete project_ref_id_complete, p.title project_title, at.title activity_type_title " +
 		"from project_activity_type pat, project p, activity_type at " +
@@ -419,7 +438,7 @@ func (db *DB) GetProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeV
 
 	var list []ProjectActivityTypeView
 	args := []interface{}{user.ID, user.ID, user.ID}
-	args = append(args, deptIDs...)
+	args = append(args, deptIDsInterface...)
 
 	_, err = db.dbMap.Select(&list, sql, args...)
 	if err != nil {
@@ -428,8 +447,8 @@ func (db *DB) GetProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeV
 	return list, nil
 }
 
-func (db *DB) getDepartmentIDsUpward(startDeptID int) ([]interface{}, error) {
-	deptIDs := []interface{}{startDeptID}
+func (db *DB) GetDepartmentIDsUpward(startDeptID int) ([]int, error) {
+	deptIDs := []int{startDeptID}
 
 	parentDeptID, err := db.dbMap.SelectNullInt("select parent_id from department where id = ?", startDeptID)
 	if err != nil {
@@ -437,11 +456,31 @@ func (db *DB) getDepartmentIDsUpward(startDeptID int) ([]interface{}, error) {
 	}
 
 	if parentDeptID.Valid {
-		parentDeptIDs, err := db.getDepartmentIDsUpward(int(parentDeptID.Int64))
+		parentDeptIDs, err := db.GetDepartmentIDsUpward(int(parentDeptID.Int64))
 		if err != nil {
 			return nil, err
 		}
 		deptIDs = append(deptIDs, parentDeptIDs...)
+	}
+
+	return deptIDs, nil
+}
+
+func (db *DB) GetDepartmentIDsDownward(startDeptID int) ([]int, error) {
+	deptIDs := []int{startDeptID}
+
+	var childrenDeptIDs []int
+	_, err := db.dbMap.Select(&childrenDeptIDs, "select id from department where parent_id = ?", startDeptID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, id := range childrenDeptIDs {
+		ids, err := db.GetDepartmentIDsDownward(id)
+		if err != nil {
+			return nil, err
+		}
+		deptIDs = append(deptIDs, ids...)
 	}
 
 	return deptIDs, nil
@@ -648,9 +687,25 @@ func (db *DB) IsProjectCategoryReferenced(projectCategory *ProjectCategory) (boo
 	return false, nil
 }
 
-func (db *DB) GetUsers() ([]User, error) {
+func (db *DB) GetUsers(departmentID *int) ([]User, error) {
+	sqlTemplate := "select * from user %sorder by username"
+	sqlWhere := ""
+	var args []interface{}
+
+	if departmentID != nil {
+		deptIDs, err := db.GetDepartmentIDsDownward(*departmentID)
+		if err != nil {
+			return nil, err
+		}
+
+		deptArgString := createSqlArgString(len(deptIDs))
+		args = sliceIntToInterface(deptIDs)
+		sqlWhere = "where department_id in (" + deptArgString + ")"
+	}
+
+	sql := fmt.Sprintf(sqlTemplate, sqlWhere)
 	var users []User
-	_, err := db.dbMap.Select(&users, "select * from user order by username")
+	_, err := db.dbMap.Select(&users, sql, args...)
 	if err != nil {
 		return nil, err
 	}

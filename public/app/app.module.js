@@ -3,7 +3,8 @@ angular
 .constant('_', window._) // use lodash via DI in controllers, etc.
 .constant('userRoles', {
     user: {id: 10, desc: "User"},
-    manager: {id: 30, desc: "Manager"},
+    deptManager: {id: 30, desc: "Department Manager"},
+    manager: {id: 50, desc: "Manager"},
     admin: {id: 99, desc: "Administrator"}
 })
 .config(['$routeProvider', '$httpProvider', 'uiSelectConfig', 'userRoles', function($routeProvider, $httpProvider, uiSelectConfig, userRoles) {
@@ -36,7 +37,7 @@ angular
     .when('/projects', {
         templateUrl: 'app/project/projectList.html',
         controller: 'ProjectListController',
-        resolve: createPermissionResolve(userRoles.manager)
+        resolve: createPermissionResolve(userRoles.deptManager)
     })
     .when('/projects/:id', {
         templateUrl: 'app/project/project.html',

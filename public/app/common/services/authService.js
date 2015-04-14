@@ -1,6 +1,6 @@
 angular.module('tima').factory('authService',
-['$location', '$q', 'JwtDecode', 'sessionService', 'Auth',
-function($location, $q, JwtDecode, sessionService, Auth) {
+['$location', '$q', 'JwtDecode', 'sessionService', 'Auth', 'userRoles',
+function($location, $q, JwtDecode, sessionService, Auth, userRoles) {
     var service = {
         getUser: function() {
             return sessionService.user;
@@ -33,6 +33,26 @@ function($location, $q, JwtDecode, sessionService, Auth) {
 
         isAuthorized: function(role) {
             return sessionService.user.role >= role.id;
+        },
+
+        isRole: function(role) {
+            return sessionService.user.role === role.id;
+        },
+
+        isAdmin: function() {
+            return service.isRole(userRoles.admin);
+        },
+
+        isManager: function() {
+            return service.isRole(userRoles.manager);
+        },
+
+        isDeptManager: function() {
+            return service.isRole(userRoles.deptManager);
+        },
+
+        isUser: function() {
+            return service.isRole(userRoles.user);
         },
 
         checkPermission: function(role) {

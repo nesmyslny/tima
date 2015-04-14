@@ -4,6 +4,10 @@ func AuthorizeUser(context *HandlerContext) (bool, error) {
 	return *context.User.Role >= RoleUser, nil
 }
 
+func AuthorizeDeptManager(context *HandlerContext) (bool, error) {
+	return *context.User.Role >= RoleDeptManager, nil
+}
+
 func AuthorizeManager(context *HandlerContext) (bool, error) {
 	return *context.User.Role >= RoleManager, nil
 }
@@ -43,4 +47,12 @@ func createSqlArgString(count int) string {
 		str += "?"
 	}
 	return str
+}
+
+func sliceIntToInterface(in []int) []interface{} {
+	out := make([]interface{}, len(in))
+	for idx, val := range in {
+		out[idx] = val
+	}
+	return out
 }

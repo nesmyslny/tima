@@ -45,7 +45,7 @@
                 <ui-select-match placeholder="Choose project responsible">
                     <span ng-bind="$select.selected.username"></span>
                 </ui-select-match>
-                <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
+                <ui-select-choices repeat="user in usersResponsible | propsFilter: {username: $select.search}">
                     <span ng-bind-html="user.username | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>

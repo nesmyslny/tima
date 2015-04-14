@@ -48,10 +48,10 @@
             </a>
         </li>
         <li><a href="#" ng-show="false"><i class="fa fa-area-chart fa-fw"></i> Reporting</a></li>
-        <li class="dropdown" dropdown user-access="manager">
+        <li class="dropdown" dropdown user-access="deptManager">
             <a href="#" class="dropdown-toggle" dropdown-toggle role="button"><i class="fa fa-wrench fa-fw"></i> Administration <i class="fa fa-caret-down"></i></a>
             <ul class="dropdown-menu">
-                <li>
+                <li user-access="deptManager">
                     <a href="#/projects">
                         <span class="fa-stack">
                             <i class="fa fa-square fa-stack-1x"></i>
@@ -59,7 +59,7 @@
                         </span> Projects
                     </a>
                 </li>
-                <li>
+                <li user-access="manager">
                     <a href="#/projectCategories">
                         <span class="fa-stack">
                             <i class="fa fa-square fa-stack-1x"></i>
@@ -67,7 +67,7 @@
                         </span> Project Categories
                     </a>
                 </li>
-                <li>
+                <li user-access="manager">
                     <a href="#/activityTypes">
                         <span class="fa-stack">
                             <i class="fa fa-square fa-stack-1x"></i>
