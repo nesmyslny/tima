@@ -10,12 +10,7 @@ func NewProjectAPI(db *DB) *ProjectAPI {
 	return &ProjectAPI{db}
 }
 
-func (projectAPI *ProjectAPI) authorizeGetSave(projectID int, user *User) (bool, error) {
-	project, err := projectAPI.db.GetProject(projectID)
-	if err != nil {
-		return false, err
-	}
-
+func (projectAPI *ProjectAPI) authorizeGetSave(project *Project, user *User) (bool, error) {
 	// Authorized are...
 	// ...users with role 'Manager'.
 	// ...the user that is responsible for the project.
@@ -43,7 +38,13 @@ func (projectAPI *ProjectAPI) AuthorizeGet(context *HandlerContext) (bool, error
 	if err != nil {
 		return false, err
 	}
-	return projectAPI.authorizeGetSave(id, context.User)
+
+	project, err := projectAPI.db.GetProject(id)
+	if err != nil {
+		return false, err
+	}
+
+	return projectAPI.authorizeGetSave(project, context.User)
 }
 
 func (projectAPI *ProjectAPI) AuthorizeSave(context *HandlerContext) (bool, error) {
@@ -52,7 +53,7 @@ func (projectAPI *ProjectAPI) AuthorizeSave(context *HandlerContext) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	return projectAPI.authorizeGetSave(project.ID, context.User)
+	return projectAPI.authorizeGetSave(&project, context.User)
 }
 
 func (projectAPI *ProjectAPI) AuthorizeDelete(context *HandlerContext) (bool, error) {
