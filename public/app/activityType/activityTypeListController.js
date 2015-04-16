@@ -51,7 +51,7 @@ function ($scope, ActivityType, messageService, popupService) {
         $scope.itemsPerPage = 10;
     };
 
-    $scope.$watch('filteredActivityTypes ', function(newVal, oldVal) {
+    $scope.$watch('filteredActivityTypes', function(newVal, oldVal) {
         $scope.currentPage = 1;
     }, true);
 

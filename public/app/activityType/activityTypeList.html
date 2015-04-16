@@ -8,7 +8,7 @@
     <div class="col-md-8">
         <form name="forActivityTypeList" class="form-inline pull-right" role="form" novalidate>
             <div class="form-group">
-                <input type="text" class="form-control" ng-model="search" placeholder="Filter..." />
+                <input type="text" class="form-control" ng-model="search.title" placeholder="Filter..." />
             </div>
             <div class="form-group">
                 <button type="button" class="btn btn-primary" ng-click="add()">
@@ -25,7 +25,7 @@
             <li class="list-group-item admin-list-item"
             ng-repeat="at in filteredActivityTypes = (activityTypes | filter:search | orderObjectBy:'title') | startFrom:(currentPage - 1) * itemsPerPage | limitTo:itemsPerPage"
             ng-mouseenter="hover = true" ng-mouseleave="hover = false">
-                <span ng-bind-html="at.title | highlight: search"></span>
+                <span ng-bind-html="at.title | highlight: search.title"></span>
                 <div class="btn-group pull-right btn-admin-list-item" role="group">
                     <button class="btn btn-sm" ng-class="{'btn-primary': hover, 'btn-default': !hover}" ng-click="edit(at)">
                         <i class="fa fa-pencil"></i> Edit
