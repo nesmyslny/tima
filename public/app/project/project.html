@@ -71,16 +71,19 @@
 
     <div class="row form-group">
         <label for="activityType" class="col-md-2 control-label">Activity types</label>
-        <div class="col-md-5">
-            <ui-select name="activityType" id="activityType" ng-model="selectedActivityType.selected">
-                <ui-select-match placeholder="Choose activity type">{{$select.selected.title}}</ui-select-match>
-                <ui-select-choices repeat="at in activityTypes | propsFilter: {title: $select.search}">
-                    <div ng-bind-html="at.title | highlight: $select.search"></div>
-                </ui-select-choices>
-            </ui-select>
-        </div>
-        <div class="col-md-1">
-            <button type="button" class="btn btn-default pull-right" ng-click="addActivityType()"><i class="fa fa-plus"></i> Add</button>
+        <div class="col-md-6">
+            <div class="input-group">
+                <ui-select name="activityType" id="activityType" ng-model="selectedActivityType.selected">
+                    <ui-select-match placeholder="Choose activity type">{{$select.selected.title}}</ui-select-match>
+                    <ui-select-choices repeat="at in activityTypes | propsFilter: {title: $select.search}">
+                        <div ng-bind-html="at.title | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="addActivityType()"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="addMultipleActivityTypes()"><i class="fa fa-ellipsis-h"></i></button>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -105,16 +108,19 @@
 
     <div class="row form-group">
         <label for="depts" class="col-md-2 control-label">Departments</label>
-        <div class="col-md-5">
-            <ui-select name="depts" id="depts" ng-model="selectedDepartment.selected">
-                <ui-select-match placeholder="Choose department">{{$select.selected.path}}</ui-select-match>
-                <ui-select-choices repeat="dept in departments | propsFilter: {path: $select.search}">
-                    <div ng-bind-html="dept.path | highlight: $select.search"></div>
-                </ui-select-choices>
-            </ui-select>
-        </div>
-        <div class="col-md-1">
-            <button type="button" class="btn btn-default pull-right" ng-click="addDepartment()"><i class="fa fa-plus"></i> Add</button>
+        <div class="col-md-6">
+            <div class="input-group">
+                <ui-select name="depts" id="depts" ng-model="selectedDepartment.selected">
+                    <ui-select-match placeholder="Choose department">{{$select.selected.path}}</ui-select-match>
+                    <ui-select-choices repeat="dept in departments | propsFilter: {path: $select.search}">
+                        <div ng-bind-html="dept.path | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="addDepartment()"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="addMultipleDepartments()"><i class="fa fa-ellipsis-h"></i></button>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -133,16 +139,19 @@
 
     <div class="row form-group">
         <label for="users" class="col-md-2 control-label">Users</label>
-        <div class="col-md-5">
-            <ui-select name="users" id="users" ng-model="selectedUser.selected">
-                <ui-select-match placeholder="Choose user">{{$select.selected.username}}</ui-select-match>
-                <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
-                    <div ng-bind-html="user.username | highlight: $select.search"></div>
-                </ui-select-choices>
-            </ui-select>
-        </div>
-        <div class="col-md-1">
-            <button type="button" class="btn btn-default pull-right" ng-click="addUser()"><i class="fa fa-plus"></i> Add</button>
+        <div class="col-md-6">
+            <div class="input-group">
+                <ui-select name="users" id="users" ng-model="selectedUser.selected">
+                    <ui-select-match placeholder="Choose user">{{$select.selected.username}}</ui-select-match>
+                    <ui-select-choices repeat="user in users | propsFilter: {username: $select.search}">
+                        <div ng-bind-html="user.username | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="addUser()"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="addMultipleUsers()"><i class="fa fa-ellipsis-h"></i></button>
+                </span>
+            </div>
         </div>
     </div>
 

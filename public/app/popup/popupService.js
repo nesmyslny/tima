@@ -28,6 +28,19 @@ function($modal) {
                     cancelButton: function() { return cancelButton; }
                 }
             });
+        },
+
+        showSelectList: function(title, items, acceptButton, cancelButton) {
+            return $modal.open({
+                templateUrl: 'app/popup/popupSelectListTemplate.html',
+                controller: 'PopupSelectListController',
+                resolve: {
+                    title: function() { return title; },
+                    items: function() { return items; },
+                    acceptButton: function() { return acceptButton; },
+                    cancelButton: function() { return cancelButton; }
+                }
+            });
         }
     };
 

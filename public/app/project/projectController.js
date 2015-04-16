@@ -1,6 +1,6 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'Department', 'User', 'authService', 'userRoles',
-function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, Department, User, authService, userRoles) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'Department', 'User', 'authService', 'userRoles', 'popupService',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, Department, User, authService, userRoles, popupService) {
 
     $scope.project = {
         id: -1,
@@ -66,71 +66,83 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
     $scope.fetch();
 
     $scope.addActivityType = function() {
-        if (_.isUndefined($scope.selectedActivityType.selected)) {
-            return;
-        }
-
-        var activityType = $scope.selectedActivityType.selected;
-        var alreadyInList = $scope.project.activityTypes.some(function(at) {
-            return at.id == activityType.id;
-        });
-
-        if (!alreadyInList) {
-            $scope.project.activityTypes.push(activityType);
-        }
-
+        addProjectItem($scope.project.activityTypes, $scope.selectedActivityType.selected);
         $scope.selectedActivityType = {};
     };
 
+    $scope.addMultipleActivityTypes = function() {
+        addMultipleProjectItems($scope.activityTypes, $scope.project.activityTypes, "Activity Types", "title");
+    };
+
     $scope.deleteActivityType = function(activityType) {
-        var index = $scope.project.activityTypes.indexOf(activityType);
-        $scope.project.activityTypes.splice(index, 1);
+        deleteProjectItem($scope.project.activityTypes, activityType);
     };
 
     $scope.addDepartment = function() {
-        if (_.isUndefined($scope.selectedDepartment.selected)) {
-            return;
-        }
-
-        var dept = $scope.selectedDepartment.selected;
-        var alreadyInList = $scope.project.departments.some(function(d) {
-            return d.id == dept.id;
-        });
-
-        if (!alreadyInList) {
-            $scope.project.departments.push(dept);
-        }
-
+        addProjectItem($scope.project.departments, $scope.selectedDepartment.selected);
         $scope.selectedDepartment = {};
     };
 
+    $scope.addMultipleDepartments = function() {
+        addMultipleProjectItems($scope.departments, $scope.project.departments, "Departments", "path");
+    };
+
     $scope.deleteDepartment = function(dept) {
-        var index = $scope.project.departments.indexOf(dept);
-        $scope.project.departments.splice(index, 1);
+        deleteProjectItem($scope.project.departments, dept);
     };
 
     $scope.addUser = function() {
-        if (_.isUndefined($scope.selectedUser.selected)) {
-            return;
-        }
-
-        var user = $scope.selectedUser.selected;
-        var alreadyInList = $scope.project.users.some(function(u) {
-            return u.id == user.id;
-        });
-
-        if (!alreadyInList) {
-            $scope.project.users.push(user);
-        }
-
+        addProjectItem($scope.project.users, $scope.selectedUser.selected);
         $scope.selectedUser = {};
     };
 
-    $scope.deleteUser = function(user) {
-        var index = $scope.project.users.indexOf(user);
-        $scope.project.users.splice(index, 1);
+    $scope.addMultipleUsers = function() {
+        addMultipleProjectItems($scope.users, $scope.project.users, "Users", "username");
     };
 
+    $scope.deleteUser = function(user) {
+        deleteProjectItem($scope.project.users, user);
+    };
+
+    function addProjectItem(projectItems, item) {
+        if (_.isUndefined(item)) {
+            return;
+        }
+
+        var alreadyInList = projectItems.some(function(projectItem) {
+            return projectItem.id == item.id;
+        });
+
+        if (!alreadyInList) {
+            projectItems.push(item);
+        }
+    }
+
+    function addMultipleProjectItems(items, projectItems, popupTitle, valueKey) {
+        var popupItems = [];
+        _.forEach(items, function(item) {
+            popupItems.push({
+                value: item[valueKey],
+                obj: item,
+                checked: _.any(projectItems, "id", item.id)
+            });
+        });
+
+        popupService.showSelectList(popupTitle, popupItems, "Ok", "Cancel")
+        .result.then(function() {
+            projectItems.length = 0;
+            _.forEach(popupItems, function(item) {
+                if (item.checked) {
+                    addProjectItem(projectItems, item.obj);
+                }
+            });
+        });
+    }
+
+    function deleteProjectItem(projectItems, item) {
+        var index = projectItems.indexOf(item);
+        projectItems.splice(index, 1);
+    }
     $scope.save = function() {
         $scope.$broadcast('show-errors-check-validity');
         if (!$scope.formProject.$valid) {
