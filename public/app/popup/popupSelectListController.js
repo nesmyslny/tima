@@ -9,7 +9,7 @@ function ($scope, $modalInstance, title, items, acceptButton, cancelButton) {
 
     $scope.currentPage = 1;
     $scope.totalItems = $scope.items.length;
-    $scope.itemsPerPage = 7;
+    $scope.itemsPerPage = 15;
 
     $scope.$watch('filteredItems', function(newVal, oldVal) {
         $scope.currentPage = 1;
