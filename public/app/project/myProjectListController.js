@@ -5,7 +5,7 @@ function ($scope, Project) {
     $scope.search = "";
 
     $scope.list = function() {
-        $scope.projects = Project.queryMyProjects(function() {
+        $scope.projects = Project.queryUser(function() {
             $scope.initializePagination();
         });
     };

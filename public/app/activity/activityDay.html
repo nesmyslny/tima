@@ -27,18 +27,27 @@
         <form name="formAddActivity" class="form-inline" role="form" ng-submit="add()" novalidate>
 
             <div class="form-group" show-errors>
-                <label class="sr-only" for="project">Project</label>
-                <ui-select name="projectActivityList" id="projectActivityList" ng-model="formData.projectActivity.selected" class="form-control form-control-ui-select activity-select" required>
-                    <ui-select-match placeholder="Activity">
-                        <span ng-bind="$select.selected.projectTitle"></span>
-                        <small ng-bind="$select.selected.activityTypeTitle"></small>
+                <label class="sr-only" for="projects">Project</label>
+                <ui-select name="projects" id="projects" ng-model="formData.project.selected" class="form-control form-control-ui-select project-select" required>
+                    <ui-select-match placeholder="Choose project">
+                        <small ng-bind="$select.selected.refIdComplete"></small>
+                        <span ng-bind="$select.selected.title"></span>
                     </ui-select-match>
-                    <ui-select-choices repeat="projectActivity in projectActivityList | propsFilter: {projectRefIdComplete: $select.search, projectTitle: $select.search, activityTypeTitle: $select.search}">
-                        <div>
-                            <small ng-bind-html="projectActivity.projectRefIdComplete | highlight: $select.search"></small>
-                            <small ng-bind-html="projectActivity.projectTitle | highlight: $select.search"></small>
-                        </div>
-                        <span ng-bind-html="projectActivity.activityTypeTitle | highlight: $select.search"></span>
+                    <ui-select-choices repeat="project in projects | propsFilter: {refIdComplete: $select.search, title: $select.search}">
+                        <small ng-bind-html="project.refIdComplete | highlight: $select.search"></small>
+                        <span ng-bind-html="project.title | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+
+            <div class="form-group" show-errors>
+                <label class="sr-only" for="activityType">Project</label>
+                <ui-select name="activityType" id="activityType" ng-model="formData.activityType.selected" class="form-control form-control-ui-select activity-type-select" required>
+                    <ui-select-match placeholder="Choose activity type">
+                        <span ng-bind="$select.selected.title"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="activityType in formData.project.selected.activityTypes | propsFilter: {title: $select.search}">
+                        <span ng-bind-html="activityType.title | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>

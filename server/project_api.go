@@ -157,6 +157,14 @@ func (projectAPI *ProjectAPI) GetListUserHandler(context *HandlerContext) (inter
 	return projects, nil
 }
 
+func (projectAPI *ProjectAPI) GetListSelectHandler(context *HandlerContext) (interface{}, *HandlerError) {
+	projects, err := projectAPI.getListSelect(context.User.ID, *context.User.DepartmentID)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
+	}
+	return projects, nil
+}
+
 func (projectAPI *ProjectAPI) SaveHandler(context *HandlerContext) (interface{}, *HandlerError) {
 	var project Project
 	err := context.GetReqBodyJSON(&project)
@@ -213,6 +221,14 @@ func (projectAPI *ProjectAPI) getList(deptID *int) ([]Project, error) {
 
 func (projectAPI *ProjectAPI) getListUser(userID int) ([]Project, error) {
 	projects, err := projectAPI.db.GetProjectsOfUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func (projectAPI *ProjectAPI) getListSelect(userID int, departmentID int) ([]Project, error) {
+	projects, err := projectAPI.db.GetProjectsForSelection(userID, departmentID)
 	if err != nil {
 		return nil, err
 	}

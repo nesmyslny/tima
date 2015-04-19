@@ -36,8 +36,12 @@
     margin-bottom: 20px;
 }
 
-.activity-select {
+.project-select {
     min-width: 300px;
+}
+
+.activity-type-select {
+    min-width: 200px;
 }
 
 .form-control-ui-select {

@@ -7,14 +7,16 @@ function (activityService, $scope, $routeParams, $location, _, $moment) {
     $scope.durationHeader = '';
     $scope.totalDuration = 0;
     $scope.activities = [];
-    $scope.projectActivityList = activityService.getProjectActivityList();
+    $scope.projects = activityService.getProjects();
 
     $scope.formData = {
-        projectActivity: null,
+        project: null,
+        activityType: null,
         hours: null,
         minutes: null,
         clear: function() {
-            this.projectActivity = null;
+            this.project = null;
+            this.activityType = null;
             this.hours = null;
             this.minutes = null;
         }
@@ -33,7 +35,9 @@ function (activityService, $scope, $routeParams, $location, _, $moment) {
             return;
         }
 
-        activityService.add($scope.activities, $scope.day, $scope.formData.projectActivity.selected, $scope.formData.hours, $scope.formData.minutes,
+        activityService.add(
+            $scope.activities, $scope.day, $scope.formData.project.selected,
+            $scope.formData.activityType.selected, $scope.formData.hours, $scope.formData.minutes,
             function() {
                 refreshTotalDuration();
             });

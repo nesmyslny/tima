@@ -1,6 +1,6 @@
 angular.module('tima').factory('activityService',
-['_', '$moment', 'sessionService', 'Activity', 'ProjectActivityType', 'util',
-function(_, $moment, sessionService, Activity, ProjectActivityType, util) {
+['_', '$moment', 'sessionService', 'Activity', 'Project', 'util',
+function(_, $moment, sessionService, Activity, Project, util) {
 
     function getDurationFormatted(duration) {
         var m = $moment.duration(duration, 'minutes');
@@ -11,19 +11,19 @@ function(_, $moment, sessionService, Activity, ProjectActivityType, util) {
         return (hours || 0) * 60 + (minutes || 0);
     }
 
-    function createNewActivity(day, projectActivity, hours, minutes) {
+    function createNewActivity(day, project, activityType, hours, minutes) {
         return {
             id: -1,
             day: $moment(day, 'YYYY-MM-DD').format('YYYY-MM-DD[T]00:00:00.000[Z]'),
             userId: sessionService.user.id,
-            projectId: projectActivity.projectId,
-            activityTypeId: projectActivity.activityTypeId,
+            projectId: project.id,
+            activityTypeId: activityType.id,
             duration: calculateDuration(hours, minutes),
             durationHours: hours || 0,
             durationMinutes: minutes || 0,
             durationFormatted: util.formatTime(hours, minutes),
-            projectTitle: projectActivity.projectTitle,
-            activityTypeTitle: projectActivity.activityTypeTitle
+            projectTitle: project.title,
+            activityTypeTitle: activityType.title
         };
     }
 
@@ -53,8 +53,8 @@ function(_, $moment, sessionService, Activity, ProjectActivityType, util) {
             return Activity.query({day:day}, function() { callback(); });
         },
 
-        getProjectActivityList: function() {
-            return ProjectActivityType.query();
+        getProjects: function() {
+            return Project.querySelectList();
         },
 
         save: function(activities, activity, callback) {
@@ -68,12 +68,12 @@ function(_, $moment, sessionService, Activity, ProjectActivityType, util) {
             });
         },
 
-        add: function(activities, day, projectActivity, hours, minutes, callback) {
-            var activityOrig = _.find(activities, { "projectId": projectActivity.projectId, "activityTypeId": projectActivity.activityTypeId});
+        add: function(activities, day, project, activityType, hours, minutes, callback) {
+            var activityOrig = _.find(activities, { "projectId": project.id, "activityTypeId": activityType.id});
             var activity = {};
 
             if (_.isUndefined(activityOrig)) {
-                activity = createNewActivity(day, projectActivity, hours, minutes);
+                activity = createNewActivity(day, project, activityType, hours, minutes);
             } else {
                 activity = _.clone(activityOrig);
                 extendActivityDuration(activity, hours, minutes);

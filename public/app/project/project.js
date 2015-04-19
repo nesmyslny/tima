@@ -12,9 +12,14 @@ function($resource, resourceSaveInterceptor, sessionService, util) {
             method: "POST",
             interceptor: resourceSaveInterceptor
         },
-        queryMyProjects: {
+        queryAdmin: {
             method: "GET",
-            url: "/myprojects",
+            url: "/projects/admin",
+            isArray: true
+        },
+        queryUser: {
+            method: "GET",
+            url: "/projects/user",
             isArray: true,
             transformResponse: function(data, headers) {
                 if (util.isJsonResponse(headers)) {
@@ -26,6 +31,11 @@ function($resource, resourceSaveInterceptor, sessionService, util) {
 
                 return data;
             }
+        },
+        querySelectList: {
+            method: "GET",
+            url: "/projects/selectList",
+            isArray: true
         },
         get: {
             method: "GET",

@@ -6,7 +6,7 @@ function ($scope, Project, popupService) {
     $scope.search = "";
 
     $scope.list = function() {
-        $scope.projects = Project.query(function() {
+        $scope.projects = Project.queryAdmin(function() {
             $scope.initializePagination();
         });
     };

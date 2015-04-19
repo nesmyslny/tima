@@ -223,6 +223,38 @@ func (db *DB) GetProjectsOfUser(userID int) ([]Project, error) {
 	return projects, nil
 }
 
+func (db *DB) GetProjectsForSelection(userID int, departmentID int) ([]Project, error) {
+	deptIDs, err := db.GetDepartmentIDsUpward(departmentID)
+	if err != nil {
+		return nil, err
+	}
+	deptArgString := createSqlArgString(len(deptIDs))
+	deptIDsInterface := sliceIntToInterface(deptIDs)
+
+	sql := "select * from project where " +
+		"responsible_user_id = ? or manager_user_id = ? or id in (select project_id from project_user where user_id = ?) " +
+		"or id in (select project_id from project_department where department_id in (" + deptArgString + ")) " +
+		"order by title"
+
+	var projects []Project
+	args := []interface{}{userID, userID, userID}
+	args = append(args, deptIDsInterface...)
+
+	_, err = db.dbMap.Select(&projects, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, project := range projects {
+		projects[i].ActivityTypes, err = db.getActivityTypesOfProject(project.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return projects, nil
+}
+
 func (db *DB) getProjectsByProjectCategory(trans *gorp.Transaction, projectCategoryId int) ([]Project, error) {
 	var projects []Project
 	_, err := trans.Select(&projects, "select * from project where project_category_id = ? order by ref_id_complete", projectCategoryId)
@@ -419,32 +451,6 @@ func (db *DB) IsActivityTypeReferenced(activityTypeID int, projectID *int) (bool
 	}
 
 	return exists == 1, nil
-}
-
-func (db *DB) GetProjectActivityTypeViewList(user *User) ([]ProjectActivityTypeView, error) {
-	deptIDs, err := db.GetDepartmentIDsUpward(*user.DepartmentID)
-	if err != nil {
-		return nil, err
-	}
-	deptArgString := createSqlArgString(len(deptIDs))
-	deptIDsInterface := sliceIntToInterface(deptIDs)
-
-	sql := "select pat.*, p.ref_id_complete project_ref_id_complete, p.title project_title, at.title activity_type_title " +
-		"from project_activity_type pat, project p, activity_type at " +
-		"where pat.project_id = p.id and pat.activity_type_id = at.id " +
-		"and (p.responsible_user_id = ? or p.manager_user_id = ? or p.id in (select project_id from project_user where user_id = ?) " +
-		"or p.id in (select project_id from project_department where department_id in (" + deptArgString + "))) " +
-		"order by p.title, at.title"
-
-	var list []ProjectActivityTypeView
-	args := []interface{}{user.ID, user.ID, user.ID}
-	args = append(args, deptIDsInterface...)
-
-	_, err = db.dbMap.Select(&list, sql, args...)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
 }
 
 func (db *DB) GetDepartmentIDsUpward(startDeptID int) ([]int, error) {

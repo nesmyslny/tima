@@ -38,8 +38,9 @@ func main() {
 	createAuthRoute(router, auth, server.AuthorizeUser, "/activities", "POST", activityAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeUser, "/activities/{id}", "DELETE", activityAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, server.AuthorizeDeptManager, "/projects", "GET", projectAPI.GetListHandler)
-	createAuthRoute(router, auth, server.AuthorizeUser, "/myprojects", "GET", projectAPI.GetListUserHandler)
+	createAuthRoute(router, auth, server.AuthorizeDeptManager, "/projects/admin", "GET", projectAPI.GetListHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/projects/user", "GET", projectAPI.GetListUserHandler)
+	createAuthRoute(router, auth, server.AuthorizeUser, "/projects/selectList", "GET", projectAPI.GetListSelectHandler)
 	createAuthRoute(router, auth, projectAPI.AuthorizeGet, "/projects/{id}", "GET", projectAPI.GetHandler)
 	createAuthRoute(router, auth, projectAPI.AuthorizeSave, "/projects", "POST", projectAPI.SaveHandler)
 	createAuthRoute(router, auth, projectAPI.AuthorizeDelete, "/projects/{id}", "DELETE", projectAPI.DeleteHandler)
@@ -63,8 +64,6 @@ func main() {
 	createAuthRoute(router, auth, server.AuthorizeUser, "/departments/list", "GET", departmentAPI.GetListHandler)
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments", "POST", departmentAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/{id}", "DELETE", departmentAPI.DeleteHandler)
-
-	createAuthRoute(router, auth, server.AuthorizeUser, "/projectActivityTypes", "GET", activityTypeAPI.GetActivityViewListHandler)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)

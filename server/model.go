@@ -111,14 +111,6 @@ type ProjectActivityType struct {
 	ActivityTypeID int `db:"activity_type_id"`
 }
 
-type ProjectActivityTypeView struct {
-	ProjectID            int    `db:"project_id" json:"projectId"`
-	ActivityTypeID       int    `db:"activity_type_id" json:"activityTypeId"`
-	ProjectRefIDComplete string `db:"project_ref_id_complete" json:"projectRefIdComplete"`
-	ProjectTitle         string `db:"project_title" json:"projectTitle"`
-	ActivityTypeTitle    string `db:"activity_type_title" json:"activityTypeTitle"`
-}
-
 type Activity struct {
 	ID             int       `db:"id" json:"id"`
 	Day            time.Time `db:"day" json:"day"`
