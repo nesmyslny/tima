@@ -49,6 +49,7 @@ type Project struct {
 	ResponsibleUserID *int           `db:"responsible_user_id" json:"responsibleUserId"`
 	ManagerUserID     *int           `db:"manager_user_id" json:"managerUserId"`
 	Title             string         `db:"title" json:"title"`
+	Description       string         `db:"description" json:"description"`
 	Version           int            `db:"version" json:"version"`
 	ActivityTypes     []ActivityType `db:"-" json:"activityTypes"`
 	Departments       []Department   `db:"-" json:"departments"`

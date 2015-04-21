@@ -41,6 +41,19 @@ function($modal) {
                     cancelButton: function() { return cancelButton; }
                 }
             });
+        },
+
+        showMarkdown: function(title, markdown, acceptButton, cancelButton) {
+            return $modal.open({
+                templateUrl: 'app/popup/popupMarkdownTemplate.html',
+                controller: 'PopupMarkdownController',
+                resolve: {
+                    title: function() { return title; },
+                    markdown: function() { return markdown; },
+                    acceptButton: function() { return acceptButton; },
+                    cancelButton: function() { return cancelButton; }
+                }
+            });
         }
     };
 

@@ -7,6 +7,7 @@ create table project (
     responsible_user_id integer         not null,
     manager_user_id     integer         not null,
     title               varchar(100)    not null,
+    description         text                null,
     version             integer         not null,
     primary key (id),
     index idx_project_project_category_id (project_category_id),

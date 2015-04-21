@@ -143,6 +143,15 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
         var index = projectItems.indexOf(item);
         projectItems.splice(index, 1);
     }
+
+    $scope.editDescription = function() {
+        var markdown = $scope.project.description;
+        popupService.showMarkdown("Description", markdown, "Ok", "Cancel")
+        .result.then(function(markdownResult) {
+            $scope.project.description = markdownResult;
+        });
+    };
+
     $scope.save = function() {
         $scope.$broadcast('show-errors-check-validity');
         if (!$scope.formProject.$valid) {

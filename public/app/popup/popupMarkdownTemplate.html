@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <h3 class="modal-title" ng-bind="title"></h3>
+</div>
+
+<div class="modal-body">
+    <div class="form-group">
+
+        <tabset>
+            <tab heading="Write">
+                <p>
+                    <div>
+                        <textarea name="desciption" id="description" class="form-control" rows="20" ng-model="tabsetData.markdown"></textarea>
+                    </div>
+                    <small class="pull-right">
+                        Use <a href="https://help.github.com/articles/github-flavored-markdown" target="_blank">Github flavored markdown</a>
+                        (<a href="https://help.github.com/articles/markdown-basics" target="_blank">basics</a>)
+                    </small>
+                </p>
+            </tab>
+            <tab heading="Preview" select="applyMarkdown()">
+                <p>
+                    <div class="panel panel-default">
+                        <div class="panel-body" marked="tabsetData.markdown"></div>
+                    </div>
+                </p>
+            </tab>
+        </tabset>
+
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="accept()">{{ acceptButton || "Ok" }}</button>
+    <button class="btn btn-default" ng-click="cancel()">{{ cancelButton || "Cancel" }}</button>
+</div>
