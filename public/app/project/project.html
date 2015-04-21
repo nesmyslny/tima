@@ -38,6 +38,13 @@
         </div>
     </div>
 
+    <div class="row form-group">
+        <label for="desciption" class="col-md-2 control-label">Description</label>
+        <div class="col-md-6">
+            <textarea name="desciption" id="description" class="form-control" rows="7" ng-model="project.description" ng-disabled="disableForUsers(false)"></textarea>
+        </div>
+    </div>
+
     <div class="row form-group" show-errors>
         <label for="responsibleUser" class="col-md-2 control-label">Responsible</label>
         <div class="col-md-6">
