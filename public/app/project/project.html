@@ -41,7 +41,10 @@
     <div class="row form-group">
         <label for="desciption" class="col-md-2 control-label">Description</label>
         <div class="col-md-6">
-            <textarea name="desciption" id="description" class="form-control" rows="7" ng-model="project.description" ng-disabled="disableForUsers(false)"></textarea>
+            <button type="button" class="btn btn-default pull-right" ng-click="editDescription()"><i class="fa fa-pencil-square-o"></i> Edit</button>
+            <div class="panel panel-default">
+                <div class="panel-body" marked="project.description"></div>
+            </div>
         </div>
     </div>
 
