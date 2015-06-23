@@ -1,0 +1,66 @@
+<h1>Reporting</h1>
+
+<form name="formProject" class="form-horizontal" role="form" ng-submit="save()" novalidate>
+
+    <div class="row form-group">
+        <label for="startDate" class="col-md-2 control-label">Start</label>
+        <div class="col-md-2">
+            <div class="input-group">
+                <input type="text" class="form-control" id="startDate" name="startDate" datepicker-popup ng-model="criteria.startDate" is-open="openDatePopups['btnStartDatePopup']" close-text="Close" />
+                <span class="input-group-btn">
+                    <button type="button" id="btnStartDatePopup" class="btn btn-default" ng-click="openDatePopup($event)"><i class="fa fa-calendar"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <label for="endDate" class="col-md-2 control-label">End</label>
+        <div class="col-md-2">
+            <div class="input-group">
+                <input type="text" class="form-control" id="endDate" name="endDate" datepicker-popup ng-model="criteria.endDate" is-open="openDatePopups['btnEndDatePopup']" close-text="Close" />
+                <span class="input-group-btn">
+                    <button type="button" id="btnEndDatePopup" class="btn btn-default" ng-click="openDatePopup($event)"><i class="fa fa-calendar"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col-md-10 col-md-offset-1 text-center">
+            <div class="">
+                <button type="button" class="btn btn-primary" ng-click="refreshReport()">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="jumbotron">
+    <div class="row">
+        <h3 class="col-md-2 col-md-offset-1 text-center" ng-show="!_.isUndefined(overview.durationHours)"><span ng-bind="overview.durationHours"></span><small> hours</small></h3>
+        <h3 class="col-md-2 col-md-offset-1 text-center" ng-show="!_.isUndefined(overview.durationDays)"><span ng-bind="overview.durationDays"></span><small> days</small></h3>
+        <h3 class="col-md-2 text-center"><span ng-bind="overview.projectCount"></span><small> projects</small></h3>
+        <h3 class="col-md-2 text-center"><span ng-bind="overview.activityTypeCount"></span><small> activity types</small></h3>
+        <h3 class="col-md-2 text-center"><span ng-bind="overview.userCount"></span><small> users</small></h3>
+        <h3 class="col-md-2 text-center"><span ng-bind="overview.departmentCount"></span><small> departments</small></h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 col-md-offset-1 text-center">
+        <p class="btn-group">
+            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Line'">Line</label>
+            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Bar'">Bar</label>
+            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Radar'">Radar</label>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <canvas id="timeline" class="chart-base" chart-type="overviewChartType" data="overview.timelineData" labels="overview.timelineLabels" options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h' }"></canvas>
+    </div>
+</div>

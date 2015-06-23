@@ -7,6 +7,8 @@ import (
 	"gopkg.in/gorp.v1"
 )
 
+// todo: separate these functions (not part of DB).
+
 func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	trans, err := db.dbMap.Begin()
 	if err != nil {
