@@ -50,17 +50,23 @@
 </div>
 
 <div class="row">
-    <div class="col-md-10 col-md-offset-1 text-center">
-        <p class="btn-group">
-            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Line'">Line</label>
-            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Bar'">Bar</label>
-            <label class="btn btn-default" ng-model="overviewChartType" btn-radio="'Radar'">Radar</label>
-        </p>
+    <div class="col-md-10 col-md-offset-1">
+        <div class="pull-right">
+            <p class="btn-group">
+                <label class="btn btn-default" ng-model="overview.currentTimeline" btn-radio="overview.timelineDay">Days</label>
+                <label class="btn btn-default" ng-model="overview.currentTimeline" btn-radio="overview.timelineWeek">Weeks</label>
+                <label class="btn btn-default" ng-model="overview.currentTimeline" btn-radio="overview.timelineMonth">Months</label>
+            </p>
+            <p class="btn-group">
+                <label class="btn btn-default" ng-model="overview.chartType" btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
+                <label class="btn btn-default" ng-model="overview.chartType" btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+            </p>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
-        <canvas id="timeline" class="chart-base" chart-type="overviewChartType" data="overview.timelineData" labels="overview.timelineLabels" options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h' }"></canvas>
+        <canvas id="timeline" class="chart-base" chart-type="overview.chartType" data="overview.currentTimeline.values" labels="overview.currentTimeline.labels" options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
     </div>
 </div>

@@ -8,7 +8,7 @@ import (
 )
 
 type ChartData struct {
-	Label string  `db:"label" json:"label"`
+	Date  string  `db:"date" json:"date"`
 	Value float32 `db:"value" json:"value"`
 }
 
@@ -56,11 +56,11 @@ func (reporting *Reporting) CreateOverview(context *HandlerContext) (interface{}
 		return nil, &HandlerError{err, "couldn't retrieve report overview", http.StatusInternalServerError}
 	}
 
-	sqlTimeline := "select concat('week ', lpad(week(a.day, 2), 2, '0')) label, (sum(a.duration) / 60) value from activity a"
+	sqlTimeline := "select date_format(day, '%Y-%m-%d') date, round(sum(a.duration) / 60, 2) value from activity a"
 	if len(sqlCriteria) > 0 {
 		sqlTimeline += " where " + sqlCriteria
 	}
-	sqlTimeline += " group by yearweek(day, 2)"
+	sqlTimeline += " group by day order by date"
 
 	var timeline []ChartData
 	_, err = reporting.dbMap.Select(&timeline, sqlTimeline, paramsCriteria...)
