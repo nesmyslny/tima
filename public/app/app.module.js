@@ -1,5 +1,5 @@
 angular
-.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'validation.match', 'ui.select', 'jwt-decode', 'angular-momentjs', 'hc.marked'])
+.module('tima', ['ngRoute', 'ngSanitize', 'ngResource', 'ui.bootstrap', 'ui.bootstrap.showErrors', 'validation.match', 'ui.select', 'jwt-decode', 'angular-momentjs', 'hc.marked', 'chart.js'])
 .constant('_', window._) // use lodash via DI in controllers, etc.
 .constant('userRoles', {
     user: {id: 10, desc: "User"},
@@ -7,7 +7,7 @@ angular
     manager: {id: 50, desc: "Manager"},
     admin: {id: 99, desc: "Administrator"}
 })
-.config(['$routeProvider', '$httpProvider', 'uiSelectConfig', 'markedProvider', 'userRoles', function($routeProvider, $httpProvider, uiSelectConfig, markedProvider, userRoles) {
+.config(['$routeProvider', '$httpProvider', 'uiSelectConfig', 'markedProvider', 'ChartJsProvider', 'userRoles', function($routeProvider, $httpProvider, uiSelectConfig, markedProvider, ChartJsProvider, userRoles) {
 
     uiSelectConfig.theme = 'bootstrap';
     markedProvider.setOptions({
@@ -76,6 +76,11 @@ angular
         templateUrl: 'app/department/departmentList.html',
         controller: 'DepartmentListController',
         resolve: createPermissionResolve(userRoles.admin)
+    })
+    .when('/reporting', {
+        templateUrl: 'app/reporting/reporting.html',
+        controller: 'ReportingController',
+        resolve: createPermissionResolve(userRoles.user)
     })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')

@@ -1,6 +1,13 @@
 package server
 
-import "gopkg.in/gorp.v1"
+import (
+	"math/rand"
+	"time"
+
+	"gopkg.in/gorp.v1"
+)
+
+// todo: separate these functions (not part of DB).
 
 func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	trans, err := db.dbMap.Begin()
@@ -95,8 +102,6 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 		return err
 	}
 
-	// todo: generate activity data (maybe random data for the current month?)
-
 	departments[1].(*Department).ParentID = &departments[0].(*Department).ID
 	departments[2].(*Department).ParentID = &departments[1].(*Department).ID
 	departments[3].(*Department).ParentID = &departments[0].(*Department).ID
@@ -114,7 +119,210 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 		return err
 	}
 
+	activities := db.generateActivityData(users, projects, departments, projectUsers, projectDepartments, projectActivityTypes)
+	if err = db.insertTestData(trans, &activities); err != nil {
+		return err
+	}
+
 	return trans.Commit()
+}
+
+func (db *DB) generateActivityData(users []interface{}, projects []interface{}, departments []interface{}, projectUsers []interface{}, projectDepartments []interface{}, projectActivityTypes []interface{}) []interface{} {
+	currentYear := time.Now().Year()
+	date := time.Date(currentYear, time.January, 1, 0, 0, 0, 0, time.UTC)
+	var activities []interface{}
+
+	mapUserProjectIDs := db.generateUserProjectMap(users, projects, departments, projectUsers, projectDepartments)
+	mapProjectActivityTypeIDs := db.generateProjectActivityTypeMap(projectActivityTypes)
+
+	for date.Year() == currentYear {
+		for userID, userProjectIDs := range mapUserProjectIDs {
+			activityCount := db.determineActivityCountPerDay(mapProjectActivityTypeIDs, userProjectIDs)
+			var mapUsedProjectActivityTypes = make(map[int][]int)
+
+			for i := 0; i < activityCount; i++ {
+				duration := rand.Intn(1440 / activityCount)
+
+				projectID, activityTypeID := db.generateIDsProjectActivityType(userProjectIDs, mapProjectActivityTypeIDs, mapUsedProjectActivityTypes)
+				mapUsedProjectActivityTypes[projectID] = append(mapUsedProjectActivityTypes[projectID], activityTypeID)
+
+				activity := &Activity{-1, date, userID, projectID, activityTypeID, duration, 1}
+				activities = append(activities, activity)
+			}
+
+		}
+		date = date.AddDate(0, 0, 1)
+	}
+
+	return activities
+}
+
+func (db *DB) generateUserProjectMap(users []interface{}, projects []interface{}, departments []interface{}, projectUsers []interface{}, projectDepartments []interface{}) map[int][]int {
+	var mapUserProjectIDs = make(map[int][]int)
+
+	for i := range projectUsers {
+		projectUser := projectUsers[i].(*ProjectUser)
+		mapUserProjectIDs[projectUser.UserID] = append(mapUserProjectIDs[projectUser.UserID], projectUser.ProjectID)
+	}
+
+	db.addManagerRespToUserProjectMap(projects, mapUserProjectIDs)
+	db.addProjectIDsOfDepartment(users, departments, projectDepartments, mapUserProjectIDs)
+
+	return mapUserProjectIDs
+}
+
+func (db *DB) addManagerRespToUserProjectMap(projects []interface{}, mapUserProjectIDs map[int][]int) {
+
+	for _, value := range projects {
+		project := value.(*Project)
+
+		addResponsible := true
+		addManager := true
+
+		for _, projectID := range mapUserProjectIDs[*project.ResponsibleUserID] {
+			if projectID == project.ID {
+				addResponsible = false
+				break
+			}
+		}
+
+		for _, projectID := range mapUserProjectIDs[*project.ManagerUserID] {
+			if projectID == project.ID {
+				addManager = false
+				break
+			}
+		}
+
+		if addResponsible {
+			mapUserProjectIDs[*project.ResponsibleUserID] = append(mapUserProjectIDs[*project.ResponsibleUserID], project.ID)
+		}
+		if addManager {
+			mapUserProjectIDs[*project.ManagerUserID] = append(mapUserProjectIDs[*project.ManagerUserID], project.ID)
+		}
+	}
+}
+
+func (db *DB) addProjectIDsOfDepartment(users []interface{}, depts []interface{}, projectDepts []interface{}, mapUserProjectIDs map[int][]int) {
+	for _, u := range users {
+		user := u.(*User)
+		projectIDs := db.getAllProjectIDsOfDepartment(*user.DepartmentID, depts, projectDepts)
+
+		for _, projectID := range projectIDs {
+			add := true
+
+			for _, userProjectID := range mapUserProjectIDs[user.ID] {
+				if projectID == userProjectID {
+					add = false
+					break
+				}
+			}
+
+			if add {
+				mapUserProjectIDs[user.ID] = append(mapUserProjectIDs[user.ID], projectID)
+			}
+		}
+	}
+}
+
+func (db *DB) getAllProjectIDsOfDepartment(deptID int, depts []interface{}, projectDepts []interface{}) []int {
+	projectIDs := db.getProjectIDsOfDepartment(deptID, projectDepts)
+	dept := db.getDepartment(deptID, depts)
+
+	for dept.ParentID != nil {
+		dept = db.getDepartment(*dept.ParentID, depts)
+		projectIDs = append(projectIDs, db.getProjectIDsOfDepartment(dept.ID, projectDepts)...)
+	}
+
+	return projectIDs
+}
+
+func (db *DB) getProjectIDsOfDepartment(deptID int, projectDepts []interface{}) []int {
+	var projectIDs []int
+
+	for _, pd := range projectDepts {
+		projectDept := pd.(*ProjectDepartment)
+		if projectDept.DepartmentID == deptID {
+			projectIDs = append(projectIDs, projectDept.ProjectID)
+		}
+	}
+
+	return projectIDs
+}
+
+func (db *DB) getDepartment(deptID int, depts []interface{}) Department {
+	var dept Department
+
+	for _, d := range depts {
+		dept = *d.(*Department)
+		if dept.ID == deptID {
+			break
+		}
+	}
+
+	return dept
+}
+
+func (db *DB) generateProjectActivityTypeMap(projectActivityTypes []interface{}) map[int][]int {
+	var mapProjectActivityTypeIDs = make(map[int][]int)
+
+	for i := range projectActivityTypes {
+		projectActivityType := projectActivityTypes[i].(*ProjectActivityType)
+		mapProjectActivityTypeIDs[projectActivityType.ProjectID] = append(mapProjectActivityTypeIDs[projectActivityType.ProjectID], projectActivityType.ActivityTypeID)
+	}
+
+	return mapProjectActivityTypeIDs
+}
+
+func (db *DB) determineActivityCountPerDay(mapProjectActivityTypeIDs map[int][]int, userProjectIDs []int) int {
+	activityCount := 0
+
+	for k, v := range mapProjectActivityTypeIDs {
+		add := false
+		for _, v := range userProjectIDs {
+			if k == v {
+				add = true
+				break
+			}
+		}
+		if !add {
+			continue
+		}
+
+		// don't add more than 4 activities per day
+		activityCount += len(v)
+		if activityCount > 4 {
+			activityCount = 4
+			break
+		}
+	}
+
+	return activityCount
+}
+
+func (db *DB) generateIDsProjectActivityType(userProjectIDs []int, mapProjectActivityTypeIDs map[int][]int, mapUsedProjectActivityTypes map[int][]int) (int, int) {
+	var projectID, activityTypeID int
+	generateIDs := true
+
+	for generateIDs {
+		projectID = userProjectIDs[rand.Intn(len(userProjectIDs))]
+		activityTypeID = mapProjectActivityTypeIDs[projectID][rand.Intn(len(mapProjectActivityTypeIDs[projectID]))]
+
+		usedActivtyTypes, ok := mapUsedProjectActivityTypes[projectID]
+		if !ok {
+			break
+		}
+
+		for _, v := range usedActivtyTypes {
+			if v == activityTypeID {
+				generateIDs = true
+				break
+			} else {
+				generateIDs = false
+			}
+		}
+	}
+
+	return projectID, activityTypeID
 }
 
 func (db *DB) insertTestData(trans *gorp.Transaction, data *[]interface{}) error {
