@@ -90,8 +90,8 @@
                     </ui-select-choices>
                 </ui-select>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="addActivityType()"><i class="fa fa-plus"></i> Add</button>
-                    <button type="button" class="btn btn-default" ng-click="addMultipleActivityTypes()"><i class="fa fa-ellipsis-h"></i></button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addSelectedItem(project.activityTypes, selectedActivityType)"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addMultipleItems(activityTypes, project.activityTypes, 'Activity Types', 'title')"><i class="fa fa-ellipsis-h"></i></button>
                 </span>
             </div>
         </div>
@@ -103,7 +103,7 @@
                 <li ng-repeat="at in project.activityTypes | orderObjectBy:'title'">
                     <span class="label label-default">
                         <span ng-bind="at.title"></span>
-                        <a href ng-click="deleteActivityType(at)" class="label-delete"><i class="fa fa-times"></i></a>
+                        <a href ng-click="multiSelect.removeItem(project.activityTypes, at)" class="label-delete"><i class="fa fa-times"></i></a>
                     </span>
                 </li>
             </ul>
@@ -127,8 +127,8 @@
                     </ui-select-choices>
                 </ui-select>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="addDepartment()"><i class="fa fa-plus"></i> Add</button>
-                    <button type="button" class="btn btn-default" ng-click="addMultipleDepartments()"><i class="fa fa-ellipsis-h"></i></button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addSelectedItem(project.departments, selectedDepartment)"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addMultipleItems(departments, project.departments, 'Departments', 'path')"><i class="fa fa-ellipsis-h"></i></button>
                 </span>
             </div>
         </div>
@@ -140,7 +140,7 @@
                 <li ng-repeat="dept in project.departments | orderObjectBy:'title'">
                     <span class="label label-default">
                         <span ng-bind="dept.title"></span>
-                        <a href ng-click="deleteDepartment(dept)" class="label-delete"><i class="fa fa-times"></i></a>
+                        <a href ng-click="multiSelect.removeItem(project.departments, dept)" class="label-delete"><i class="fa fa-times"></i></a>
                     </span>
                 </li>
             </ul>
@@ -158,8 +158,8 @@
                     </ui-select-choices>
                 </ui-select>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="addUser()"><i class="fa fa-plus"></i> Add</button>
-                    <button type="button" class="btn btn-default" ng-click="addMultipleUsers()"><i class="fa fa-ellipsis-h"></i></button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addSelectedItem(project.users, selectedUser)"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addMultipleItems(users, project.users, 'Users', 'username')"><i class="fa fa-ellipsis-h"></i></button>
                 </span>
             </div>
         </div>
@@ -171,7 +171,7 @@
                 <li ng-repeat="user in project.users | orderObjectBy:'username'">
                     <span class="label label-default">
                         <span ng-bind="user.username"></span>
-                        <a href ng-click="deleteUser(user)" class="label-delete"><i class="fa fa-times"></i></a>
+                        <a href ng-click="multiSelect.removeItem(project.users, user)" class="label-delete"><i class="fa fa-times"></i></a>
                     </span>
                 </li>
             </ul>

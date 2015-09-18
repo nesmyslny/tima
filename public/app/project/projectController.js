@@ -1,6 +1,8 @@
 angular.module('tima').controller('ProjectController',
-['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'Department', 'User', 'authService', 'userRoles', 'popupService',
-function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, Department, User, authService, userRoles, popupService) {
+['$scope', '$routeParams', '$location', '$q', '_', 'Project', 'ProjectCategory', 'ActivityType', 'Department', 'User', 'authService', 'userRoles', 'popupService', 'multiSelect',
+function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, ActivityType, Department, User, authService, userRoles, popupService, multiSelect) {
+
+    $scope.multiSelect = multiSelect;
 
     $scope.project = {
         id: -1,
@@ -64,85 +66,6 @@ function ($scope, $routeParams, $location, $q, _, Project, ProjectCategory, Acti
         });
     };
     $scope.fetch();
-
-    $scope.addActivityType = function() {
-        addProjectItem($scope.project.activityTypes, $scope.selectedActivityType.selected);
-        $scope.selectedActivityType = {};
-    };
-
-    $scope.addMultipleActivityTypes = function() {
-        addMultipleProjectItems($scope.activityTypes, $scope.project.activityTypes, "Activity Types", "title");
-    };
-
-    $scope.deleteActivityType = function(activityType) {
-        deleteProjectItem($scope.project.activityTypes, activityType);
-    };
-
-    $scope.addDepartment = function() {
-        addProjectItem($scope.project.departments, $scope.selectedDepartment.selected);
-        $scope.selectedDepartment = {};
-    };
-
-    $scope.addMultipleDepartments = function() {
-        addMultipleProjectItems($scope.departments, $scope.project.departments, "Departments", "path");
-    };
-
-    $scope.deleteDepartment = function(dept) {
-        deleteProjectItem($scope.project.departments, dept);
-    };
-
-    $scope.addUser = function() {
-        addProjectItem($scope.project.users, $scope.selectedUser.selected);
-        $scope.selectedUser = {};
-    };
-
-    $scope.addMultipleUsers = function() {
-        addMultipleProjectItems($scope.users, $scope.project.users, "Users", "username");
-    };
-
-    $scope.deleteUser = function(user) {
-        deleteProjectItem($scope.project.users, user);
-    };
-
-    function addProjectItem(projectItems, item) {
-        if (_.isUndefined(item)) {
-            return;
-        }
-
-        var alreadyInList = projectItems.some(function(projectItem) {
-            return projectItem.id == item.id;
-        });
-
-        if (!alreadyInList) {
-            projectItems.push(item);
-        }
-    }
-
-    function addMultipleProjectItems(items, projectItems, popupTitle, valueKey) {
-        var popupItems = [];
-        _.forEach(items, function(item) {
-            popupItems.push({
-                value: item[valueKey],
-                obj: item,
-                checked: _.any(projectItems, "id", item.id)
-            });
-        });
-
-        popupService.showSelectList(popupTitle, popupItems, "Ok", "Cancel")
-        .result.then(function() {
-            projectItems.length = 0;
-            _.forEach(popupItems, function(item) {
-                if (item.checked) {
-                    addProjectItem(projectItems, item.obj);
-                }
-            });
-        });
-    }
-
-    function deleteProjectItem(projectItems, item) {
-        var index = projectItems.indexOf(item);
-        projectItems.splice(index, 1);
-    }
 
     $scope.editDescription = function() {
         var markdown = $scope.project.description;

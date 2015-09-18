@@ -15,6 +15,7 @@ type ChartData struct {
 type ReportCriteria struct {
 	StartDate *time.Time `json:"startDate"`
 	EndDate   *time.Time `json:"endDate"`
+	Projects  []Project  `json:"projects"`
 }
 
 type ReportOverview struct {
@@ -84,6 +85,18 @@ func (reporting *Reporting) createSqlWhere(criteria *ReportCriteria) (string, []
 	if criteria.EndDate != nil {
 		whereConditions = append(whereConditions, "a.day <= ?")
 		params = append(params, criteria.EndDate)
+	}
+
+	if len(criteria.Projects) > 0 {
+		var projectsIn string
+		for _, p := range criteria.Projects {
+			if len(projectsIn) > 0 {
+				projectsIn += ", "
+			}
+			projectsIn += "?"
+			params = append(params, p.ID)
+		}
+		whereConditions = append(whereConditions, "a.project_id in("+projectsIn+")")
 	}
 
 	var where string
