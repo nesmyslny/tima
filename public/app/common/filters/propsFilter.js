@@ -10,7 +10,7 @@ function() {
                 var keys = Object.keys(props);
                 for (var i = 0; i < keys.length; i++) {
                     var prop = keys[i];
-                    var text = props[prop].toLowerCase();
+                    var text = props[prop] === undefined ? "" : props[prop].toLowerCase();
                     if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
                         itemMatches = true;
                         break;

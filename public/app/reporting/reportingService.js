@@ -103,7 +103,8 @@ function(_, $moment, Reporting) {
         createCriteria: function() {
             return {
                 startDate: $moment().startOf("month"),
-                endDate: $moment().endOf("month")
+                endDate: $moment().endOf("month"),
+                projects: []
             };
         }
     };

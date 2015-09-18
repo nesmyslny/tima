@@ -27,8 +27,44 @@
     </div>
 
     <div class="row form-group">
-        <div class="col-md-10 col-md-offset-1 text-center">
-            <div class="">
+        <label for="projects" class="col-md-2 control-label">Projects</label>
+        <div class="col-md-6">
+            <div class="input-group">
+                <ui-select name="projects" id="projects" ng-model="selectedProject.selected">
+                    <ui-select-match placeholder="Choose projects">
+                        <small ng-bind="$select.selected.refIdComplete"></small>
+                        <span ng-bind="$select.selected.title"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="project in projects | propsFilter: {refIdComplete: $select.search, title: $select.search}">
+                        <small ng-bind-html="project.refIdComplete | highlight: $select.search"></small>
+                        <span ng-bind-html="project.title | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addSelectedItem(criteria.projects, selectedProject)"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-default" ng-click="multiSelect.addMultipleItems(projects, criteria.projects, 'Projects', 'refIdComplete', 'small', 'title', '')"><i class="fa fa-ellipsis-h"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-6">
+            <ul class="list-inline">
+                <li ng-repeat="p in criteria.projects | orderObjectBy:'title'">
+                    <span class="label label-default">
+                        <small ng-bind="p.refIdComplete"></small>
+                        <span ng-bind="p.title"></span>
+                        <a href ng-click="multiSelect.removeItem(criteria.projects, p)" class="label-delete"><i class="fa fa-times"></i></a>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col-md-8">
+            <div class="pull-right">
                 <button type="button" class="btn btn-primary" ng-click="refreshReport()">
                     <i class="fa fa-refresh"></i> Refresh
                 </button>
