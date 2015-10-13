@@ -1,10 +1,10 @@
 angular.module('tima').factory('popupService',
-['$modal',
-function($modal) {
+['$uibModal',
+function($uibModal) {
 
     var service = {
         showSimple: function(title, body, acceptButton, cancelButton) {
-            return $modal.open({
+            return $uibModal.open({
                 templateUrl: 'app/popup/popupSimpleTemplate.html',
                 controller: 'PopupSimpleController',
                 resolve: {
@@ -17,7 +17,7 @@ function($modal) {
         },
 
         showForm: function(title, template, data, acceptButton, cancelButton) {
-            return $modal.open({
+            return $uibModal.open({
                 templateUrl: 'app/popup/popupFormTemplate.html',
                 controller: 'PopupFormController',
                 resolve: {
@@ -31,7 +31,7 @@ function($modal) {
         },
 
         showSelectList: function(title, items, acceptButton, cancelButton) {
-            return $modal.open({
+            return $uibModal.open({
                 templateUrl: 'app/popup/popupSelectListTemplate.html',
                 controller: 'PopupSelectListController',
                 resolve: {
@@ -44,7 +44,7 @@ function($modal) {
         },
 
         showMarkdown: function(title, markdown, acceptButton, cancelButton) {
-            return $modal.open({
+            return $uibModal.open({
                 templateUrl: 'app/popup/popupMarkdownTemplate.html',
                 controller: 'PopupMarkdownController',
                 resolve: {

@@ -17,7 +17,7 @@
                 <button class="btn btn-default" ng-click="openDatePicker($event)" ng-class="{active: datePickerOpened}"><i class="fa fa-calendar"></i></button>
             </span>
         </div>
-        <div datepicker-popup ng-model="day" show-button-bar="false" is-open="datePickerOpened">
+        <div uib-datepicker-popup ng-model="day" show-button-bar="false" is-open="datePickerOpened">
         </div>
     </div>
 </div>
@@ -99,7 +99,7 @@
             </div>
 
             <div class="panel-body">
-                <progressbar class="progress-slim" max="100" value="(a.duration * 100) / totalDuration">{{a.durationFormatted}}</progressbar>
+                <uib-progressbar class="progress-slim" max="100" value="(a.duration * 100) / totalDuration">{{a.durationFormatted}}</uib-progressbar>
             </div>
 
         </div>

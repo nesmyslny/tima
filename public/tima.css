@@ -45,12 +45,11 @@
 }
 
 .form-control-ui-select {
-    width: 100%;
     padding: 0;
     border: 0;
 }
 
-.form-control-ui-select > .ui-select-match,
+.form-control-ui-select > .ui-select-match > .ui-select-toggle,
 .form-control-ui-select > .ui-select-search {
     width: 100%;
 }

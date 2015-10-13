@@ -5,8 +5,8 @@
 <div class="modal-body">
     <div class="form-group">
 
-        <tabset>
-            <tab heading="Write">
+        <uib-tabset>
+            <uib-tab heading="Write">
                 <p>
                     <div>
                         <textarea name="desciption" id="description" class="form-control" rows="20" ng-model="tabsetData.markdown"></textarea>
@@ -16,15 +16,15 @@
                         (<a href="https://help.github.com/articles/markdown-basics" target="_blank">basics</a>)
                     </small>
                 </p>
-            </tab>
-            <tab heading="Preview" select="applyMarkdown()">
+            </uib-tab>
+            <uib-tab heading="Preview" select="applyMarkdown()">
                 <p>
                     <div class="panel panel-default">
                         <div class="panel-body" marked="tabsetData.markdown"></div>
                     </div>
                 </p>
-            </tab>
-        </tabset>
+            </uib-tab>
+        </uib-tabset>
 
     </div>
 </div>
