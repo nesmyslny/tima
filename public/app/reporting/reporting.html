@@ -87,6 +87,7 @@
 
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
+        <h1>Overview</h1>
         <div class="pull-right">
             <p class="btn-group">
                 <label class="btn btn-default" ng-model="overview.currentTimeline" btn-radio="overview.timelineDay">Days</label>
@@ -108,6 +109,7 @@
 
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
+        <h1>Projects</h1>
         <div class="pull-right">
             <p class="btn-group">
                 <label class="btn btn-default" ng-model="projectsView.currentTimeline" btn-radio="projectsView.timelineDay">Days</label>
@@ -123,7 +125,11 @@
 </div>
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
-        <canvas id="timeline-projects" class="chart-base" chart-type="projectsView.chartType" chart-labels="projectsView.currentTimeline.labels" chart-series="projectsView.timeline.series" chart-data="projectsView.currentTimeline.values" chart-legend="true" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>', multiTooltipTemplate: '<%= value.toFixed(2) %>' }"></canvas>
+        <canvas id="timeline-projects" class="chart-base" chart-type="projectsView.chartType" chart-labels="projectsView.currentTimeline.labels" chart-series="projectsView.timeline.series" chart-data="projectsView.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>', multiTooltipTemplate: '<%= value.toFixed(2) %>' }"></canvas>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
         <canvas id="pie-projects" class="chart chart-pie" chart-labels="projectsView.pie.labels" chart-data="projectsView.pie.data" chart-legend="true" chart-options="{ tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
     </div>
 </div>
