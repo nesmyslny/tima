@@ -5,6 +5,10 @@ function($resource) {
         createOverview: {
             url: "/report/overview",
             method: "POST"
+        },
+        createProjects: {
+            url: "/report/projects",
+            method: "POST"
         }
     });
 }]);

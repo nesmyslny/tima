@@ -100,9 +100,30 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <canvas id="timeline-overview" class="chart-base" chart-type="overview.chartType" chart-labels="overview.currentTimeline.labels" chart-data="overview.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
-        <canvas id="timeline" class="chart-base" chart-type="overview.chartType" data="overview.currentTimeline.values" labels="overview.currentTimeline.labels" options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
+        <div class="pull-right">
+            <p class="btn-group">
+                <label class="btn btn-default" ng-model="projectsView.currentTimeline" btn-radio="projectsView.timelineDay">Days</label>
+                <label class="btn btn-default" ng-model="projectsView.currentTimeline" btn-radio="projectsView.timelineWeek">Weeks</label>
+                <label class="btn btn-default" ng-model="projectsView.currentTimeline" btn-radio="projectsView.timelineMonth">Months</label>
+            </p>
+            <p class="btn-group">
+                <label class="btn btn-default" ng-model="projectsView.chartType" btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
+                <label class="btn btn-default" ng-model="projectsView.chartType" btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <canvas id="timeline-projects" class="chart-base" chart-type="projectsView.chartType" chart-labels="projectsView.currentTimeline.labels" chart-series="projectsView.timeline.series" chart-data="projectsView.currentTimeline.values" chart-legend="true" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>', multiTooltipTemplate: '<%= value.toFixed(2) %>' }"></canvas>
+        <canvas id="pie-projects" class="chart chart-pie" chart-labels="projectsView.pie.labels" chart-data="projectsView.pie.data" chart-legend="true" chart-options="{ tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
     </div>
 </div>
