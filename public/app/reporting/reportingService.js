@@ -11,75 +11,50 @@ function(_, $moment, Reporting) {
         }
     }
 
-    function insertMissingDays(timeline, startDate, endDate) {
-        var start = null;
-        if (startDate) {
-            start = $moment(startDate).format("YYYY-MM-DD");
-        } else if (timeline.length > 0) {
-            start = timeline[0].date;
-        }
-
-        var end = null;
-        if (endDate) {
-            end = $moment(endDate).format("YYYY-MM-DD");
-        } else if (timeline.length > 0) {
-            end = timeline[timeline.length - 1].date;
-        }
-
-        var date = start;
-
-        for (i = 0; date != end; i++) {
-            var tlDate = null;
-            if (!_.isUndefined(timeline[i])) {
-                tlDate = timeline[i].date;
-            }
-
-            if (tlDate != date) {
-                timeline.splice(i, 0, {date: date, value: 0});
-            }
-            date = $moment(date).add(1, "d").format("YYYY-MM-DD");
-        }
-    }
-
-    function initializeGrouping(overview) {
-        overview.timelineDay = {
-            labels: _.pluck(overview.timeline, "date"),
-            values: [_.pluck(overview.timeline, "value")]
+    function addTimelineGrouping(obj, timeline) {
+        obj.timelineDay = {
+            labels: timeline.labels,
+            values: timeline.data
         };
 
-        overview.timelineWeek = groupTimeline(overview.timeline, "YYYY[W]WW");
-        overview.timelineMonth = groupTimeline(overview.timeline, "YYYY-MM");
+        obj.timelineWeek = groupTimeline(timeline, "YYYY[W]WW");
+        obj.timelineMonth = groupTimeline(timeline, "YYYY-MM");
 
-        if (overview.timeline.length > 180) {
-            return overview.timelineMonth;
-        } else if (overview.timeline.length > 31) {
-            return overview.timelineWeek;
+        if (timeline.labels.length > 180) {
+            return obj.timelineMonth;
+        } else if (timeline.labels.length > 31) {
+            return obj.timelineWeek;
         }
-        return overview.timelineDay;
+        return obj.timelineDay;
     }
 
     function groupTimeline(timeline, groupByFormat) {
         var groupedTimeline = {};
 
-        _.forEach(timeline, function(item) {
-            var group = $moment(item.date).format(groupByFormat);
+        for (var i = 0; i < timeline.labels.length; i++) {
+            var group = $moment(timeline.labels[i]).format(groupByFormat);
 
             if (_.isUndefined(groupedTimeline[group])) {
-                groupedTimeline[group] = 0;
+                groupedTimeline[group] = [];
             }
 
-            groupedTimeline[group] += item.value;
-        });
+            for (var j = 0; j < timeline.data.length; j++) {
+                if (_.isUndefined(groupedTimeline[group][j])) {
+                    groupedTimeline[group][j] = 0;
+                }
+                groupedTimeline[group][j] += timeline.data[j][i];
+            }
+        }
 
         return {
             labels: _.keys(groupedTimeline),
-            values: [_.values(groupedTimeline)]
+            values: _.unzip(_.values(groupedTimeline))
         };
     }
 
     var service = {
 
-        getOverview: function(criteria, callback) {
+        getReportOverview: function(criteria, callback) {
 
             prepareCriteria(criteria);
 
@@ -95,8 +70,27 @@ function(_, $moment, Reporting) {
                     overview.durationDays = +days.toFixed(2);
                 }
 
-                insertMissingDays(overview.timeline, criteria.startDate, criteria.endDate);
-                overview.currentTimeline = initializeGrouping(overview);
+                overview.currentTimeline = addTimelineGrouping(overview, overview.timeline);
+            });
+        },
+
+        getReportProjects: function(criteria, callback) {
+
+            prepareCriteria(criteria);
+
+            return Reporting.createProjects(criteria, function(projectsView) {
+                projectsView.chartType = "Line";
+                projectsView.currentTimeline = addTimelineGrouping(projectsView, projectsView.timeline);
+
+
+                projectsView.pie = {
+                    labels: projectsView.timeline.series,
+                    data: []
+                };
+
+                for (var i = 0; i < projectsView.timeline.series.length; i++) {
+                    projectsView.pie.data.push(_.sum(projectsView.timeline.data[i]));
+                }
             });
         },
 

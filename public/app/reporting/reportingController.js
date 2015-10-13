@@ -5,6 +5,7 @@ function ($scope, _, reportingService, Project, multiSelect) {
     $scope.multiSelect = multiSelect;
     $scope.criteria = reportingService.createCriteria();
     $scope.overview = {};
+    $scope.projectsView = {};
     $scope.openDatePopups = [];
 
     // todo: keep user rights in mind! users aren't allowed to analyse all projects.
@@ -12,7 +13,8 @@ function ($scope, _, reportingService, Project, multiSelect) {
     $scope.selectedProject = {};
 
     $scope.refreshReport = function() {
-        $scope.overview = reportingService.getOverview($scope.criteria);
+        $scope.overview = reportingService.getReportOverview($scope.criteria);
+        $scope.projectsView = reportingService.getReportProjects($scope.criteria);
     };
     $scope.refreshReport();
 
