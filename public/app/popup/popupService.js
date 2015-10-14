@@ -54,6 +54,19 @@ function($uibModal) {
                     cancelButton: function() { return cancelButton; }
                 }
             });
+        },
+
+        showText: function(title, text, acceptButton, cancelButton) {
+            return $uibModal.open({
+                templateUrl: 'app/popup/popupTextTemplate.html',
+                controller: 'PopupTextController',
+                resolve: {
+                    title: function() { return title; },
+                    text: function() { return text; },
+                    acceptButton: function() { return acceptButton; },
+                    cancelButton: function() { return cancelButton; }
+                }
+            });
         }
     };
 

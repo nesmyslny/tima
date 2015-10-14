@@ -81,18 +81,19 @@
                     </div>
                     <div class="col-md-3 pull-right text-right">
                         <ng-form name="formActivity" class="form-inline">
-                        <div class="form-group no-margin" show-errors>
-                            <div class="input-group">
-                                <div class="pull-right">
-                                    <input type="number" class="form-control input-sm activity-time-small" name="actHours" placeholder="Hours"  min="0" max="23" ng-model="a.durationHours" ng-required="!a.durationMinutes" />
-                                    <input type="number" class="form-control input-sm activity-time-small" name="actMinutes" placeholder="Minutes" min="0" max="59" ng-model="a.durationMinutes" ng-required="!a.durationHours" />
+                            <div class="form-group no-margin" show-errors>
+                                <button class="btn btn-default btn-sm" ng-click="editDescription(a)"><i ng-class="{'fa-comment-o': !a.description, 'fa-comment': a.description}" class="fa fa-md"></i></button>
+                                <div class="input-group">
+                                    <div class="pull-right">
+                                        <input type="number" class="form-control input-sm activity-time-small" name="actHours" placeholder="Hours"  min="0" max="23" ng-model="a.durationHours" ng-required="!a.durationMinutes" />
+                                        <input type="number" class="form-control input-sm activity-time-small" name="actMinutes" placeholder="Minutes" min="0" max="59" ng-model="a.durationMinutes" ng-required="!a.durationHours" />
+                                    </div>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default btn-sm" ng-click="save(a)" ng-disabled="formActivity.actHours.$invalid || formActivity.actMinutes.$invalid"><i class="fa fa-check fa-md"></i></button>
+                                        <button class="btn btn-default btn-sm" ng-click="delete(a)"><i class="fa fa-remove fa-md"></i></button>
+                                    </span>
                                 </div>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default btn-sm" ng-click="save(a)" ng-disabled="formActivity.actHours.$invalid || formActivity.actMinutes.$invalid"><i class="fa fa-check fa-md"></i></button>
-                                    <button class="btn btn-default btn-sm" ng-click="delete(a)"><i class="fa fa-remove fa-md"></i></button>
-                                </span>
                             </div>
-                        </div>
                         </ng-form>
                     </div>
                 </div>

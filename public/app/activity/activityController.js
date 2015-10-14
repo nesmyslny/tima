@@ -1,6 +1,6 @@
 angular.module('tima').controller('ActivityController',
-['activityService', '$scope', '$routeParams', '$location', '_', '$moment',
-function (activityService, $scope, $routeParams, $location, _, $moment) {
+['activityService', '$scope', '$routeParams', '$location', '_', '$moment', 'popupService',
+function (activityService, $scope, $routeParams, $location, _, $moment, popupService) {
 
     $scope.day = $routeParams.day;
     $scope.dayHeader = $moment($scope.day, 'YYYY-MM-DD').format('dddd, MMMM Do YYYY');
@@ -61,6 +61,15 @@ function (activityService, $scope, $routeParams, $location, _, $moment) {
     $scope.save = function(activity) {
         activityService.save($scope.activities, activity, function() {
             refreshTotalDuration();
+        });
+    };
+
+    $scope.editDescription = function(activity) {
+        var text = activity.description;
+        popupService.showText("Description", text, "Ok", "Cancel")
+        .result.then(function(textResult) {
+            activity.description = textResult;
+            $scope.save(activity);
         });
     };
 
