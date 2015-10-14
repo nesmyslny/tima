@@ -53,7 +53,7 @@ func (auth *Auth) createToken(user *User) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = user
 	// todo: exp -> config
-	token.Claims["exp"] = time.Now().Unix() + 3600
+	token.Claims["exp"] = time.Now().Add(time.Hour * 8).Unix()
 	return token.SignedString(auth.privateKey)
 }
 
@@ -62,6 +62,8 @@ func (auth *Auth) getToken(r *http.Request) (*jwt.Token, error) {
 		return auth.privateKey, nil
 	})
 	if err != nil {
+		log.Println(err.Error())
+		log.Println(token.Valid)
 		return nil, err
 	}
 
@@ -76,21 +78,25 @@ func (auth *Auth) ValidateToken(context *HandlerContext) bool {
 	return token.Valid
 }
 
-func (auth *Auth) AuthenticateUser(context *HandlerContext) (bool, error) {
+func (auth *Auth) AuthenticateUser(context *HandlerContext) (string, error) {
 	token, err := auth.getToken(context.Request)
-	if err != nil {
-		return false, err
-	}
-	if !token.Valid {
-		return false, errors.New("Invalid token")
+	if err != nil || !token.Valid {
+		return "", errNotAuthenticated
 	}
 
 	user, err := auth.extractUser(token.Raw)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	context.User = user
-	return true, nil
+
+	// create new token -> to reset exp time
+	newToken, err := auth.createToken(user)
+	if err != nil {
+		return "", err
+	}
+
+	return newToken, nil
 }
 
 func (auth *Auth) extractUser(token string) (*User, error) {

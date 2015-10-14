@@ -10,6 +10,7 @@ var errUsernameUnavailable = errors.New("Username unavailable")
 var errIDNotUnique = errors.New("ID must be unique")
 var errOptimisticLocking = errors.New("Data was changed/deleted")
 var errForbidden = errors.New("Forbidden")
+var errNotAuthenticated = errors.New("Not authenticated")
 
 const RoleUser int = 10
 const RoleDeptManager int = 30
