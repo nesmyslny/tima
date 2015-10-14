@@ -8,6 +8,13 @@ function (sessionService) {
                 config.headers.Authorization = 'Bearer ' + sessionService.token;
             }
             return config;
+        },
+        response: function (response) {
+            var token = response.headers("Authorization");
+            if (token) {
+                sessionService.setToken(token);
+            }
+            return response;
         }
     };
 }]);

@@ -17,6 +17,7 @@ const RoleManager int = 50
 const RoleAdmin int = 99
 
 const dateLayout string = "2006-01-02"
+const sec8h int = 28800
 
 type Department struct {
 	ID          int          `db:"id" json:"id"`

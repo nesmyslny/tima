@@ -53,7 +53,7 @@ func (auth *Auth) createToken(user *User) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = user
 	// todo: exp -> config
-	token.Claims["exp"] = time.Now().Unix() + 3600
+	token.Claims["exp"] = time.Now().Unix() + int64(sec8h)
 	return token.SignedString(auth.privateKey)
 }
 
@@ -76,21 +76,28 @@ func (auth *Auth) ValidateToken(context *HandlerContext) bool {
 	return token.Valid
 }
 
-func (auth *Auth) AuthenticateUser(context *HandlerContext) (bool, error) {
+func (auth *Auth) AuthenticateUser(context *HandlerContext) (bool, string, error) {
 	token, err := auth.getToken(context.Request)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 	if !token.Valid {
-		return false, errors.New("Invalid token")
+		return false, "", errors.New("Invalid token")
 	}
 
 	user, err := auth.extractUser(token.Raw)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 	context.User = user
-	return true, nil
+
+	// create new token -> to reset exp time
+	newToken, err := auth.createToken(user)
+	if err != nil {
+		return false, "", err
+	}
+
+	return true, newToken, nil
 }
 
 func (auth *Auth) extractUser(token string) (*User, error) {

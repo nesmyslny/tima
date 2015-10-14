@@ -19,12 +19,16 @@ function($window, _) {
             service.user = user;
         },
 
-        updateUser: function (user) {
+        updateUser: function(user) {
             // todo: is there a lodash-function for this? (copying only properties, which are in source.)
             _.forOwn(service.user, function(value, key, object) {
                 object[key] = user[key];
             });
             $window.sessionStorage.user = JSON.stringify(service.user);
+        },
+
+        setToken: function(token) {
+            $window.sessionStorage.token = service.token = token;
         },
 
         delete: function() {

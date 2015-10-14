@@ -17,7 +17,7 @@ type AnonHandler struct {
 
 type AuthHandler struct {
 	HandlerFunc      func(context *HandlerContext) (interface{}, *HandlerError)
-	AuthenticateFunc func(context *HandlerContext) (bool, error)
+	AuthenticateFunc func(context *HandlerContext) (bool, string, error)
 	AuthorizeFunc    func(context *HandlerContext) (bool, error)
 }
 
@@ -27,7 +27,7 @@ func NewAnonHandler(handlerFunc func(context *HandlerContext) (interface{}, *Han
 
 func NewAuthHandler(
 	handlerFunc func(context *HandlerContext) (interface{}, *HandlerError),
-	authenticateFunc func(context *HandlerContext) (bool, error),
+	authenticateFunc func(context *HandlerContext) (bool, string, error),
 	authorizeFunc func(context *HandlerContext) (bool, error)) AuthHandler {
 	return AuthHandler{handlerFunc, authenticateFunc, authorizeFunc}
 }
@@ -41,7 +41,7 @@ func (anonHandler AnonHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 func (authHandler AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	context := NewHandlerContext(w, r)
 
-	authenticated, err := authHandler.AuthenticateFunc(context)
+	authenticated, newToken, err := authHandler.AuthenticateFunc(context)
 	if err != nil {
 		http.Error(w, "Error while authenticating the user.", http.StatusInternalServerError)
 		return
@@ -63,6 +63,7 @@ func (authHandler AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	}
 
 	response, hErr := authHandler.HandlerFunc(context)
+	w.Header().Set("Authorization", newToken)
 	serveHTTP(w, response, hErr)
 }
 
