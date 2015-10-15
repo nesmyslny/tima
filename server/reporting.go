@@ -184,6 +184,7 @@ func (reporting *Reporting) getDateBoundaries(criteriaStart *time.Time, criteria
 
 func (reporting *Reporting) createLabelsAndData(criteriaStart *time.Time, criteriaEnd *time.Time, dateValuesArray [][]DateValue) (labels []string, data [][]float32) {
 	data = make([][]float32, len(dateValuesArray))
+	labels = make([]string, 0)
 	start, end := reporting.getDateBoundaries(criteriaStart, criteriaEnd, dateValuesArray)
 
 	for i, dateValues := range dateValuesArray {
