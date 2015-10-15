@@ -62,8 +62,6 @@ func (auth *Auth) getToken(r *http.Request) (*jwt.Token, error) {
 		return auth.privateKey, nil
 	})
 	if err != nil {
-		log.Println(err.Error())
-		log.Println(token.Valid)
 		return nil, err
 	}
 
