@@ -52,6 +52,17 @@ function(_, $moment, Reporting) {
         };
     }
 
+    function addPieData(obj, timeline) {
+        obj.pie = {
+            labels: timeline.series,
+            data: []
+        };
+
+        for (var i = 0; i < timeline.series.length; i++) {
+            obj.pie.data.push(_.sum(timeline.data[i]));
+        }
+    }
+
     var service = {
 
         getReportOverview: function(criteria, callback) {
@@ -82,16 +93,7 @@ function(_, $moment, Reporting) {
                 projectsView.chartType = "Line";
                 projectsView.noData = projectsView.timeline.labels.length === 0;
                 projectsView.currentTimeline = addTimelineGrouping(projectsView, projectsView.timeline);
-
-
-                projectsView.pie = {
-                    labels: projectsView.timeline.series,
-                    data: []
-                };
-
-                for (var i = 0; i < projectsView.timeline.series.length; i++) {
-                    projectsView.pie.data.push(_.sum(projectsView.timeline.data[i]));
-                }
+                addPieData(projectsView, projectsView.timeline);
             });
         },
 
