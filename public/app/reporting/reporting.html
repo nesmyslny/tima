@@ -85,51 +85,63 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-10 col-md-offset-1">
-        <h1>Overview</h1>
-        <div class="pull-right">
-            <p class="btn-group">
-                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineDay">Days</label>
-                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineWeek">Weeks</label>
-                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineMonth">Months</label>
-            </p>
-            <p class="btn-group">
-                <label class="btn btn-default" ng-model="overview.chartType" uib-btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
-                <label class="btn btn-default" ng-model="overview.chartType" uib-btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+<uib-tabset>
+    <uib-tab heading="Overview" select="selectedTab = 'overview'">
+        <div ng-if="selectedTab == 'overview'">
+            <p>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div class="pull-right">
+                            <p class="btn-group">
+                                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineDay">Days</label>
+                                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineWeek">Weeks</label>
+                                <label class="btn btn-default" ng-model="overview.currentTimeline" uib-btn-radio="overview.timelineMonth">Months</label>
+                            </p>
+                            <p class="btn-group">
+                                <label class="btn btn-default" ng-model="overview.chartType" uib-btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
+                                <label class="btn btn-default" ng-model="overview.chartType" uib-btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <canvas id="timeline-overview" class="chart-base" chart-type="overview.chartType" chart-labels="overview.currentTimeline.labels" chart-data="overview.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
+                    </div>
+                </div>
             </p>
         </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-10 col-md-offset-1">
-        <canvas id="timeline-overview" class="chart-base" chart-type="overview.chartType" chart-labels="overview.currentTimeline.labels" chart-data="overview.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
-    </div>
-</div>
+    </uib-tab>
 
-<div class="row">
-    <div class="col-md-10 col-md-offset-1">
-        <h1>Projects</h1>
-        <div class="pull-right">
-            <p class="btn-group">
-                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineDay">Days</label>
-                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineWeek">Weeks</label>
-                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineMonth">Months</label>
-            </p>
-            <p class="btn-group">
-                <label class="btn btn-default" ng-model="projectsView.chartType" uib-btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
-                <label class="btn btn-default" ng-model="projectsView.chartType" uib-btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+    <uib-tab heading="Projects" select="selectedTab = 'projects'">
+        <div ng-if="selectedTab == 'projects' && projectsView.noData == false">
+            <p>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div class="pull-right">
+                            <p class="btn-group">
+                                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineDay">Days</label>
+                                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineWeek">Weeks</label>
+                                <label class="btn btn-default" ng-model="projectsView.currentTimeline" uib-btn-radio="projectsView.timelineMonth">Months</label>
+                            </p>
+                            <p class="btn-group">
+                                <label class="btn btn-default" ng-model="projectsView.chartType" uib-btn-radio="'Line'"><i class="fa fa-area-chart"></i></label>
+                                <label class="btn btn-default" ng-model="projectsView.chartType" uib-btn-radio="'Bar'"><i class="fa fa-bar-chart"></i></label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <canvas id="timeline-projects" class="chart-base" chart-type="projectsView.chartType" chart-labels="projectsView.currentTimeline.labels" chart-series="projectsView.timeline.series" chart-data="projectsView.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>', multiTooltipTemplate: '<%= value.toFixed(2) %>' }"></canvas>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <canvas id="pie-projects" class="chart chart-pie" chart-labels="projectsView.pie.labels" chart-data="projectsView.pie.data" chart-legend="true" chart-options="{ tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
+                    </div>
+                </div>
             </p>
         </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-10 col-md-offset-1">
-        <canvas id="timeline-projects" class="chart-base" chart-type="projectsView.chartType" chart-labels="projectsView.currentTimeline.labels" chart-series="projectsView.timeline.series" chart-data="projectsView.currentTimeline.values" chart-options="{ scaleBeginAtZero: true, scaleLabel: '<%=value%> h', tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>', multiTooltipTemplate: '<%= value.toFixed(2) %>' }"></canvas>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-4 col-md-offset-4">
-        <canvas id="pie-projects" class="chart chart-pie" chart-labels="projectsView.pie.labels" chart-data="projectsView.pie.data" chart-legend="true" chart-options="{ tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(2) %>' }"></canvas>
-    </div>
-</div>
+    </uib-tab>
+</uib-tabset>

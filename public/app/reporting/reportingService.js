@@ -80,6 +80,7 @@ function(_, $moment, Reporting) {
 
             return Reporting.createProjects(criteria, function(projectsView) {
                 projectsView.chartType = "Line";
+                projectsView.noData = projectsView.timeline.labels.length === 0;
                 projectsView.currentTimeline = addTimelineGrouping(projectsView, projectsView.timeline);
 
 
