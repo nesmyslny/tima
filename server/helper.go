@@ -20,6 +20,10 @@ func intPtr(i int) *int {
 	return &i
 }
 
+func stringPtr(s string) *string {
+	return &s
+}
+
 func diffInt(x, y []int) []int {
 	var diff []int
 

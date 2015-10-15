@@ -146,9 +146,9 @@ func (db *DB) generateActivityData(users []interface{}, projects []interface{}, 
 				projectID, activityTypeID := db.generateIDsProjectActivityType(userProjectIDs, mapProjectActivityTypeIDs, mapUsedProjectActivityTypes)
 				mapUsedProjectActivityTypes[projectID] = append(mapUsedProjectActivityTypes[projectID], activityTypeID)
 
-				description := ""
+				var description *string = nil
 				if rand.Intn(5) == 0 {
-					description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+					description = stringPtr("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
 				}
 
 				activity := &Activity{-1, date, userID, projectID, activityTypeID, duration, description, 1}

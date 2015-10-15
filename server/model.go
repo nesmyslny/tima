@@ -120,7 +120,7 @@ type Activity struct {
 	ProjectID      int       `db:"project_id" json:"projectId"`
 	ActivityTypeID int       `db:"activity_type_id" json:"activityTypeId"`
 	Duration       int       `db:"duration" json:"duration"`
-	Description    string    `db:"description" json:"description"`
+	Description    *string   `db:"description" json:"description"`
 	Version        int       `db:"version" json:"version"`
 }
 
@@ -131,7 +131,7 @@ type ActivityView struct {
 	ProjectID         int       `db:"project_id" json:"projectId"`
 	ActivityTypeID    int       `db:"activity_type_id" json:"activityTypeId"`
 	Duration          int       `db:"duration" json:"duration"`
-	Description       string    `db:"description" json:"description"`
+	Description       *string   `db:"description" json:"description"`
 	Version           int       `db:"version" json:"version"`
 	ProjectTitle      string    `db:"project_title" json:"projectTitle"`
 	ActivityTypeTitle string    `db:"activity_type_title" json:"activityTypeTitle"`
