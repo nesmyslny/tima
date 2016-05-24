@@ -1,0 +1,12 @@
+httpAddr=":8080"
+
+[database]
+protocol="tcp"
+address="localhost:3307"
+name="tima"
+username="root"
+password="pwd"
+
+[jwt]
+privateKey="develop/jwt-keys/dev.rsa"
+publicKey="develop/jwt-keys/dev.rsa.pub"

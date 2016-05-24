@@ -19,15 +19,14 @@ type Auth struct {
 	publicKey  []byte
 }
 
-func NewAuth() *Auth {
-	// todo: configuration of paths (private/public key)
+func NewAuth(privateKey string, publicKey string) *Auth {
 	// todo: error handling (when keys not present)
-	privKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa")
+	privKey, err := ioutil.ReadFile(privateKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pubKey, err := ioutil.ReadFile("develop/jwt-keys/dev.rsa.pub")
+	pubKey, err := ioutil.ReadFile(publicKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -138,8 +137,7 @@ func (auth *Auth) extractUser(token string) (*User, error) {
 }
 
 func (auth *Auth) GeneratePasswordHash(pwd string) ([]byte, error) {
-	const bcryptCost int = 13
-	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcryptCost)
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), BcryptCost)
 	if err != nil {
 		return nil, err
 	}

@@ -11,22 +11,22 @@ import (
 )
 
 type DB struct {
-	dbMap            *gorp.DbMap
-	connectionString string
-	dialect          string
-	migrationDir     string
-	migrationTable   string
+	dbMap          *gorp.DbMap
+	dataSourceName string
+	dialect        string
+	migrationDir   string
+	migrationTable string
 }
 
-func NewDB(connectionString string) *DB {
+func NewDB(dataSourceName string) *DB {
 	dbAccess := &DB{
-		connectionString: connectionString,
-		dialect:          "mysql",
-		migrationDir:     "migration",
-		migrationTable:   "migration",
+		dataSourceName: dataSourceName,
+		dialect:        "mysql",
+		migrationDir:   "migration",
+		migrationTable: "migration",
 	}
 
-	db, err := sql.Open(dbAccess.dialect, dbAccess.connectionString)
+	db, err := sql.Open(dbAccess.dialect, dbAccess.dataSourceName)
 	if err != nil {
 		// todo: error handling
 		panic(err.Error())
@@ -48,6 +48,22 @@ func NewDB(connectionString string) *DB {
 
 func (db *DB) Close() error {
 	return db.dbMap.Db.Close()
+}
+
+func (db *DB) ExecCliActions(dbUp int, dbDown int, dbGenerateData bool) (bool, error) {
+	if dbUp > -1 {
+		return true, db.Upgrade(dbUp)
+	}
+
+	if dbDown > -1 {
+		return true, db.Downgrade(dbDown)
+	}
+
+	if dbGenerateData {
+		return true, db.GenerateTestData()
+	}
+
+	return false, nil
 }
 
 func (db *DB) initMigrate() migrate.MigrationSource {

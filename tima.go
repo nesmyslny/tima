@@ -9,15 +9,27 @@ import (
 	"github.com/nesmyslny/tima/server"
 )
 
+type cliFlags struct {
+	configPath     string
+	dbUp           int
+	dbDown         int
+	dbGenerateData bool
+}
+
 func main() {
-	if execFlags() {
+	flags := parseFlags()
+	config := server.NewConfig(flags.configPath)
+
+	db := server.NewDB(config.GetDataSourceName())
+	defer db.Close()
+
+	executed, err := db.ExecCliActions(flags.dbUp, flags.dbDown, flags.dbGenerateData)
+	if executed {
+		printCliActionResult(err)
 		return
 	}
 
-	db := initDB()
-	defer db.Close()
-
-	auth := server.NewAuth()
+	auth := server.NewAuth(config.JwtPrivateKey, config.JwtPublicKey)
 	departmentAPI := server.NewDepartmentAPI(db)
 	userAPI := server.NewUserAPI(db, auth)
 	projectAPI := server.NewProjectAPI(db)
@@ -71,7 +83,7 @@ func main() {
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(config.HttpAddr, nil)
 }
 
 func createAnonRoute(router *mux.Router, path string, method string,
@@ -86,51 +98,14 @@ func createAuthRoute(router *mux.Router, auth *server.Auth,
 	router.Handle(path, server.NewAuthHandler(handlerFunc, auth.AuthenticateUser, authorizeFunc)).Methods(method)
 }
 
-func initDB() *server.DB {
-	// todo: configuration
-	db := server.NewDB("root:pwd@tcp(localhost:3307)/tima?parseTime=true")
-	return db
-}
-
-func execFlags() bool {
+func parseFlags() cliFlags {
+	configPath := flag.String("configPath", ".", "Path of the config file (default: current working directory)")
 	dbUp := flag.Int("dbUp", -1, "Apply the given number of database migrations (if 0 is specified, all pending migrations will be applied)")
 	dbDown := flag.Int("dbDown", -1, "Undo the given number of database migration (if 0 is specified, all migration will be undone)")
 	dbGenerateData := flag.Bool("dbGenerateData", false, "Generate test data")
 	flag.Parse()
 
-	if *dbUp > -1 && *dbDown > -1 {
-		fmt.Println("dbUp and dbDown can't be used at once")
-		return true
-	}
-
-	db := initDB()
-	defer db.Close()
-
-	if *dbUp > -1 {
-		err := db.Upgrade(*dbUp)
-		printCliActionResult(err)
-		return true
-	}
-
-	if *dbDown > -1 {
-		err := db.Downgrade(*dbDown)
-		printCliActionResult(err)
-		return true
-	}
-
-	if *dbGenerateData {
-		auth := server.NewAuth()
-		testPwdHash, err := auth.GeneratePasswordHash("pwd")
-		if err != nil {
-			printCliActionResult(err)
-			return true
-		}
-		err = db.GenerateTestData(testPwdHash)
-		printCliActionResult(err)
-		return true
-	}
-
-	return false
+	return cliFlags{*configPath, *dbUp, *dbDown, *dbGenerateData}
 }
 
 func printCliActionResult(err error) {

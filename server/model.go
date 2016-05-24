@@ -12,6 +12,8 @@ var errOptimisticLocking = errors.New("Data was changed/deleted")
 var errForbidden = errors.New("Forbidden")
 var errNotAuthenticated = errors.New("Not authenticated")
 
+const BcryptCost int = 13
+
 const RoleUser int = 10
 const RoleDeptManager int = 30
 const RoleManager int = 50

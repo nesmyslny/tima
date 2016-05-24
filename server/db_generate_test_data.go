@@ -4,13 +4,20 @@ import (
 	"math/rand"
 	"time"
 
+	"code.google.com/p/go.crypto/bcrypt"
+
 	"gopkg.in/gorp.v1"
 )
 
 // todo: separate these functions (not part of DB).
 
-func (db *DB) GenerateTestData(testPwdHash []byte) error {
+func (db *DB) GenerateTestData() error {
 	trans, err := db.dbMap.Begin()
+	if err != nil {
+		return err
+	}
+
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte("pwd"), BcryptCost)
 	if err != nil {
 		return err
 	}
@@ -29,10 +36,10 @@ func (db *DB) GenerateTestData(testPwdHash []byte) error {
 	}
 
 	users := []interface{}{
-		&User{0, intPtr(RoleAdmin), &departments[0].(*Department).ID, "admin", testPwdHash, "Nny", "C.", "admin@example.com", 0, "", ""},
-		&User{1, intPtr(RoleManager), &departments[1].(*Department).ID, "manager", testPwdHash, "Zim", "Irken", "manager@example.com", 0, "", ""},
-		&User{2, intPtr(RoleDeptManager), &departments[1].(*Department).ID, "deptman", testPwdHash, "Tak", "Irken", "deptman@example.com", 0, "", ""},
-		&User{3, intPtr(RoleUser), &departments[3].(*Department).ID, "user", testPwdHash, "GIR", "Dimmwitted", "user@example.com", 0, "", ""}}
+		&User{0, intPtr(RoleAdmin), &departments[0].(*Department).ID, "admin", pwdHash, "Nny", "C.", "admin@example.com", 0, "", ""},
+		&User{1, intPtr(RoleManager), &departments[1].(*Department).ID, "manager", pwdHash, "Zim", "Irken", "manager@example.com", 0, "", ""},
+		&User{2, intPtr(RoleDeptManager), &departments[1].(*Department).ID, "deptman", pwdHash, "Tak", "Irken", "deptman@example.com", 0, "", ""},
+		&User{3, intPtr(RoleUser), &departments[3].(*Department).ID, "user", pwdHash, "GIR", "Dimmwitted", "user@example.com", 0, "", ""}}
 	if err = db.insertTestData(trans, &users); err != nil {
 		return err
 	}
