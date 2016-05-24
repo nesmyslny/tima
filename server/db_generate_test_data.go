@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"code.google.com/p/go.crypto/bcrypt"
+	"golang.org/x/crypto/bcrypt"
 
 	"gopkg.in/gorp.v1"
 )
