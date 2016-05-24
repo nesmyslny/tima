@@ -83,7 +83,7 @@ func main() {
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+config.HttpPort, nil)
 }
 
 func createAnonRoute(router *mux.Router, path string, method string,
