@@ -60,12 +60,7 @@ func (db *DB) ExecCliActions(dbUp int, dbDown int, dbGenerateData bool) (bool, e
 	}
 
 	if dbGenerateData {
-		auth := NewAuth()
-		testPwdHash, err := auth.GeneratePasswordHash("pwd")
-		if err != nil {
-			return true, err
-		}
-		return true, db.GenerateTestData(testPwdHash)
+		return true, db.GenerateTestData()
 	}
 
 	return false, nil

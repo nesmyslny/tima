@@ -7,12 +7,14 @@ import (
 )
 
 type Config struct {
-	HttpPort   string
-	dbProtocol string
-	dbAddress  string
-	dbName     string
-	dbUsername string
-	dbPassword string
+	HttpPort      string
+	dbProtocol    string
+	dbAddress     string
+	dbName        string
+	dbUsername    string
+	dbPassword    string
+	JwtPrivateKey string
+	JwtPublicKey  string
 }
 
 func NewConfig(configPath string) *Config {
@@ -25,12 +27,14 @@ func NewConfig(configPath string) *Config {
 	}
 
 	config := &Config{
-		HttpPort:   viper.GetString("httpPort"),
-		dbProtocol: viper.GetString("database.protocol"),
-		dbAddress:  viper.GetString("database.address"),
-		dbName:     viper.GetString("database.name"),
-		dbUsername: viper.GetString("database.username"),
-		dbPassword: viper.GetString("database.password"),
+		HttpPort:      viper.GetString("httpPort"),
+		dbProtocol:    viper.GetString("database.protocol"),
+		dbAddress:     viper.GetString("database.address"),
+		dbName:        viper.GetString("database.name"),
+		dbUsername:    viper.GetString("database.username"),
+		dbPassword:    viper.GetString("database.password"),
+		JwtPrivateKey: viper.GetString("jwt.privateKey"),
+		JwtPublicKey:  viper.GetString("jwt.publicKey"),
 	}
 
 	if config.dbName == "" {
