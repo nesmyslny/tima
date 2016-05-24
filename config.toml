@@ -1,4 +1,4 @@
-httpPort=8080
+httpAddr=":8080"
 
 [database]
 protocol="tcp"

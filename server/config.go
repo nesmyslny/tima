@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	HttpPort      string
+	HttpAddr      string
 	dbProtocol    string
 	dbAddress     string
 	dbName        string
@@ -27,7 +27,7 @@ func NewConfig(configPath string) *Config {
 	}
 
 	config := &Config{
-		HttpPort:      viper.GetString("httpPort"),
+		HttpAddr:      viper.GetString("httpAddr"),
 		dbProtocol:    viper.GetString("database.protocol"),
 		dbAddress:     viper.GetString("database.address"),
 		dbName:        viper.GetString("database.name"),
