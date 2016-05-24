@@ -1,0 +1,6 @@
+[database]
+protocol="tcp"
+address="localhost:3307"
+name="tima"
+username="root"
+password="pwd"
