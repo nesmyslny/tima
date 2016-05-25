@@ -1,6 +1,6 @@
 angular.module('tima').controller('PopupMarkdownController',
-['$scope', '$modalInstance', 'title', 'markdown', 'acceptButton', 'cancelButton',
-function ($scope, $modalInstance, title, markdown, acceptButton, cancelButton) {
+['$scope', '$uibModalInstance', 'title', 'markdown', 'acceptButton', 'cancelButton',
+function ($scope, $uibModalInstance, title, markdown, acceptButton, cancelButton) {
 
     $scope.title = title;
     $scope.acceptButton = acceptButton;
@@ -11,11 +11,11 @@ function ($scope, $modalInstance, title, markdown, acceptButton, cancelButton) {
     };
 
     $scope.accept = function() {
-        $modalInstance.close($scope.tabsetData.markdown);
+        $uibModalInstance.close($scope.tabsetData.markdown);
     };
 
     $scope.cancel = function() {
-        $modalInstance.dismiss();
+        $uibModalInstance.dismiss();
     };
 
 }]);

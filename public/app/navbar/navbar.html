@@ -12,7 +12,7 @@
     <ul class="nav navbar-nav">
         <li class="dropdown" uib-dropdown>
             <a href="#" uib-dropdown-toggle role="button"><i class="fa fa-tasks fa-fw"></i> Activities <i class="fa fa-caret-down"></i></a>
-            <ul class="uib-dropdown-menu">
+            <ul class="dropdown-menu" uib-dropdown-menu>
                 <li>
                     <a ng-href="#/{{activitiesPathToday}}">
                         <span class="fa-stack">
@@ -50,7 +50,7 @@
         <li user-access="manager"><a href="#/reporting"><i class="fa fa-area-chart fa-fw"></i> Reporting</a></li>
         <li class="dropdown" uib-dropdown user-access="deptManager">
             <a href="#" uib-dropdown-toggle role="button"><i class="fa fa-wrench fa-fw"></i> Administration <i class="fa fa-caret-down"></i></a>
-            <ul class="uib-dropdown-menu">
+            <ul class="dropdown-menu" uib-dropdown-menu>
                 <li user-access="deptManager">
                     <a href="#/projects">
                         <span class="fa-stack">
@@ -91,7 +91,7 @@
                 </span>
                 <i class="fa fa-caret-down fa-fw"></i>
             </a>
-            <ul class="uib-dropdown-menu">
+            <ul class="dropdown-menu" uib-dropdown-menu>
                 <li><a ng-href="#/userSettings"><i class="fa fa-cog fa-fw"></i> Settings</a></li>
                 <li class="divider"></li>
                 <li><a href="" ng-click="signout()"><i class="fa fa-sign-out fa-fw"></i> Sign out</a></li>

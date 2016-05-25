@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Auth struct {

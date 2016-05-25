@@ -3,12 +3,14 @@ angular.module('tima').factory('reportingService',
 function(_, $moment, Reporting) {
 
     function prepareCriteria(criteria) {
-        if (criteria.startDate) {
-            criteria.startDate = $moment(criteria.startDate).format("YYYY-MM-DD[T]00:00:00.000[Z]");
+        var c = _.clone(criteria);
+        if (c.startDate) {
+            c.startDate = $moment(c.startDate).format("YYYY-MM-DD[T]00:00:00.000[Z]");
         }
-        if (criteria.endDate) {
-            criteria.endDate = $moment(criteria.endDate).format("YYYY-MM-DD[T]00:00:00.0000[Z]");
+        if (c.endDate) {
+            c.endDate = $moment(c.endDate).format("YYYY-MM-DD[T]00:00:00.0000[Z]");
         }
+        return c;
     }
 
     function addTimelineGrouping(obj, timeline) {
@@ -67,9 +69,9 @@ function(_, $moment, Reporting) {
 
         getReportOverview: function(criteria, callback) {
 
-            prepareCriteria(criteria);
+            var c = prepareCriteria(criteria);
 
-            return Reporting.createOverview(criteria, function(overview) {
+            return Reporting.createOverview(c, function(overview) {
                 overview.chartType = "Line";
                 var duration = overview.durationTotal;
 
@@ -87,9 +89,9 @@ function(_, $moment, Reporting) {
 
         getReportProjects: function(criteria, callback) {
 
-            prepareCriteria(criteria);
+            var c = prepareCriteria(criteria);
 
-            return Reporting.createProjects(criteria, function(projectsView) {
+            return Reporting.createProjects(c, function(projectsView) {
                 projectsView.chartType = "Line";
                 projectsView.noData = projectsView.timeline.labels.length === 0;
                 projectsView.currentTimeline = addTimelineGrouping(projectsView, projectsView.timeline);
@@ -99,8 +101,8 @@ function(_, $moment, Reporting) {
 
         createCriteria: function() {
             return {
-                startDate: $moment().startOf("month"),
-                endDate: $moment().endOf("month"),
+                startDate: $moment().startOf("month").toDate(),
+                endDate: $moment().endOf("month").toDate(),
                 projects: []
             };
         }
