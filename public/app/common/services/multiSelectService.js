@@ -31,7 +31,7 @@ function (_, popupService) {
                     value2: item[valueKey2],
                     class2: valueClass2,
                     obj: item,
-                    checked: _.any(selectedItems, "id", item.id)
+                    checked: _.some(selectedItems, ["id", item.id])
                 });
             });
 
