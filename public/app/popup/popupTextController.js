@@ -1,6 +1,6 @@
 angular.module('tima').controller('PopupTextController',
-['$scope', '$modalInstance', 'title', 'text', 'acceptButton', 'cancelButton',
-function ($scope, $modalInstance, title, text, acceptButton, cancelButton) {
+['$scope', '$uibModalInstance', 'title', 'text', 'acceptButton', 'cancelButton',
+function ($scope, $uibModalInstance, title, text, acceptButton, cancelButton) {
 
     $scope.title = title;
     $scope.text = text;
@@ -8,11 +8,11 @@ function ($scope, $modalInstance, title, text, acceptButton, cancelButton) {
     $scope.cancelButton = cancelButton;
 
     $scope.accept = function() {
-        $modalInstance.close($scope.text);
+        $uibModalInstance.close($scope.text);
     };
 
     $scope.cancel = function() {
-        $modalInstance.dismiss();
+        $uibModalInstance.dismiss();
     };
 
 }]);
