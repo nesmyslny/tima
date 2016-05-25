@@ -26,7 +26,7 @@
     "angular-bootstrap-show-errors": "2.3.0",
     "angular-validation-match": "1.9.0",
     "lodash": "4.13.1",
-    "jquery": "2.1.4",
+    "jquery": "2.2.4",
     "bootstrap": "3.3.6",
     "jwt-decode": "*",
     "angular-jwt-decode": "1.0.1",
