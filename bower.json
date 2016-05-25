@@ -33,7 +33,7 @@
     "moment": "2.13.0",
     "angular-momentjs": "0.2.2",
     "font-awesome": "4.6.3",
-    "angular-marked": "0.0.21",
+    "angular-marked": "1.2.0",
     "angular-chart.js": "0.8.4"
   }
 }
