@@ -28,7 +28,7 @@
     "lodash": "4.13.1",
     "jquery": "2.2.4",
     "bootstrap": "3.3.6",
-    "jwt-decode": "*",
+    "jwt-decode": "2.0.1",
     "angular-jwt-decode": "1.0.1",
     "moment": "2.10.6",
     "angular-momentjs": "0.2.2",
