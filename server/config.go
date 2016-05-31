@@ -15,6 +15,7 @@ type Config struct {
 	dbPassword    string
 	JwtPrivateKey string
 	JwtPublicKey  string
+	TokenExpiry   int
 }
 
 func NewConfig(configPath string) *Config {
@@ -35,6 +36,7 @@ func NewConfig(configPath string) *Config {
 		dbPassword:    viper.GetString("database.password"),
 		JwtPrivateKey: viper.GetString("jwt.privateKey"),
 		JwtPublicKey:  viper.GetString("jwt.publicKey"),
+		TokenExpiry:   viper.GetInt("jwt.tokenExpiry"),
 	}
 
 	if config.dbName == "" {

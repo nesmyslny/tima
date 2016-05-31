@@ -10,3 +10,4 @@ password="pwd"
 [jwt]
 privateKey="develop/jwt-keys/dev.rsa"
 publicKey="develop/jwt-keys/dev.rsa.pub"
+tokenExpiry=480 # expiration of the jwt token in minutes

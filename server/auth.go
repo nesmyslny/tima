@@ -15,11 +15,12 @@ import (
 )
 
 type Auth struct {
-	privateKey []byte
-	publicKey  []byte
+	privateKey  []byte
+	publicKey   []byte
+	tokenExpiry time.Duration
 }
 
-func NewAuth(privateKey string, publicKey string) *Auth {
+func NewAuth(privateKey string, publicKey string, tokenExpiry int) *Auth {
 	// todo: error handling (when keys not present)
 	privKey, err := ioutil.ReadFile(privateKey)
 	if err != nil {
@@ -31,7 +32,7 @@ func NewAuth(privateKey string, publicKey string) *Auth {
 		log.Fatal(err)
 	}
 
-	return &Auth{privKey, pubKey}
+	return &Auth{privKey, pubKey, time.Duration(tokenExpiry)}
 }
 
 func (auth *Auth) Authenticate(user *User, pwd string) (string, error) {
@@ -51,8 +52,7 @@ func (auth *Auth) Authenticate(user *User, pwd string) (string, error) {
 func (auth *Auth) createToken(user *User) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = user
-	// todo: exp -> config
-	token.Claims["exp"] = time.Now().Add(time.Hour * 8).Unix()
+	token.Claims["exp"] = time.Now().Add(time.Minute * auth.tokenExpiry).Unix()
 	return token.SignedString(auth.privateKey)
 }
 

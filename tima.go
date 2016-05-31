@@ -29,7 +29,7 @@ func main() {
 		return
 	}
 
-	auth := server.NewAuth(config.JwtPrivateKey, config.JwtPublicKey)
+	auth := server.NewAuth(config.JwtPrivateKey, config.JwtPublicKey, config.TokenExpiry)
 	departmentAPI := server.NewDepartmentAPI(db)
 	userAPI := server.NewUserAPI(db, auth)
 	projectAPI := server.NewProjectAPI(db)
