@@ -74,7 +74,7 @@
 
 </form>
 
-<div class="jumbotron">
+<div class="jumbotron" ng-if="!_.isUndefined(overview.timeline)">
     <div class="row">
         <h3 class="col-md-2 col-md-offset-1 text-center" ng-show="!_.isUndefined(overview.durationHours)"><span ng-bind="overview.durationHours"></span><small> hours</small></h3>
         <h3 class="col-md-2 col-md-offset-1 text-center" ng-show="!_.isUndefined(overview.durationDays)"><span ng-bind="overview.durationDays"></span><small> days</small></h3>
@@ -85,7 +85,7 @@
     </div>
 </div>
 
-<uib-tabset>
+<uib-tabset ng-if="!_.isUndefined(overview.timeline)">
     <uib-tab heading="Overview" select="selectedTab = 'overview'">
         <div ng-if="selectedTab == 'overview'">
             <p>
@@ -145,3 +145,7 @@
         </div>
     </uib-tab>
 </uib-tabset>
+
+<div class="jumbotron text-center" ng-if="_.isUndefined(overview.timeline)">
+    <h3>No data to display<br><small>Please specify some criteria and refresh the view.</small></h3>
+</div>

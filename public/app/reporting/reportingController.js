@@ -20,7 +20,6 @@ function ($scope, _, reportingService, Project, multiSelect) {
         $scope.overview = reportingService.getReportOverview($scope.criteria);
         $scope.projectsView = reportingService.getReportProjects($scope.criteria);
     };
-    $scope.refreshReport();
 
     $scope.openDatePopup = function($event) {
         $event.preventDefault();
