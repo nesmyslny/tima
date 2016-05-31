@@ -35,7 +35,7 @@
 
 <div class="row form-group" show-errors>
     <label for="passwordConfirm" class="col-md-2 control-label sr-only">Password</label>
-    <div class="col-md-6">
+    <div class="col-md-offset-2 col-md-6">
         <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" ng-model="user.newPasswordConfirm" maxlength="50" placeholder="Confirm Password" ng-required="user.id === -1" match="user.newPassword" />
         <small class="help-block" ng-show="formUser.passwordConfirm.$error.match">Passwords do not match</small>
     </div>
