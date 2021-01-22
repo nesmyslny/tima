@@ -201,6 +201,7 @@ func (db *DB) GetProject(id int) (*Project, error) {
 	return project, nil
 }
 
+// GetProjects returns all projects of a given department (or its descendant). If no department is given, it returns all projects
 func (db *DB) GetProjects(departmentID *int) ([]Project, error) {
 	sqlTemplate := "select * from project %sorder by ref_id_complete"
 	sqlWhere := ""

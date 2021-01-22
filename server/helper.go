@@ -60,3 +60,21 @@ func sliceIntToInterface(in []int) []interface{} {
 	}
 	return out
 }
+
+// func getProjectIDsAsInterfaces(projects []Project) []interface{} {
+// 	var IDs []interface{}
+// 	for _, p := range projects {
+// 		IDs = append(IDs, p.ID)
+// 	}
+//
+// 	return IDs
+// }
+
+func getProjectIDs(projects []Project) []int {
+	var IDs []int
+	for _, p := range projects {
+		IDs = append(IDs, p.ID)
+	}
+
+	return IDs
+}

@@ -3,8 +3,6 @@ package server
 import (
 	"net/http"
 	"time"
-
-	"gopkg.in/gorp.v1"
 )
 
 type DateValue struct {
@@ -38,11 +36,13 @@ type ReportProjects struct {
 }
 
 type Reporting struct {
-	dbMap *gorp.DbMap
+	// dbMap *gorp.DbMap
+	db *DB
 }
 
 func NewReporting(db *DB) *Reporting {
-	return &Reporting{db.dbMap}
+	// return &Reporting{db.dbMap}
+	return &Reporting{db}
 }
 
 func (reporting *Reporting) CreateReportOverview(context *HandlerContext) (interface{}, *HandlerError) {
@@ -52,7 +52,11 @@ func (reporting *Reporting) CreateReportOverview(context *HandlerContext) (inter
 		return nil, &HandlerError{err, "couldn't retrieve report overview", http.StatusInternalServerError}
 	}
 
-	sqlCriteria, paramsCriteria := reporting.createSqlWhere(&criteria)
+	// sqlCriteria, paramsCriteria := reporting.createSqlWhere(&criteria)
+	sqlCriteria, paramsCriteria, err := reporting.createSqlWhere(context.User, &criteria)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't create where clause", http.StatusInternalServerError}
+	}
 
 	sql := "select count(distinct a.user_id) user_count, count(distinct a.project_id) project_count, " +
 		"count(distinct a.activity_type_id) activity_type_count, ifnull(sum(a.duration), 0) duration_total, " +
@@ -62,9 +66,10 @@ func (reporting *Reporting) CreateReportOverview(context *HandlerContext) (inter
 	}
 
 	var overview *ReportOverview
-	err = reporting.dbMap.SelectOne(&overview, sql, paramsCriteria...)
+	err = reporting.db.dbMap.SelectOne(&overview, sql, paramsCriteria...)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve report overview", http.StatusInternalServerError}
+		// return nil, &HandlerError{err, err.Error(), http.StatusInternalServerError}
 	}
 
 	sqlTimeline := "select day date, round(sum(a.duration) / 60, 2) value from activity a"
@@ -74,7 +79,7 @@ func (reporting *Reporting) CreateReportOverview(context *HandlerContext) (inter
 	sqlTimeline += " group by day order by day"
 
 	var dateValues []DateValue
-	_, err = reporting.dbMap.Select(&dateValues, sqlTimeline, paramsCriteria...)
+	_, err = reporting.db.dbMap.Select(&dateValues, sqlTimeline, paramsCriteria...)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve timeline in report overview", http.StatusInternalServerError}
 	}
@@ -90,7 +95,11 @@ func (reporting *Reporting) CreateReportProjects(context *HandlerContext) (inter
 		return nil, &HandlerError{err, "couln't retieve report of projects", http.StatusInternalServerError}
 	}
 
-	sqlCriteria, paramsCriteria := reporting.createSqlWhere(&criteria)
+	// sqlCriteria, paramsCriteria := reporting.createSqlWhere(&criteria)
+	sqlCriteria, paramsCriteria, err := reporting.createSqlWhere(context.User, &criteria)
+	if err != nil {
+		return nil, &HandlerError{err, "couldn't create where clause", http.StatusInternalServerError}
+	}
 
 	sql := "select * from project where id in (select distinct a.project_id from activity a"
 	if len(sqlCriteria) > 0 {
@@ -99,7 +108,7 @@ func (reporting *Reporting) CreateReportProjects(context *HandlerContext) (inter
 	sql += ")"
 
 	var projects []Project
-	_, err = reporting.dbMap.Select(&projects, sql, paramsCriteria...)
+	_, err = reporting.db.dbMap.Select(&projects, sql, paramsCriteria...)
 	if err != nil {
 		return nil, &HandlerError{err, "couldn't retrieve projects", http.StatusInternalServerError}
 	}
@@ -118,7 +127,7 @@ func (reporting *Reporting) CreateReportProjects(context *HandlerContext) (inter
 		sqlTimeline += " group by day order by day"
 
 		var dateValues []DateValue
-		_, err = reporting.dbMap.Select(&dateValues, sqlTimeline, append([]interface{}{project.ID}, paramsCriteria...)...)
+		_, err = reporting.db.dbMap.Select(&dateValues, sqlTimeline, append([]interface{}{project.ID}, paramsCriteria...)...)
 		if err != nil {
 			return nil, &HandlerError{err, "couldn't retrieve timeline in report of projects", http.StatusInternalServerError}
 		}
@@ -195,9 +204,31 @@ func (reporting *Reporting) createLabelsAndData(criteriaStart *time.Time, criter
 	return labels, data
 }
 
-func (reporting *Reporting) createSqlWhere(criteria *ReportCriteria) (string, []interface{}) {
+func (reporting *Reporting) createSqlWhere(user *User, criteria *ReportCriteria) (string, []interface{}, error) {
 	var whereConditions []string
 	var params []interface{}
+
+	if *user.Role == RoleDeptManager {
+		// alle project des departments
+		projects, err := reporting.db.GetProjects(user.DepartmentID)
+		if err != nil {
+			return "", nil, err
+		}
+
+		if len(projects) > 0 {
+			IDs := getProjectIDs(projects)
+			cond, p := reporting.createSqlInConditionInt("a.project_id", IDs...)
+			whereConditions = append(whereConditions, cond)
+			params = append(params, p...)
+
+		} else {
+			// if there are no projects in the department, make sure, no projects are selected
+			whereConditions = append(whereConditions, "a.project_id = ?")
+			params = append(params, -1)
+		}
+	} else if *user.Role == RoleUser {
+		// alle projekte in dem user responsible oder manger ist
+	}
 
 	if criteria.StartDate != nil {
 		whereConditions = append(whereConditions, "a.day >= ?")
@@ -210,15 +241,20 @@ func (reporting *Reporting) createSqlWhere(criteria *ReportCriteria) (string, []
 	}
 
 	if len(criteria.Projects) > 0 {
-		var projectsIn string
-		for _, p := range criteria.Projects {
-			if len(projectsIn) > 0 {
-				projectsIn += ", "
-			}
-			projectsIn += "?"
-			params = append(params, p.ID)
-		}
-		whereConditions = append(whereConditions, "a.project_id in("+projectsIn+")")
+		// var projectsIn string
+		// for _, p := range criteria.Projects {
+		// 	if len(projectsIn) > 0 {
+		// 		projectsIn += ", "
+		// 	}
+		// 	projectsIn += "?"
+		// 	params = append(params, p.ID)
+		// }
+		// whereConditions = append(whereConditions, "a.project_id in("+projectsIn+")")
+
+		IDs := getProjectIDs(criteria.Projects)
+		cond, p := reporting.createSqlInConditionInt("a.project_id", IDs...)
+		whereConditions = append(whereConditions, cond)
+		params = append(params, p...)
 	}
 
 	var where string
@@ -229,5 +265,30 @@ func (reporting *Reporting) createSqlWhere(criteria *ReportCriteria) (string, []
 		where += v
 	}
 
-	return where, params
+	return where, params, nil
+}
+
+func (reporting *Reporting) createSqlInCondition(column string, values ...interface{}) (string, []interface{}) {
+	var in string
+	var condition string
+	var params []interface{}
+
+	for _, v := range values {
+		if len(in) > 0 {
+			in += ", "
+		}
+		in += "?"
+		params = append(params, v)
+	}
+	condition = column + " in(" + in + ")"
+
+	return condition, params
+}
+
+func (reporting *Reporting) createSqlInConditionInt(column string, values ...int) (string, []interface{}) {
+	var iValues []interface{}
+	for _, v := range values {
+		iValues = append(iValues, v)
+	}
+	return reporting.createSqlInCondition(column, iValues...)
 }

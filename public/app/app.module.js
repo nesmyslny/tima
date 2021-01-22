@@ -80,7 +80,7 @@ angular
     .when('/reporting', {
         templateUrl: 'app/reporting/reporting.html',
         controller: 'ReportingController',
-        resolve: createPermissionResolve(userRoles.user)
+        resolve: createPermissionResolve(userRoles.deptManager)
     })
     .when('/', {
         redirectTo: '/activities/' + moment().format('YYYY-MM-DD')

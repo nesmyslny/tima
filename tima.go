@@ -78,8 +78,8 @@ func main() {
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments", "POST", departmentAPI.SaveHandler)
 	createAuthRoute(router, auth, server.AuthorizeAdmin, "/departments/{id}", "DELETE", departmentAPI.DeleteHandler)
 
-	createAuthRoute(router, auth, server.AuthorizeManager, "/report/overview", "POST", reporting.CreateReportOverview)
-	createAuthRoute(router, auth, server.AuthorizeManager, "/report/projects", "POST", reporting.CreateReportProjects)
+	createAuthRoute(router, auth, server.AuthorizeDeptManager, "/report/overview", "POST", reporting.CreateReportOverview)
+	createAuthRoute(router, auth, server.AuthorizeDeptManager, "/report/projects", "POST", reporting.CreateReportProjects)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", router)
